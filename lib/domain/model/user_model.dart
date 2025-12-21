@@ -5,8 +5,12 @@ part 'user_model.freezed.dart';
 @freezed
 class UserModel with _$UserModel {
   const factory UserModel({
-    String? id,
+    required String id,
     required String nickname,
-    required DateTime createdAt,
+    required String inviteCode,
+    String? profileImageUrl,
+    @Default('ACTIVE') String status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _UserModel;
 }

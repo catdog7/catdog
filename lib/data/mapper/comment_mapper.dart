@@ -1,24 +1,26 @@
-import 'package:amumal/data/dto/comment_dto.dart';
-import 'package:amumal/domain/model/comment_model.dart';
+import 'package:catdog/data/dto/comment_dto.dart';
+import 'package:catdog/domain/model/comment_model.dart';
 
 class CommentMapper {
-  static CommentModel toDomain(CommentDto dto) => CommentModel(
-        id: dto.id,
-        writerId: dto.writerId,
-        feedId: dto.feedId,
-        nickname: dto.nickname,
-        content: dto.content,
-        createdAt: dto.createdAt,
-        modifiedAt: dto.modifiedAt,
-      );
+  static CommentModel toDomain(CommentDto dto) {
+    return CommentModel(
+      id: dto.id,
+      feedId: dto.feedId,
+      userId: dto.userId,
+      content: dto.content,
+      createdAt: dto.createdAt,
+      updatedAt: dto.updatedAt,
+    );
+  }
 
-  static CommentDto toDto(CommentModel model) => CommentDto(
-        id: model.id,
-        writerId: model.writerId,
-        feedId: model.feedId,
-        nickname: model.nickname,
-        content: model.content,
-        createdAt: model.createdAt,
-        modifiedAt: model.modifiedAt,
-      );
+  static CommentDto toDto(CommentModel model) {
+    return CommentDto(
+      id: model.id,
+      feedId: model.feedId,
+      userId: model.userId,
+      content: model.content,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
+  }
 }

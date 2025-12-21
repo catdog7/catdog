@@ -1,26 +1,26 @@
-import 'package:amumal/data/dto/feed_dto.dart';
-import 'package:amumal/domain/model/feed_model.dart';
+import 'package:catdog/data/dto/feed_dto.dart';
+import 'package:catdog/domain/model/feed_model.dart';
 
 class FeedMapper {
-  static FeedModel toDomain(FeedDto dto) => FeedModel(
-        id: dto.id,
-        writerId: dto.writerId,
-        nickname: dto.nickname,
-        tag: dto.tag,
-        content: dto.content,
-        imageUrl: dto.imageUrl,
-        createdAt: dto.createdAt,
-        modifiedAt: dto.modifiedAt,
-      );
+  static FeedModel toDomain(FeedDto dto) {
+    return FeedModel(
+      id: dto.id,
+      userId: dto.userId,
+      imageUrl: dto.imageUrl,
+      content: dto.content,
+      createdAt: dto.createdAt,
+      updatedAt: dto.updatedAt,
+    );
+  }
 
-  static FeedDto toDto(FeedModel model) => FeedDto(
-        id: model.id,
-        writerId: model.writerId,
-        nickname: model.nickname,
-        tag: model.tag,
-        content: model.content,
-        imageUrl: model.imageUrl,
-        createdAt: model.createdAt,
-        modifiedAt: model.modifiedAt,
-      );
+  static FeedDto toDto(FeedModel model) {
+    return FeedDto(
+      id: model.id,
+      userId: model.userId,
+      imageUrl: model.imageUrl,
+      content: model.content,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
+  }
 }

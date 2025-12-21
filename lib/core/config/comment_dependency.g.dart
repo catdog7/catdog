@@ -6,7 +6,7 @@ part of 'comment_dependency.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$commentRepositoryHash() => r'd0623bd2aba877e973e1de51ddcf08b3b1207b76';
+String _$commentRepositoryHash() => r'1da3e3776e827569d7c3ad366d2c2cb3eb906cbd';
 
 /// See also [commentRepository].
 @ProviderFor(commentRepository)
@@ -24,7 +24,7 @@ final commentRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef CommentRepositoryRef = AutoDisposeProviderRef<CommentRepository>;
-String _$commentUseCaseHash() => r'c6b3f2d62f759cbb4eae40799d7794d4a08e2bac';
+String _$commentUseCaseHash() => r'0f9f6ff5bca36ea81e4d46b16df24ae1cdaefdce';
 
 /// See also [commentUseCase].
 @ProviderFor(commentUseCase)

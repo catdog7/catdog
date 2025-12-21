@@ -17,13 +17,12 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$CommentModel {
-  String? get id => throw _privateConstructorUsedError;
-  String get writerId => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   String get feedId => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
+  String get userId => throw _privateConstructorUsedError;
   String get content => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  DateTime get modifiedAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Create a copy of CommentModel
   /// with the given fields replaced by the non-null parameter values.
@@ -40,13 +39,12 @@ abstract class $CommentModelCopyWith<$Res> {
   ) = _$CommentModelCopyWithImpl<$Res, CommentModel>;
   @useResult
   $Res call({
-    String? id,
-    String writerId,
+    String id,
     String feedId,
-    String nickname,
+    String userId,
     String content,
-    DateTime createdAt,
-    DateTime modifiedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -65,44 +63,39 @@ class _$CommentModelCopyWithImpl<$Res, $Val extends CommentModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? writerId = null,
+    Object? id = null,
     Object? feedId = null,
-    Object? nickname = null,
+    Object? userId = null,
     Object? content = null,
-    Object? createdAt = null,
-    Object? modifiedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
-            id: freezed == id
+            id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            writerId: null == writerId
-                ? _value.writerId
-                : writerId // ignore: cast_nullable_to_non_nullable
                       as String,
             feedId: null == feedId
                 ? _value.feedId
                 : feedId // ignore: cast_nullable_to_non_nullable
                       as String,
-            nickname: null == nickname
-                ? _value.nickname
-                : nickname // ignore: cast_nullable_to_non_nullable
+            userId: null == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
                       as String,
             content: null == content
                 ? _value.content
                 : content // ignore: cast_nullable_to_non_nullable
                       as String,
-            createdAt: null == createdAt
+            createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            modifiedAt: null == modifiedAt
-                ? _value.modifiedAt
-                : modifiedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -119,13 +112,12 @@ abstract class _$$CommentModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String? id,
-    String writerId,
+    String id,
     String feedId,
-    String nickname,
+    String userId,
     String content,
-    DateTime createdAt,
-    DateTime modifiedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -143,44 +135,39 @@ class __$$CommentModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? writerId = null,
+    Object? id = null,
     Object? feedId = null,
-    Object? nickname = null,
+    Object? userId = null,
     Object? content = null,
-    Object? createdAt = null,
-    Object? modifiedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _$CommentModelImpl(
-        id: freezed == id
+        id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        writerId: null == writerId
-            ? _value.writerId
-            : writerId // ignore: cast_nullable_to_non_nullable
                   as String,
         feedId: null == feedId
             ? _value.feedId
             : feedId // ignore: cast_nullable_to_non_nullable
                   as String,
-        nickname: null == nickname
-            ? _value.nickname
-            : nickname // ignore: cast_nullable_to_non_nullable
+        userId: null == userId
+            ? _value.userId
+            : userId // ignore: cast_nullable_to_non_nullable
                   as String,
         content: null == content
             ? _value.content
             : content // ignore: cast_nullable_to_non_nullable
                   as String,
-        createdAt: null == createdAt
+        createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        modifiedAt: null == modifiedAt
-            ? _value.modifiedAt
-            : modifiedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -188,35 +175,32 @@ class __$$CommentModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$CommentModelImpl extends _CommentModel {
+class _$CommentModelImpl implements _CommentModel {
   const _$CommentModelImpl({
-    this.id,
-    required this.writerId,
+    required this.id,
     required this.feedId,
-    required this.nickname,
+    required this.userId,
     required this.content,
-    required this.createdAt,
-    required this.modifiedAt,
-  }) : super._();
+    this.createdAt,
+    this.updatedAt,
+  });
 
   @override
-  final String? id;
-  @override
-  final String writerId;
+  final String id;
   @override
   final String feedId;
   @override
-  final String nickname;
+  final String userId;
   @override
   final String content;
   @override
-  final DateTime createdAt;
+  final DateTime? createdAt;
   @override
-  final DateTime modifiedAt;
+  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'CommentModel(id: $id, writerId: $writerId, feedId: $feedId, nickname: $nickname, content: $content, createdAt: $createdAt, modifiedAt: $modifiedAt)';
+    return 'CommentModel(id: $id, feedId: $feedId, userId: $userId, content: $content, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -225,28 +209,24 @@ class _$CommentModelImpl extends _CommentModel {
         (other.runtimeType == runtimeType &&
             other is _$CommentModelImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.writerId, writerId) ||
-                other.writerId == writerId) &&
             (identical(other.feedId, feedId) || other.feedId == feedId) &&
-            (identical(other.nickname, nickname) ||
-                other.nickname == nickname) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.content, content) || other.content == content) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.modifiedAt, modifiedAt) ||
-                other.modifiedAt == modifiedAt));
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
   int get hashCode => Object.hash(
     runtimeType,
     id,
-    writerId,
     feedId,
-    nickname,
+    userId,
     content,
     createdAt,
-    modifiedAt,
+    updatedAt,
   );
 
   /// Create a copy of CommentModel
@@ -258,32 +238,28 @@ class _$CommentModelImpl extends _CommentModel {
       __$$CommentModelImplCopyWithImpl<_$CommentModelImpl>(this, _$identity);
 }
 
-abstract class _CommentModel extends CommentModel {
+abstract class _CommentModel implements CommentModel {
   const factory _CommentModel({
-    final String? id,
-    required final String writerId,
+    required final String id,
     required final String feedId,
-    required final String nickname,
+    required final String userId,
     required final String content,
-    required final DateTime createdAt,
-    required final DateTime modifiedAt,
+    final DateTime? createdAt,
+    final DateTime? updatedAt,
   }) = _$CommentModelImpl;
-  const _CommentModel._() : super._();
 
   @override
-  String? get id;
-  @override
-  String get writerId;
+  String get id;
   @override
   String get feedId;
   @override
-  String get nickname;
+  String get userId;
   @override
   String get content;
   @override
-  DateTime get createdAt;
+  DateTime? get createdAt;
   @override
-  DateTime get modifiedAt;
+  DateTime? get updatedAt;
 
   /// Create a copy of CommentModel
   /// with the given fields replaced by the non-null parameter values.

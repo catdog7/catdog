@@ -8,20 +8,24 @@ part of 'comment_dto.dart';
 
 _$CommentDtoImpl _$$CommentDtoImplFromJson(Map<String, dynamic> json) =>
     _$CommentDtoImpl(
-      writerId: json['writer_id'] as String,
+      id: json['id'] as String,
       feedId: json['feed_id'] as String,
-      nickname: json['nickname'] as String,
+      userId: json['user_id'] as String,
       content: json['content'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      modifiedAt: DateTime.parse(json['modified_at'] as String),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$$CommentDtoImplToJson(_$CommentDtoImpl instance) =>
     <String, dynamic>{
-      'writer_id': instance.writerId,
+      'id': instance.id,
       'feed_id': instance.feedId,
-      'nickname': instance.nickname,
+      'user_id': instance.userId,
       'content': instance.content,
-      'created_at': instance.createdAt.toIso8601String(),
-      'modified_at': instance.modifiedAt.toIso8601String(),
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
     };

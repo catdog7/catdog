@@ -6,24 +6,7 @@ part of 'feed_dependency.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$firebaseStorageHash() => r'0b9ca26d5bca95f85c00c5d7deaebe8133d5b562';
-
-/// See also [firebaseStorage].
-@ProviderFor(firebaseStorage)
-final firebaseStorageProvider = AutoDisposeProvider<FirebaseStorage>.internal(
-  firebaseStorage,
-  name: r'firebaseStorageProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$firebaseStorageHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FirebaseStorageRef = AutoDisposeProviderRef<FirebaseStorage>;
-String _$feedRepositoryHash() => r'66ba7b73c442bf195531aa063cd90dcfd889e23e';
+String _$feedRepositoryHash() => r'3f36af0cb47da5f46fc1c8d67953748abd1efe11';
 
 /// See also [feedRepository].
 @ProviderFor(feedRepository)
@@ -40,7 +23,7 @@ final feedRepositoryProvider = AutoDisposeProvider<FeedRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FeedRepositoryRef = AutoDisposeProviderRef<FeedRepository>;
-String _$feedUseCaseHash() => r'12957b56198c5acf137b971f7b0ccd90a4d22a37';
+String _$feedUseCaseHash() => r'a4f6e9f6467126f5769fa8c80b8f9699dde24d0a';
 
 /// See also [feedUseCase].
 @ProviderFor(feedUseCase)
