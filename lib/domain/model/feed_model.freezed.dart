@@ -17,15 +17,12 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$FeedModel {
-  String? get id =>
-      throw _privateConstructorUsedError; // Firestore docId → nullable
-  String get writerId => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
-  List<String> get tag => throw _privateConstructorUsedError;
-  String get content => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
+  String get userId => throw _privateConstructorUsedError;
   String get imageUrl => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  DateTime get modifiedAt => throw _privateConstructorUsedError;
+  String? get content => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Create a copy of FeedModel
   /// with the given fields replaced by the non-null parameter values.
@@ -40,14 +37,12 @@ abstract class $FeedModelCopyWith<$Res> {
       _$FeedModelCopyWithImpl<$Res, FeedModel>;
   @useResult
   $Res call({
-    String? id,
-    String writerId,
-    String nickname,
-    List<String> tag,
-    String content,
+    String id,
+    String userId,
     String imageUrl,
-    DateTime createdAt,
-    DateTime modifiedAt,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -66,49 +61,39 @@ class _$FeedModelCopyWithImpl<$Res, $Val extends FeedModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? writerId = null,
-    Object? nickname = null,
-    Object? tag = null,
-    Object? content = null,
+    Object? id = null,
+    Object? userId = null,
     Object? imageUrl = null,
-    Object? createdAt = null,
-    Object? modifiedAt = null,
+    Object? content = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
-            id: freezed == id
+            id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            writerId: null == writerId
-                ? _value.writerId
-                : writerId // ignore: cast_nullable_to_non_nullable
                       as String,
-            nickname: null == nickname
-                ? _value.nickname
-                : nickname // ignore: cast_nullable_to_non_nullable
-                      as String,
-            tag: null == tag
-                ? _value.tag
-                : tag // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            content: null == content
-                ? _value.content
-                : content // ignore: cast_nullable_to_non_nullable
+            userId: null == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
                       as String,
             imageUrl: null == imageUrl
                 ? _value.imageUrl
                 : imageUrl // ignore: cast_nullable_to_non_nullable
                       as String,
-            createdAt: null == createdAt
+            content: freezed == content
+                ? _value.content
+                : content // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            modifiedAt: null == modifiedAt
-                ? _value.modifiedAt
-                : modifiedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -125,14 +110,12 @@ abstract class _$$FeedModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String? id,
-    String writerId,
-    String nickname,
-    List<String> tag,
-    String content,
+    String id,
+    String userId,
     String imageUrl,
-    DateTime createdAt,
-    DateTime modifiedAt,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -150,49 +133,39 @@ class __$$FeedModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? writerId = null,
-    Object? nickname = null,
-    Object? tag = null,
-    Object? content = null,
+    Object? id = null,
+    Object? userId = null,
     Object? imageUrl = null,
-    Object? createdAt = null,
-    Object? modifiedAt = null,
+    Object? content = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _$FeedModelImpl(
-        id: freezed == id
+        id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        writerId: null == writerId
-            ? _value.writerId
-            : writerId // ignore: cast_nullable_to_non_nullable
                   as String,
-        nickname: null == nickname
-            ? _value.nickname
-            : nickname // ignore: cast_nullable_to_non_nullable
-                  as String,
-        tag: null == tag
-            ? _value._tag
-            : tag // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        content: null == content
-            ? _value.content
-            : content // ignore: cast_nullable_to_non_nullable
+        userId: null == userId
+            ? _value.userId
+            : userId // ignore: cast_nullable_to_non_nullable
                   as String,
         imageUrl: null == imageUrl
             ? _value.imageUrl
             : imageUrl // ignore: cast_nullable_to_non_nullable
                   as String,
-        createdAt: null == createdAt
+        content: freezed == content
+            ? _value.content
+            : content // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        modifiedAt: null == modifiedAt
-            ? _value.modifiedAt
-            : modifiedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -200,46 +173,32 @@ class __$$FeedModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$FeedModelImpl extends _FeedModel {
+class _$FeedModelImpl implements _FeedModel {
   const _$FeedModelImpl({
-    this.id,
-    required this.writerId,
-    required this.nickname,
-    required final List<String> tag,
-    required this.content,
+    required this.id,
+    required this.userId,
     required this.imageUrl,
-    required this.createdAt,
-    required this.modifiedAt,
-  }) : _tag = tag,
-       super._();
+    this.content,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   @override
-  final String? id;
-  // Firestore docId → nullable
+  final String id;
   @override
-  final String writerId;
-  @override
-  final String nickname;
-  final List<String> _tag;
-  @override
-  List<String> get tag {
-    if (_tag is EqualUnmodifiableListView) return _tag;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_tag);
-  }
-
-  @override
-  final String content;
+  final String userId;
   @override
   final String imageUrl;
   @override
-  final DateTime createdAt;
+  final String? content;
   @override
-  final DateTime modifiedAt;
+  final DateTime? createdAt;
+  @override
+  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'FeedModel(id: $id, writerId: $writerId, nickname: $nickname, tag: $tag, content: $content, imageUrl: $imageUrl, createdAt: $createdAt, modifiedAt: $modifiedAt)';
+    return 'FeedModel(id: $id, userId: $userId, imageUrl: $imageUrl, content: $content, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -248,31 +207,25 @@ class _$FeedModelImpl extends _FeedModel {
         (other.runtimeType == runtimeType &&
             other is _$FeedModelImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.writerId, writerId) ||
-                other.writerId == writerId) &&
-            (identical(other.nickname, nickname) ||
-                other.nickname == nickname) &&
-            const DeepCollectionEquality().equals(other._tag, _tag) &&
-            (identical(other.content, content) || other.content == content) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
+            (identical(other.content, content) || other.content == content) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.modifiedAt, modifiedAt) ||
-                other.modifiedAt == modifiedAt));
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
   int get hashCode => Object.hash(
     runtimeType,
     id,
-    writerId,
-    nickname,
-    const DeepCollectionEquality().hash(_tag),
-    content,
+    userId,
     imageUrl,
+    content,
     createdAt,
-    modifiedAt,
+    updatedAt,
   );
 
   /// Create a copy of FeedModel
@@ -284,35 +237,28 @@ class _$FeedModelImpl extends _FeedModel {
       __$$FeedModelImplCopyWithImpl<_$FeedModelImpl>(this, _$identity);
 }
 
-abstract class _FeedModel extends FeedModel {
+abstract class _FeedModel implements FeedModel {
   const factory _FeedModel({
-    final String? id,
-    required final String writerId,
-    required final String nickname,
-    required final List<String> tag,
-    required final String content,
+    required final String id,
+    required final String userId,
     required final String imageUrl,
-    required final DateTime createdAt,
-    required final DateTime modifiedAt,
+    final String? content,
+    final DateTime? createdAt,
+    final DateTime? updatedAt,
   }) = _$FeedModelImpl;
-  const _FeedModel._() : super._();
 
   @override
-  String? get id; // Firestore docId → nullable
+  String get id;
   @override
-  String get writerId;
-  @override
-  String get nickname;
-  @override
-  List<String> get tag;
-  @override
-  String get content;
+  String get userId;
   @override
   String get imageUrl;
   @override
-  DateTime get createdAt;
+  String? get content;
   @override
-  DateTime get modifiedAt;
+  DateTime? get createdAt;
+  @override
+  DateTime? get updatedAt;
 
   /// Create a copy of FeedModel
   /// with the given fields replaced by the non-null parameter values.

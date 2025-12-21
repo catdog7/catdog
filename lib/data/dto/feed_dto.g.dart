@@ -8,22 +8,24 @@ part of 'feed_dto.dart';
 
 _$FeedDtoImpl _$$FeedDtoImplFromJson(Map<String, dynamic> json) =>
     _$FeedDtoImpl(
-      writerId: json['writer_id'] as String,
-      nickname: json['nickname'] as String,
-      tag: (json['tag'] as List<dynamic>).map((e) => e as String).toList(),
-      content: json['content'] as String,
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
       imageUrl: json['image_url'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      modifiedAt: DateTime.parse(json['modified_at'] as String),
+      content: json['content'] as String?,
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$$FeedDtoImplToJson(_$FeedDtoImpl instance) =>
     <String, dynamic>{
-      'writer_id': instance.writerId,
-      'nickname': instance.nickname,
-      'tag': instance.tag,
-      'content': instance.content,
+      'id': instance.id,
+      'user_id': instance.userId,
       'image_url': instance.imageUrl,
-      'created_at': instance.createdAt.toIso8601String(),
-      'modified_at': instance.modifiedAt.toIso8601String(),
+      'content': instance.content,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
     };

@@ -21,18 +21,16 @@ CommentDto _$CommentDtoFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$CommentDto {
-  @JsonKey(ignore: true)
-  String? get id => throw _privateConstructorUsedError; // Firestore 필드에 저장 안 함
-  @JsonKey(name: 'writer_id')
-  String get writerId => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'feed_id')
   String get feedId => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
+  String get userId => throw _privateConstructorUsedError;
   String get content => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  @JsonKey(name: 'modified_at')
-  DateTime get modifiedAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this CommentDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -52,13 +50,12 @@ abstract class $CommentDtoCopyWith<$Res> {
   ) = _$CommentDtoCopyWithImpl<$Res, CommentDto>;
   @useResult
   $Res call({
-    @JsonKey(ignore: true) String? id,
-    @JsonKey(name: 'writer_id') String writerId,
+    String id,
     @JsonKey(name: 'feed_id') String feedId,
-    String nickname,
+    @JsonKey(name: 'user_id') String userId,
     String content,
-    @JsonKey(name: 'created_at') DateTime createdAt,
-    @JsonKey(name: 'modified_at') DateTime modifiedAt,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -77,44 +74,39 @@ class _$CommentDtoCopyWithImpl<$Res, $Val extends CommentDto>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? writerId = null,
+    Object? id = null,
     Object? feedId = null,
-    Object? nickname = null,
+    Object? userId = null,
     Object? content = null,
-    Object? createdAt = null,
-    Object? modifiedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
-            id: freezed == id
+            id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            writerId: null == writerId
-                ? _value.writerId
-                : writerId // ignore: cast_nullable_to_non_nullable
                       as String,
             feedId: null == feedId
                 ? _value.feedId
                 : feedId // ignore: cast_nullable_to_non_nullable
                       as String,
-            nickname: null == nickname
-                ? _value.nickname
-                : nickname // ignore: cast_nullable_to_non_nullable
+            userId: null == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
                       as String,
             content: null == content
                 ? _value.content
                 : content // ignore: cast_nullable_to_non_nullable
                       as String,
-            createdAt: null == createdAt
+            createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            modifiedAt: null == modifiedAt
-                ? _value.modifiedAt
-                : modifiedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -131,13 +123,12 @@ abstract class _$$CommentDtoImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    @JsonKey(ignore: true) String? id,
-    @JsonKey(name: 'writer_id') String writerId,
+    String id,
     @JsonKey(name: 'feed_id') String feedId,
-    String nickname,
+    @JsonKey(name: 'user_id') String userId,
     String content,
-    @JsonKey(name: 'created_at') DateTime createdAt,
-    @JsonKey(name: 'modified_at') DateTime modifiedAt,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -155,44 +146,39 @@ class __$$CommentDtoImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? writerId = null,
+    Object? id = null,
     Object? feedId = null,
-    Object? nickname = null,
+    Object? userId = null,
     Object? content = null,
-    Object? createdAt = null,
-    Object? modifiedAt = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _$CommentDtoImpl(
-        id: freezed == id
+        id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        writerId: null == writerId
-            ? _value.writerId
-            : writerId // ignore: cast_nullable_to_non_nullable
                   as String,
         feedId: null == feedId
             ? _value.feedId
             : feedId // ignore: cast_nullable_to_non_nullable
                   as String,
-        nickname: null == nickname
-            ? _value.nickname
-            : nickname // ignore: cast_nullable_to_non_nullable
+        userId: null == userId
+            ? _value.userId
+            : userId // ignore: cast_nullable_to_non_nullable
                   as String,
         content: null == content
             ? _value.content
             : content // ignore: cast_nullable_to_non_nullable
                   as String,
-        createdAt: null == createdAt
+        createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        modifiedAt: null == modifiedAt
-            ? _value.modifiedAt
-            : modifiedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -202,42 +188,37 @@ class __$$CommentDtoImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CommentDtoImpl implements _CommentDto {
   const _$CommentDtoImpl({
-    @JsonKey(ignore: true) this.id,
-    @JsonKey(name: 'writer_id') required this.writerId,
+    required this.id,
     @JsonKey(name: 'feed_id') required this.feedId,
-    required this.nickname,
+    @JsonKey(name: 'user_id') required this.userId,
     required this.content,
-    @JsonKey(name: 'created_at') required this.createdAt,
-    @JsonKey(name: 'modified_at') required this.modifiedAt,
+    @JsonKey(name: 'created_at') this.createdAt,
+    @JsonKey(name: 'updated_at') this.updatedAt,
   });
 
   factory _$CommentDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$CommentDtoImplFromJson(json);
 
   @override
-  @JsonKey(ignore: true)
-  final String? id;
-  // Firestore 필드에 저장 안 함
-  @override
-  @JsonKey(name: 'writer_id')
-  final String writerId;
+  final String id;
   @override
   @JsonKey(name: 'feed_id')
   final String feedId;
   @override
-  final String nickname;
+  @JsonKey(name: 'user_id')
+  final String userId;
   @override
   final String content;
   @override
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
   @override
-  @JsonKey(name: 'modified_at')
-  final DateTime modifiedAt;
+  @JsonKey(name: 'updated_at')
+  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'CommentDto(id: $id, writerId: $writerId, feedId: $feedId, nickname: $nickname, content: $content, createdAt: $createdAt, modifiedAt: $modifiedAt)';
+    return 'CommentDto(id: $id, feedId: $feedId, userId: $userId, content: $content, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -246,16 +227,13 @@ class _$CommentDtoImpl implements _CommentDto {
         (other.runtimeType == runtimeType &&
             other is _$CommentDtoImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.writerId, writerId) ||
-                other.writerId == writerId) &&
             (identical(other.feedId, feedId) || other.feedId == feedId) &&
-            (identical(other.nickname, nickname) ||
-                other.nickname == nickname) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.content, content) || other.content == content) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
-            (identical(other.modifiedAt, modifiedAt) ||
-                other.modifiedAt == modifiedAt));
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -263,12 +241,11 @@ class _$CommentDtoImpl implements _CommentDto {
   int get hashCode => Object.hash(
     runtimeType,
     id,
-    writerId,
     feedId,
-    nickname,
+    userId,
     content,
     createdAt,
-    modifiedAt,
+    updatedAt,
   );
 
   /// Create a copy of CommentDto
@@ -287,37 +264,33 @@ class _$CommentDtoImpl implements _CommentDto {
 
 abstract class _CommentDto implements CommentDto {
   const factory _CommentDto({
-    @JsonKey(ignore: true) final String? id,
-    @JsonKey(name: 'writer_id') required final String writerId,
+    required final String id,
     @JsonKey(name: 'feed_id') required final String feedId,
-    required final String nickname,
+    @JsonKey(name: 'user_id') required final String userId,
     required final String content,
-    @JsonKey(name: 'created_at') required final DateTime createdAt,
-    @JsonKey(name: 'modified_at') required final DateTime modifiedAt,
+    @JsonKey(name: 'created_at') final DateTime? createdAt,
+    @JsonKey(name: 'updated_at') final DateTime? updatedAt,
   }) = _$CommentDtoImpl;
 
   factory _CommentDto.fromJson(Map<String, dynamic> json) =
       _$CommentDtoImpl.fromJson;
 
   @override
-  @JsonKey(ignore: true)
-  String? get id; // Firestore 필드에 저장 안 함
-  @override
-  @JsonKey(name: 'writer_id')
-  String get writerId;
+  String get id;
   @override
   @JsonKey(name: 'feed_id')
   String get feedId;
   @override
-  String get nickname;
+  @JsonKey(name: 'user_id')
+  String get userId;
   @override
   String get content;
   @override
   @JsonKey(name: 'created_at')
-  DateTime get createdAt;
+  DateTime? get createdAt;
   @override
-  @JsonKey(name: 'modified_at')
-  DateTime get modifiedAt;
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt;
 
   /// Create a copy of CommentDto
   /// with the given fields replaced by the non-null parameter values.
