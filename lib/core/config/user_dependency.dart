@@ -7,9 +7,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'user_dependency.g.dart';
 
 @riverpod
-UserRepository userRepository(UserRepositoryRef ref) => 
-    UserRepositoryImpl(client: ref.read(supabaseClientProvider));
+UserRepository userRepository(UserRepositoryRef ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return UserRepositoryImpl(client);
+}
 
 @riverpod
-UserUseCase userUseCase(UserUseCaseRef ref) => 
-    UserUseCase(ref.read(userRepositoryProvider));
+UserUseCase userUseCase(UserUseCaseRef ref) {
+  final repository = ref.watch(userRepositoryProvider);
+  return UserUseCase(repository);
+}

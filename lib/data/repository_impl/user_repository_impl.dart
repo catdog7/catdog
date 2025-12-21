@@ -5,44 +5,31 @@ import 'package:catdog/domain/repository/user_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserRepositoryImpl implements UserRepository {
-  UserRepositoryImpl({required this.client});
-  final SupabaseClient client;
+  final SupabaseClient _client;
+
+  UserRepositoryImpl(this._client);
 
   @override
-  Future<void> addUser({required UserModel user}) async {
+  Future<UserModel?> getUser(String id) async {
+    final response = await _client
+        .from('users')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    
+    if (response == null) return null;
+    return UserMapper.toModel(UserDto.fromJson(response));
+  }
+
+  @override
+  Future<void> addUser(UserModel user) async {
     final dto = UserMapper.toDto(user);
-    await client.from('users').upsert(dto.toJson());
+    await _client.from('users').insert(dto.toJson());
   }
 
   @override
-  Future<UserModel> getUser(String userId) async {
-    final data = await client.from('users').select().eq('id', userId).single();
-    return UserMapper.toDomain(UserDto.fromJson(data));
-  }
-
-  Future<UserModel> getMyProfile() async {
-    final userId = client.auth.currentUser?.id;
-    if (userId == null) throw Exception("Not authenticated");
-    return getUser(userId);
-  }
-
-  @override
-  Future<bool> hasProfile(String userId) async {
-    final data = await client
-        .from('users')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle();
-    return data != null;
-  }
-
-  @override
-  Future<bool> nicknameAvailable({required String nickname}) async {
-    final data = await client
-        .from('users')
-        .select('id')
-        .eq('nickname', nickname)
-        .maybeSingle();
-    return data == null;
+  Future<void> updateUser(UserModel user) async {
+    final dto = UserMapper.toDto(user);
+    await _client.from('users').update(dto.toJson()).eq('id', user.id);
   }
 }

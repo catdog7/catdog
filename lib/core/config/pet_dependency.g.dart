@@ -6,7 +6,7 @@ part of 'pet_dependency.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$petRepositoryHash() => r'6ef874791e35236ee992971682ff0dc0aa86a955';
+String _$petRepositoryHash() => r'080da96c71d1fc0669d6e1bb0c2be226220bdcb7';
 
 /// See also [petRepository].
 @ProviderFor(petRepository)
@@ -23,7 +23,7 @@ final petRepositoryProvider = AutoDisposeProvider<PetRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PetRepositoryRef = AutoDisposeProviderRef<PetRepository>;
-String _$petUseCaseHash() => r'749bc20ad5aa4099fa9ff277dfd3a40480ddab78';
+String _$petUseCaseHash() => r'e697eaaaedb74bcb3ec0624bbb6544b8982ac44a';
 
 /// See also [petUseCase].
 @ProviderFor(petUseCase)
