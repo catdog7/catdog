@@ -12,6 +12,8 @@ _$UserDtoImpl _$$UserDtoImplFromJson(Map<String, dynamic> json) =>
       nickname: json['nickname'] as String,
       inviteCode: json['invite_code'] as String,
       profileImageUrl: json['profile_image_url'] as String?,
+      email: json['email'] as String?,
+      provider: json['provider'] as String?,
       status: json['status'] as String? ?? 'ACTIVE',
       createdAt: json['created_at'] == null
           ? null
@@ -27,6 +29,8 @@ Map<String, dynamic> _$$UserDtoImplToJson(_$UserDtoImpl instance) =>
       'nickname': instance.nickname,
       'invite_code': instance.inviteCode,
       'profile_image_url': instance.profileImageUrl,
+      'email': instance.email,
+      'provider': instance.provider,
       'status': instance.status,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),

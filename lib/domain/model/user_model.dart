@@ -9,6 +9,8 @@ class UserModel with _$UserModel {
     required String nickname,
     required String inviteCode,
     String? profileImageUrl,
+    String? email,
+    String? provider,
     @Default('ACTIVE') String status,
     DateTime? createdAt,
     DateTime? updatedAt,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -19,10 +20,28 @@ class _TestSupabasePageState extends State<TestSupabasePage> {
   String? targetUserId; // 팔로우 대상이 될 유저 ID
   String? lastFeedId;
 
+  StreamSubscription<AuthState>? _authSubscription;
+
   @override
   void initState() {
     super.initState();
     lastUserId = client.auth.currentUser?.id;
+    _authSubscription = client.auth.onAuthStateChange.listen((data) {
+      if (mounted) {
+        setState(() {
+          lastUserId = data.session?.user.id;
+          if (lastUserId != null) {
+            status = 'Logged in as ${data.session?.user.email}';
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   void updateStatus(String msg) {
@@ -56,6 +75,18 @@ class _TestSupabasePageState extends State<TestSupabasePage> {
       }
     } catch (e) {
       updateStatus('Auth Error Detail: $e');
+    }
+  }
+
+  Future<void> testGoogleLogin() async {
+    try {
+      updateStatus('Starting Google Login (OAuth)...');
+      await client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'io.supabase.catdog://login-callback/',
+      );
+    } catch (e) {
+      updateStatus('Google Login Error: $e');
     }
   }
 
@@ -223,6 +254,11 @@ class _TestSupabasePageState extends State<TestSupabasePage> {
               onPressed: testUser, 
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[100]),
               child: const Text('1. 유저 생성 (연속 2번 클릭 시 팔로우 테스트 가능)')
+            ),
+            ElevatedButton(
+              onPressed: testGoogleLogin, 
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[100]),
+              child: const Text('구글 로그인 테스트 (OAuth)')
             ),
             ElevatedButton(onPressed: testSignOut, child: const Text('로그아웃 (초기화)')),
             const Divider(height: 30),

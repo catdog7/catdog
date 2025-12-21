@@ -21,6 +21,8 @@ mixin _$UserModel {
   String get nickname => throw _privateConstructorUsedError;
   String get inviteCode => throw _privateConstructorUsedError;
   String? get profileImageUrl => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
+  String? get provider => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -42,6 +44,8 @@ abstract class $UserModelCopyWith<$Res> {
     String nickname,
     String inviteCode,
     String? profileImageUrl,
+    String? email,
+    String? provider,
     String status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -67,6 +71,8 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? nickname = null,
     Object? inviteCode = null,
     Object? profileImageUrl = freezed,
+    Object? email = freezed,
+    Object? provider = freezed,
     Object? status = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -88,6 +94,14 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
             profileImageUrl: freezed == profileImageUrl
                 ? _value.profileImageUrl
                 : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            email: freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            provider: freezed == provider
+                ? _value.provider
+                : provider // ignore: cast_nullable_to_non_nullable
                       as String?,
             status: null == status
                 ? _value.status
@@ -121,6 +135,8 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String nickname,
     String inviteCode,
     String? profileImageUrl,
+    String? email,
+    String? provider,
     String status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -145,6 +161,8 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? nickname = null,
     Object? inviteCode = null,
     Object? profileImageUrl = freezed,
+    Object? email = freezed,
+    Object? provider = freezed,
     Object? status = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -166,6 +184,14 @@ class __$$UserModelImplCopyWithImpl<$Res>
         profileImageUrl: freezed == profileImageUrl
             ? _value.profileImageUrl
             : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        email: freezed == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        provider: freezed == provider
+            ? _value.provider
+            : provider // ignore: cast_nullable_to_non_nullable
                   as String?,
         status: null == status
             ? _value.status
@@ -192,6 +218,8 @@ class _$UserModelImpl implements _UserModel {
     required this.nickname,
     required this.inviteCode,
     this.profileImageUrl,
+    this.email,
+    this.provider,
     this.status = 'ACTIVE',
     this.createdAt,
     this.updatedAt,
@@ -206,6 +234,10 @@ class _$UserModelImpl implements _UserModel {
   @override
   final String? profileImageUrl;
   @override
+  final String? email;
+  @override
+  final String? provider;
+  @override
   @JsonKey()
   final String status;
   @override
@@ -215,7 +247,7 @@ class _$UserModelImpl implements _UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, nickname: $nickname, inviteCode: $inviteCode, profileImageUrl: $profileImageUrl, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserModel(id: $id, nickname: $nickname, inviteCode: $inviteCode, profileImageUrl: $profileImageUrl, email: $email, provider: $provider, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -230,6 +262,9 @@ class _$UserModelImpl implements _UserModel {
                 other.inviteCode == inviteCode) &&
             (identical(other.profileImageUrl, profileImageUrl) ||
                 other.profileImageUrl == profileImageUrl) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.provider, provider) ||
+                other.provider == provider) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -244,6 +279,8 @@ class _$UserModelImpl implements _UserModel {
     nickname,
     inviteCode,
     profileImageUrl,
+    email,
+    provider,
     status,
     createdAt,
     updatedAt,
@@ -264,6 +301,8 @@ abstract class _UserModel implements UserModel {
     required final String nickname,
     required final String inviteCode,
     final String? profileImageUrl,
+    final String? email,
+    final String? provider,
     final String status,
     final DateTime? createdAt,
     final DateTime? updatedAt,
@@ -277,6 +316,10 @@ abstract class _UserModel implements UserModel {
   String get inviteCode;
   @override
   String? get profileImageUrl;
+  @override
+  String? get email;
+  @override
+  String? get provider;
   @override
   String get status;
   @override

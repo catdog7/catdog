@@ -12,6 +12,8 @@ DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users (
     id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
     nickname TEXT,
+    email TEXT,
+    provider TEXT,
     invite_code TEXT UNIQUE,
     profile_image_url TEXT,
     status TEXT DEFAULT 'ACTIVE',
@@ -112,8 +114,13 @@ CREATE TRIGGER update_follow_requests_updated_at BEFORE UPDATE ON follow_request
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.users (id, nickname)
-  VALUES (new.id, new.raw_user_meta_data->>'nickname');
+  INSERT INTO public.users (id, nickname, email, provider)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'nickname',
+    new.email,
+    new.raw_app_meta_data->>'provider'
+  );
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

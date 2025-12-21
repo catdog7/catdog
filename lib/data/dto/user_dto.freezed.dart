@@ -27,6 +27,8 @@ mixin _$UserDto {
   String get inviteCode => throw _privateConstructorUsedError;
   @JsonKey(name: 'profile_image_url')
   String? get profileImageUrl => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
+  String? get provider => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -52,6 +54,8 @@ abstract class $UserDtoCopyWith<$Res> {
     String nickname,
     @JsonKey(name: 'invite_code') String inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
+    String? email,
+    String? provider,
     String status,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
@@ -77,6 +81,8 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
     Object? nickname = null,
     Object? inviteCode = null,
     Object? profileImageUrl = freezed,
+    Object? email = freezed,
+    Object? provider = freezed,
     Object? status = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -98,6 +104,14 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
             profileImageUrl: freezed == profileImageUrl
                 ? _value.profileImageUrl
                 : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            email: freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            provider: freezed == provider
+                ? _value.provider
+                : provider // ignore: cast_nullable_to_non_nullable
                       as String?,
             status: null == status
                 ? _value.status
@@ -130,6 +144,8 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
     String nickname,
     @JsonKey(name: 'invite_code') String inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
+    String? email,
+    String? provider,
     String status,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
@@ -154,6 +170,8 @@ class __$$UserDtoImplCopyWithImpl<$Res>
     Object? nickname = null,
     Object? inviteCode = null,
     Object? profileImageUrl = freezed,
+    Object? email = freezed,
+    Object? provider = freezed,
     Object? status = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -175,6 +193,14 @@ class __$$UserDtoImplCopyWithImpl<$Res>
         profileImageUrl: freezed == profileImageUrl
             ? _value.profileImageUrl
             : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        email: freezed == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        provider: freezed == provider
+            ? _value.provider
+            : provider // ignore: cast_nullable_to_non_nullable
                   as String?,
         status: null == status
             ? _value.status
@@ -201,6 +227,8 @@ class _$UserDtoImpl implements _UserDto {
     required this.nickname,
     @JsonKey(name: 'invite_code') required this.inviteCode,
     @JsonKey(name: 'profile_image_url') this.profileImageUrl,
+    this.email,
+    this.provider,
     this.status = 'ACTIVE',
     @JsonKey(name: 'created_at') this.createdAt,
     @JsonKey(name: 'updated_at') this.updatedAt,
@@ -220,6 +248,10 @@ class _$UserDtoImpl implements _UserDto {
   @JsonKey(name: 'profile_image_url')
   final String? profileImageUrl;
   @override
+  final String? email;
+  @override
+  final String? provider;
+  @override
   @JsonKey()
   final String status;
   @override
@@ -231,7 +263,7 @@ class _$UserDtoImpl implements _UserDto {
 
   @override
   String toString() {
-    return 'UserDto(id: $id, nickname: $nickname, inviteCode: $inviteCode, profileImageUrl: $profileImageUrl, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserDto(id: $id, nickname: $nickname, inviteCode: $inviteCode, profileImageUrl: $profileImageUrl, email: $email, provider: $provider, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -246,6 +278,9 @@ class _$UserDtoImpl implements _UserDto {
                 other.inviteCode == inviteCode) &&
             (identical(other.profileImageUrl, profileImageUrl) ||
                 other.profileImageUrl == profileImageUrl) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.provider, provider) ||
+                other.provider == provider) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -261,6 +296,8 @@ class _$UserDtoImpl implements _UserDto {
     nickname,
     inviteCode,
     profileImageUrl,
+    email,
+    provider,
     status,
     createdAt,
     updatedAt,
@@ -286,6 +323,8 @@ abstract class _UserDto implements UserDto {
     required final String nickname,
     @JsonKey(name: 'invite_code') required final String inviteCode,
     @JsonKey(name: 'profile_image_url') final String? profileImageUrl,
+    final String? email,
+    final String? provider,
     final String status,
     @JsonKey(name: 'created_at') final DateTime? createdAt,
     @JsonKey(name: 'updated_at') final DateTime? updatedAt,
@@ -303,6 +342,10 @@ abstract class _UserDto implements UserDto {
   @override
   @JsonKey(name: 'profile_image_url')
   String? get profileImageUrl;
+  @override
+  String? get email;
+  @override
+  String? get provider;
   @override
   String get status;
   @override

@@ -11,6 +11,8 @@ class UserDto with _$UserDto {
     required String nickname,
     @JsonKey(name: 'invite_code') required String inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
+    String? email,
+    String? provider,
     @Default('ACTIVE') String status,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
