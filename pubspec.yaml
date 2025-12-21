@@ -1,0 +1,88 @@
+name: catdog
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8  # iOS 스타일 기본 아이콘
+
+  google_fonts: ^6.3.2     # 구글 폰트 사용
+
+  # ---------------------
+  # Supabase
+  # ---------------------
+  supabase_flutter: ^2.8.3
+
+  # ---------------------
+  # Firebase 필수 패키지 (Removed)
+  # ---------------------
+  # firebase_core: ^4.1.0
+  # cloud_firestore: ^6.0.1
+  # firebase_storage: ^13.0.3
+  # firebase_crashlytics: ^5.0.5
+
+  # ---------------------
+  # 상태 관리 - Riverpod
+  # ---------------------
+  flutter_riverpod: ^2.5.1          # Riverpod 기본 패키지
+  riverpod_annotation: ^2.3.5        # Riverpod 코드제너레이션(annotation)
+
+  # ---------------------
+  # 코드 제너레이션
+  # ---------------------
+  freezed_annotation: ^2.4.4         # Freezed 모델 어노테이션
+  json_annotation: ^4.9.0            # JSON 직렬화 어노테이션
+
+  # ---------------------
+  # 라우팅 (go_router)
+  # ---------------------
+  go_router: ^17.0.0                 # 선언적 라우팅
+
+  # ---------------------
+  # 유틸 패키지
+  # ---------------------
+  intl: ^0.20.2                      # 날짜/시간 포맷
+  uuid: ^4.5.1                       # UUID 생성
+  flutter_native_splash: ^2.4.7      # 스플래시 화면 자동 생성
+
+  image_picker: ^1.1.2               # 갤러리/카메라 이미지 선택
+
+  shared_preferences: ^2.5.3         # 로컬 저장 (key-value)
+  flutter_dotenv: ^5.1.0             # 환경 변수 (.env 파일)
+
+  hooks_riverpod: ^2.6.1             # HookConsumerWidget, lifecycle 활용
+  flutter_hooks: ^0.21.3+1           # Hooks 기반 위젯 구조 지원
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # ---------------------
+  # 빌드 / 코드 생성 도구
+  # ---------------------
+  build_runner: ^2.4.9           # 코드 생성 실행기
+  riverpod_generator: ^2.4.4     # Riverpod 코드 생성기
+  freezed: ^2.5.8                # Freezed 코드 생성기
+  json_serializable: ^6.9.0      # JSON 코드 생성기
+
+  # ---------------------
+  # 테스트용 Firebase Mock (Removed)
+  # ---------------------
+  # fake_cloud_firestore: ^4.0.0   # Firestore mock(단위 테스트용)
+
+  flutter_lints: ^5.0.0          # Dart/Flutter lint 규칙
+
+
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - .env
