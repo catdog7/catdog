@@ -2,7 +2,7 @@ import 'package:catdog/data/dto/user_dto.dart';
 import 'package:catdog/domain/model/user_model.dart';
 
 class UserMapper {
-  static UserModel toDomain(UserDto dto) => UserModel(
+  static UserModel toModel(UserDto dto) => UserModel(
         id: dto.id,
         nickname: dto.nickname,
         inviteCode: dto.inviteCode,
