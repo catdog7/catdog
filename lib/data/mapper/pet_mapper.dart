@@ -2,7 +2,7 @@ import 'package:catdog/data/dto/pet_dto.dart';
 import 'package:catdog/domain/model/pet_model.dart';
 
 class PetMapper {
-  static PetModel toDomain(PetDto dto) => PetModel(
+  static PetModel toModel(PetDto dto) => PetModel(
         id: dto.id,
         userId: dto.userId,
         name: dto.name,
