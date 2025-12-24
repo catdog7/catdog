@@ -1,5 +1,6 @@
 import 'package:catdog/firebase_options.dart';
 import 'package:catdog/ui/pages/login/root_page.dart';
+import 'package:catdog/ui/pages/splash/splash_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const RootPage(),
+      home: const SplashPage(),
     );
   }
 }
