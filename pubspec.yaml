@@ -49,6 +49,7 @@ dependencies:
   # ---------------------
   intl: ^0.20.2                      # 날짜/시간 포맷
   uuid: ^4.5.1                       # UUID 생성
+  random_string: ^2.3.1              # 랜덤 문자열 생성
   flutter_native_splash: ^2.4.7      # 스플래시 화면 자동 생성
 
   image_picker: ^1.1.2               # 갤러리/카메라 이미지 선택

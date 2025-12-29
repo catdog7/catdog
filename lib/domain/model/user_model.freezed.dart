@@ -212,7 +212,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$UserModelImpl implements _UserModel {
+class _$UserModelImpl extends _UserModel {
   const _$UserModelImpl({
     required this.id,
     required this.nickname,
@@ -223,7 +223,7 @@ class _$UserModelImpl implements _UserModel {
     this.status = 'ACTIVE',
     this.createdAt,
     this.updatedAt,
-  });
+  }) : super._();
 
   @override
   final String id;
@@ -295,7 +295,7 @@ class _$UserModelImpl implements _UserModel {
       __$$UserModelImplCopyWithImpl<_$UserModelImpl>(this, _$identity);
 }
 
-abstract class _UserModel implements UserModel {
+abstract class _UserModel extends UserModel {
   const factory _UserModel({
     required final String id,
     required final String nickname,
@@ -307,6 +307,7 @@ abstract class _UserModel implements UserModel {
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$UserModelImpl;
+  const _UserModel._() : super._();
 
   @override
   String get id;
