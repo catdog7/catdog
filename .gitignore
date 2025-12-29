@@ -48,3 +48,13 @@ app.*.map.json
 # Environment variables
 .env
 .env.*
+
+### iOS - CocoaPods ###
+ios/Pods/
+ios/Podfile.lock
+
+### iOS - Xcode (개인/캐시 파일) ###
+ios/DerivedData/
+ios/**/*.xcuserdata/
+ios/**/*.xcuserstate
+ios/**/project.xcworkspace/xcuserdata/

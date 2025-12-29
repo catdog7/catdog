@@ -14,58 +14,165 @@ class MainNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      color: Colors.white,
-      elevation: 10,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.home, '홈', 0),
-          _buildNavItem(Icons.article, '게시글', 1),
-          // Central Write Button
-          GestureDetector(
-            onTap: onWritePressed,
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: const BoxDecoration(
-                color: Color(0xFF6A11CB),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 네비게이션바 위 구분선
+        Container(
+          height: 1,
+          color: Colors.black.withOpacity(0.15),
+        ),
+        Container(
+          color: Colors.white,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 상단 네비게이션 아이템 영역
+              Container(
+                padding: EdgeInsets.only(
+                  top: 4,
+                  bottom: MediaQuery.of(context).padding.bottom, // 아이폰 safe area 하단 패딩
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    // left border 제거 (하단 바와 겹치지 않도록)
+                    top: BorderSide(
+                      width: 1,
+                      color: Colors.black.withOpacity(0.15),
+                    ),
+                    right: BorderSide(
+                      color: Colors.black.withOpacity(0.15),
+                    ),
+                    // bottom border 제거 (하단 바와 겹치지 않도록)
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 52,
+                        decoration: const ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                            ),
+                          ),
+                        ),
+                        child: _NavItem(
+                          icon: Icons.home,
+                          label: '홈',
+                          isActive: selectedIndex == 0,
+                          onTap: () => onItemSelected(0),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 52,
+                        child: _NavItem(
+                          icon: Icons.sticky_note_2,
+                          label: '게시글',
+                          isActive: selectedIndex == 1,
+                          onTap: () => onItemSelected(1),
+                        ),
+                      ),
+                    ),
+                    // FAB 공간 (게시글과 친구 사이) - 버튼이 여기에 위치
+                    GestureDetector(
+                      onTap: onWritePressed,
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const ShapeDecoration(
+                            color: Color(0xFF121416),
+                            shape: CircleBorder(),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 52,
+                        child: _NavItem(
+                          icon: Icons.group,
+                          label: '친구',
+                          isActive: selectedIndex == 2,
+                          onTap: () => onItemSelected(2),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 52,
+                        child: _NavItem(
+                          icon: Icons.account_circle,
+                          label: '내정보',
+                          isActive: selectedIndex == 3,
+                          onTap: () => onItemSelected(3),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 32),
-            ),
+            ],
           ),
-          _buildNavItem(Icons.people, '친구', 2),
-          _buildNavItem(Icons.person, '내정보', 3),
-        ],
-      ),
+        ),
+      ],
     );
   }
+}
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    final isSelected = selectedIndex == index;
-    return InkWell(
-      onTap: () => onItemSelected(index),
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    this.isActive = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = const Color(0xFFFCBC0D);
+    final inactiveColor = Colors.grey;
+    final iconColor = isActive ? activeColor : inactiveColor;
+    final textColor = isActive ? activeColor : inactiveColor;
+
+    return GestureDetector(
+      onTap: onTap,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
-            color: isSelected ? const Color(0xFF6A11CB) : Colors.grey,
+            size: 24,
+            color: iconColor,
+            fill: isActive ? 1.0 : 0.0, // 활성일 때 채워진 아이콘
           ),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
-              color: isSelected ? const Color(0xFF6A11CB) : Colors.grey,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: textColor,
             ),
           ),
         ],

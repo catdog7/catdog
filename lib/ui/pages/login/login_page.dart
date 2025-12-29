@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:catdog/core/config/common_dependency.dart';
+import 'package:catdog/core/config/user_dependency.dart';
 import 'package:catdog/ui/pages/home/home_page.dart';
+import 'package:catdog/ui/pages/login/login_page1.dart';
 import 'package:catdog/ui/pages/login/nickname_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -16,15 +17,8 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   late final SupabaseClient client;
-  final uuid = const Uuid();
-  String status = 'Ready to test';
-  bool _isNavigating = false;
   bool _isLoading = false;
-
-  // Controllers for manual input
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
+  bool _isNavigating = false;
   StreamSubscription<AuthState>? _authSubscription;
 
   @override
@@ -35,18 +29,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) {
         final session = data.session;
         if (session != null) {
-          setState(() {
-            status = 'Logged in as ${session.user.email}';
-          });
-          // Check nickname and navigate
           _handlePostLoginNavigation(session.user.id);
-        } else {
-          setState(() {
-            status = 'Signed Out.';
-          });
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _handlePostLoginNavigation(String userId) async {
@@ -55,26 +47,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     _isNavigating = true;
 
     try {
-      print('LoginPage: Handling Post-Login for $userId');
-      final response = await client
-          .from('users')
-          .select('nickname')
-          .eq('id', userId)
-          .maybeSingle();
-
-      print('LoginPage: Nickname Check Result: $response');
+      final useCase = ref.read(userUseCaseProvider);
+      final hasNickname = await useCase.hasNickname(userId);
 
       Widget targetPage;
-      if (response == null || response['nickname'] == null || (response['nickname'] as String).isEmpty) {
-        print('LoginPage: Navigating to NicknamePage');
+      if (!hasNickname) {
         targetPage = const NicknamePage();
       } else {
-        print('LoginPage: Navigating to HomePage');
         targetPage = const HomePage();
       }
 
       if (mounted) {
-        print('LoginPage: Executing Navigator.pushAndRemoveUntil to ${targetPage.runtimeType}');
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => targetPage),
           (route) => false,
@@ -93,114 +76,160 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  void updateStatus(String msg) {
-    setState(() {
-      status = msg;
-    });
-    print(msg);
-  }
-
-
-  // Manual Sign In
-  Future<void> testSignIn() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      return updateStatus('Enter email and password first!');
-    }
-
+  Future<void> _googleLogin() async {
+    if (_isLoading) return; // 이미 로딩 중이면 중복 실행 방지
+    
     try {
       setState(() => _isLoading = true);
-      updateStatus('Attempting Manual SignIn: $email');
-      final res = await client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-      if (res.user != null) {
-        updateStatus('Success! User Signed In: ${res.user!.id}');
-      }
-    } catch (e) {
-      updateStatus('SignIn Error: $e');
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> testGoogleLogin() async {
-    try {
-      setState(() => _isLoading = true);
-      updateStatus('Starting Google Login (OAuth)...');
+      
+      // 구글 계정 선택 화면을 강제로 표시하기 위해 queryParams 추가
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'io.supabase.catdog://login-callback/',
+        authScreenLaunchMode: LaunchMode.externalApplication,
+        queryParams: {
+          'prompt': 'select_account', // 계정 선택 화면 강제 표시
+        },
       );
+      
+      // OAuth 로그인 후 딥링크로 돌아오면 onAuthStateChange가 트리거됨
+      // 타임아웃 설정: 10초 후에도 세션이 없으면 로딩 해제
+      await Future.delayed(const Duration(seconds: 10));
+      
+      if (mounted) {
+        final session = client.auth.currentSession;
+        if (session != null) {
+          _handlePostLoginNavigation(session.user.id);
+        } else {
+          // 세션이 없으면 로딩 해제 (OAuth 취소되었거나 실패)
+          setState(() => _isLoading = false);
+          _isNavigating = false;
+        }
+      }
     } catch (e) {
-      updateStatus('Google Login Error: $e');
-      if (mounted) setState(() => _isLoading = false);
+      print('Google Login Error: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _isNavigating = false;
+      }
     }
   }
 
-  Future<void> testSignOut() async {
-    await client.auth.signOut();
+  Future<void> _appleLogin() async {
+    // TODO: Apple 로그인 구현
+    print('Apple login not implemented yet');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('CatDog Login Test')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              color: Colors.grey[200],
-              child: Text('Status: $status', style: const TextStyle(fontSize: 13)),
-            ),
-            const SizedBox(height: 20),
-            
-            // Manual Input Section
-            const Text('Manual Login', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: _isLoading ? null : testSignIn, 
-              child: _isLoading 
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Sign In')
-            ),
-            const Divider(height: 40),
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final safeAreaBottom = MediaQuery.of(context).padding.bottom;
+    
+    // 반응형 이미지 크기 (화면 너비의 60-70%)
+    final desImageWidth = screenWidth * 0.64; // 240/375 ≈ 0.64
+    final titleImageWidth = screenWidth * 0.693; // 260/375 ≈ 0.693
+    
+    // 반응형 패딩
+    final horizontalPadding = screenWidth * 0.053; // 20/375 ≈ 0.053
+    final termsPadding = screenWidth * 0.099; // 37/375 ≈ 0.099
 
-            ElevatedButton(
-              onPressed: _isLoading ? null : testGoogleLogin, 
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[100]),
-              child: const Text('구글 로그인 테스트 (OAuth)')
-            ),
-            ElevatedButton(
-              onPressed: _isLoading ? null : testSignOut, 
-              child: const Text('로그아웃 (초기화)')
-            ),
-            const SizedBox(height: 40),
-          ],
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFD),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const LoginPage1()),
+          );
+        },
+        backgroundColor: Colors.grey,
+        child: const Icon(Icons.bug_report, color: Colors.white),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final availableHeight = constraints.maxHeight;
+            
+            return Column(
+              children: [
+                // 상단 콘텐츠 영역 (Expanded로 남은 공간 차지)
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      child: Column(
+                        children: [
+                          SizedBox(height: availableHeight * 0.2), // 상단 여백 증가
+
+                          // 부제목 이미지
+                          Image.asset(
+                            'assets/images/des.webp',
+                            width: desImageWidth,
+                            fit: BoxFit.contain,
+                          ),
+
+                          SizedBox(height: availableHeight * 0.02), // 간격 증가
+
+                          // 타이틀 이미지
+                          Image.asset(
+                            'assets/images/title.webp',
+                            width: titleImageWidth,
+                            fit: BoxFit.contain,
+                          ),
+
+                          SizedBox(height: availableHeight * 0.12), // 간격 증가
+
+                          // 구글 로그인 버튼
+                          GestureDetector(
+                            onTap: _isLoading ? null : _googleLogin,
+                            child: Image.asset(
+                              'assets/images/google.webp',
+                              width: double.infinity,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+
+                          SizedBox(height: availableHeight * 0.025), // 간격 증가
+
+                          // 애플 로그인 버튼
+                          GestureDetector(
+                            onTap: _isLoading ? null : _appleLogin,
+                            child: Image.asset(
+                              'assets/images/ios.webp',
+                              width: double.infinity,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // 약관 동의 텍스트 (항상 맨 아래 고정)
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: termsPadding,
+                    right: termsPadding,
+                    bottom: safeAreaBottom > 0 ? safeAreaBottom + screenHeight * 0.02 : screenHeight * 0.02,
+                  ),
+                  child: Text(
+                    '회원가입 시 댕냥댕냥 서비스의\n개인정보처리방침 및 이용약관에 동의한 것으로 간주합니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.30),
+                      fontSize: screenWidth * 0.035, // 13/375 ≈ 0.035
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w500,
+                      height: 1.54,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

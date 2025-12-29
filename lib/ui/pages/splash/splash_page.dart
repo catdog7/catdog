@@ -1,4 +1,5 @@
 import 'package:catdog/core/config/common_dependency.dart';
+import 'package:catdog/core/config/user_dependency.dart';
 import 'package:catdog/ui/pages/home/home_page.dart';
 import 'package:catdog/ui/pages/login/nickname_page.dart';
 import 'package:catdog/ui/pages/login/login_page.dart';
@@ -59,6 +60,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   Future<void> _runInit() async {
     try {
       final client = ref.read(supabaseClientProvider);
+      final useCase = ref.read(userUseCaseProvider);
 
       await Future.delayed(const Duration(milliseconds: 1500));
 
@@ -71,17 +73,11 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         return;
       }
 
-      final response = await client
-          .from('users')
-          .select('nickname')
-          .eq('id', session.user.id)
-          .maybeSingle();
+      final hasNickname = await useCase.hasNickname(session.user.id);
 
       if (!mounted) return;
 
-      if (response == null ||
-          response['nickname'] == null ||
-          (response['nickname'] as String).isEmpty) {
+      if (!hasNickname) {
         _navigate(const NicknamePage());
       } else {
         _navigate(const HomePage());
