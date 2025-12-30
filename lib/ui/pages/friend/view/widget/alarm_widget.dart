@@ -1,8 +1,8 @@
-import 'package:catdog/domain/model/user_model.dart';
+import 'package:catdog/domain/model/friend_info_model.dart';
 import 'package:flutter/material.dart';
 
 class AlarmWidget extends StatelessWidget {
-  final UserModel user;
+  final FriendInfoModel user;
   final void Function(String id) onDeleted;
   final void Function(String id) onAccepted;
   const AlarmWidget({
@@ -31,7 +31,7 @@ class AlarmWidget extends StatelessWidget {
         ),
         InkWell(
           onTap: () {
-            onDeleted(user.id);
+            onDeleted(user.userId);
             //print("친구 요청 삭제");
           },
           child: Container(
@@ -51,12 +51,12 @@ class AlarmWidget extends StatelessWidget {
         SizedBox(width: 5),
         Ink(
           decoration: BoxDecoration(
-            color: Colors.amberAccent,
+            color: const Color(0xFFFDCA40),
             borderRadius: BorderRadius.circular(5),
           ),
           child: InkWell(
             onTap: () {
-              onAccepted(user.id);
+              onAccepted(user.userId);
               //print("친구 요청 수락");
             },
             child: Container(
@@ -65,7 +65,7 @@ class AlarmWidget extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: Colors.amberAccent),
+                border: Border.all(color: const Color(0xFFFDCA40)),
               ),
               child: Text("친구 수락", style: TextStyle(color: Colors.black)),
             ),

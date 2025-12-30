@@ -1,6 +1,9 @@
 import 'package:catdog/data/dto/friend_dto.dart';
+import 'package:catdog/data/dto/user_dto.dart';
 import 'package:catdog/data/mapper/friend_mapper.dart';
+import 'package:catdog/data/mapper/user_mapper.dart';
 import 'package:catdog/domain/model/friend_model.dart';
+import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/domain/repository/friend_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,9 +14,18 @@ class FriendRepositoryImpl implements FriendRepository {
   @override
   Future<bool> addFriend(FriendModel friend) async {
     try {
-      final dto = FriendMapper.toDto(friend);
-      await _client.from('friends').insert(dto.toJson());
-      return true;
+      final myId = _client.auth.currentUser?.id;
+      if (myId != null) {
+        if (myId.compareTo(friend.userAId) < 0) {
+          friend = friend.copyWith(userAId: myId);
+        } else {
+          friend = friend.copyWith(userBId: myId);
+        }
+        final dto = FriendMapper.toDto(friend);
+        await _client.from('friends').insert(dto.toJson());
+        return true;
+      }
+      return false;
     } catch (e) {
       print("친구테이블에 추가 실패");
       return false;
@@ -21,23 +33,27 @@ class FriendRepositoryImpl implements FriendRepository {
   }
 
   @override
-  Future<bool> deleteFriend(String userAID, String userBID) async {
+  Future<bool> deleteFriend(String friendId) async {
     try {
-      //user A의 Id와 user B의 Id 순서 비교
-      if (userAID.compareTo(userBID) < 0) {
-        await _client
-            .from('friends')
-            .delete()
-            .eq('user_a_id', userAID)
-            .eq('user_b_id', userBID);
-      } else {
-        await _client
-            .from('friends')
-            .delete()
-            .eq('user_a_id', userBID)
-            .eq('user_b_id', userAID);
+      final myId = _client.auth.currentUser?.id;
+      if (myId != null) {
+        //user A의 Id와 user B의 Id 순서 비교
+        if (myId.compareTo(friendId) < 0) {
+          await _client
+              .from('friends')
+              .delete()
+              .eq('user_a_id', myId)
+              .eq('user_b_id', friendId);
+        } else {
+          await _client
+              .from('friends')
+              .delete()
+              .eq('user_a_id', friendId)
+              .eq('user_b_id', myId);
+        }
+        return true;
       }
-      return true;
+      return false;
     } catch (e) {
       print("친구테이블에서 삭제 실패");
       return false;
@@ -45,27 +61,58 @@ class FriendRepositoryImpl implements FriendRepository {
   }
 
   @override
-  Future<List<FriendModel>> getAllFriends(String userId) async {
-    //유저의 id가 'user_a_id'에 있는 경우
-    final response1 = await _client
-        .from('friends')
-        .select()
-        .eq('user_a_id', userId);
+  Future<(List<FriendModel>, List<FriendModel>)> getAllFriends() async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId != null) {
+        //유저의 id가 'user_a_id'에 있는 경우
+        final response1 = await _client
+            .from('friends')
+            .select()
+            .eq('user_a_id', userId);
 
-    final result1 = response1
-        .map((json) => FriendMapper.toDomain(FriendDto.fromJson(json)))
-        .toList();
+        final result1 = response1
+            .map((json) => FriendMapper.toDomain(FriendDto.fromJson(json)))
+            .toList();
 
-    //유저의 id가 'user_b_id'에 있는 경우
-    final response2 = await _client
-        .from('friends')
-        .select()
-        .eq('user_b_id', userId);
+        //유저의 id가 'user_b_id'에 있는 경우
+        final response2 = await _client
+            .from('friends')
+            .select()
+            .eq('user_b_id', userId);
 
-    final result2 = response2
-        .map((json) => FriendMapper.toDomain(FriendDto.fromJson(json)))
-        .toList();
+        final result2 = response2
+            .map((json) => FriendMapper.toDomain(FriendDto.fromJson(json)))
+            .toList();
 
-    return [...result1, ...result2];
+        return (result1, result2);
+      }
+      print("친구 가져오기 실패");
+      return (<FriendModel>[], <FriendModel>[]);
+    } catch (e) {
+      print("친구 가져오기 실패");
+      return (<FriendModel>[], <FriendModel>[]);
+    }
+  }
+
+  @override
+  Future<List<UserModel>> findUsers(String friendId) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId != null) {
+        final response = await _client
+            .from('users')
+            .select()
+            .or('nickname.ilike.%$friendId%, invite_code.ilike.%$friendId%')
+            .neq('id', userId);
+        final result = response
+            .map((json) => UserMapper.toModel(UserDto.fromJson(json)))
+            .toList();
+        return result;
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 }
