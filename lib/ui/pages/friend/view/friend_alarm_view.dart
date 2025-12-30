@@ -1,3 +1,4 @@
+import 'package:catdog/domain/model/friend_info_model.dart';
 import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/ui/pages/friend/view/widget/alarm_widget.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +9,11 @@ class FriendAlarmPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = UserModel(
-      id: 'adfadfadf',
+    final user = FriendInfoModel(
+      userId: 'adfadfadf',
       nickname: '콩이',
-      inviteCode: 'ㅁㅇㄹㅁㅇㄹ',
       profileImageUrl: 'https://picsum.photos/200/300',
+      isFriend: false,
     );
     return Scaffold(
       appBar: AppBar(

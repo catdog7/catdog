@@ -1,10 +1,12 @@
+import 'package:catdog/domain/model/friend_info_model.dart';
 import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/ui/widgets/more_widget.dart';
 import 'package:flutter/material.dart';
 
 class FriendWidget extends StatelessWidget {
-  final UserModel user;
-  const FriendWidget(this.user);
+  final FriendInfoModel friend;
+  final void Function(String id) onTap;
+  const FriendWidget({super.key, required this.friend, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -12,18 +14,22 @@ class FriendWidget extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundImage: user.profileImageUrl != null
-              ? NetworkImage(user.profileImageUrl!)
+          backgroundColor: Colors.grey,
+          backgroundImage: friend.profileImageUrl != null
+              ? NetworkImage(friend.profileImageUrl!)
               : null,
         ),
         SizedBox(width: 8),
-        Expanded(child: Text(user.nickname)),
+        Expanded(
+          child: Text(
+            friend.nickname,
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
         MoreWidget(
           menus: [
-            MenuAction(title: '친구 취소', onTap: (_) => print("친구 취소 누름")),
-            MenuAction(title: '친구 차단', onTap: (_) => print("친구 차단 누름")),
-            MenuAction(title: '친구 삭제', onTap: (_) => print("친구 삭제 누름")),
-            MenuAction(title: '친구 거절', onTap: (_) => print("친구 거절 누름")),
+            MenuAction(title: '친구 취소', onTap: (_) => onTap(friend.userId)),
+            //MenuAction(title: '친구 차단', onTap: (_) => print("친구 차단 누름")),
           ],
         ),
       ],
