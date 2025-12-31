@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
-import 'package:catdog/ui/pages/home/home_page.dart';
-import 'package:catdog/ui/pages/login/login_page1.dart';
-import 'package:catdog/ui/pages/login/nickname_page.dart';
+import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/login/login_view1.dart';
+import 'package:catdog/ui/pages/login/nickname_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key});
+class LoginView extends ConsumerStatefulWidget {
+  const LoginView({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _LoginViewState extends ConsumerState<LoginView> {
   late final SupabaseClient client;
   bool _isLoading = false;
   bool _isNavigating = false;
@@ -52,9 +52,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       Widget targetPage;
       if (!hasNickname) {
-        targetPage = const NicknamePage();
+        targetPage = const NicknameView();
       } else {
-        targetPage = const HomePage();
+        targetPage = const HomeView();
       }
 
       if (mounted) {
@@ -67,7 +67,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       print('LoginPage: Navigation Error: $e');
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const HomeView()),
           (route) => false,
         );
       }
@@ -140,7 +140,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const LoginPage1()),
+            MaterialPageRoute(builder: (context) => const LoginView1()),
           );
         },
         backgroundColor: Colors.grey,

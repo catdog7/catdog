@@ -1,19 +1,19 @@
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
-import 'package:catdog/ui/pages/home/home_page.dart';
-import 'package:catdog/ui/pages/login/nickname_page.dart';
-import 'package:catdog/ui/pages/login/login_page.dart';
+import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/login/nickname_view.dart';
+import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SplashPage extends ConsumerStatefulWidget {
-  const SplashPage({super.key});
+class SplashView extends ConsumerStatefulWidget {
+  const SplashView({super.key});
 
   @override
-  ConsumerState<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashView> createState() => _SplashViewState();
 }
 
-class _SplashPageState extends ConsumerState<SplashPage> {
+class _SplashViewState extends ConsumerState<SplashView> {
   bool _isInitialized = false;
   bool _bgLoaded = false;
   bool _catLoaded = false;
@@ -69,7 +69,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       if (!mounted) return;
 
       if (session == null) {
-        _navigate(const LoginPage());
+        _navigate(const LoginView());
         return;
       }
 
@@ -78,12 +78,12 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       if (!mounted) return;
 
       if (!hasNickname) {
-        _navigate(const NicknamePage());
+        _navigate(const NicknameView());
       } else {
-        _navigate(const HomePage());
+        _navigate(const HomeView());
       }
     } catch (_) {
-      if (mounted) _navigate(const LoginPage());
+      if (mounted) _navigate(const LoginView());
     }
   }
 
