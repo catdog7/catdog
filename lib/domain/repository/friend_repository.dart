@@ -3,7 +3,7 @@ import 'package:catdog/domain/model/user_model.dart';
 
 abstract interface class FriendRepository {
   Future<(List<FriendModel>, List<FriendModel>)> getAllFriends();
-  Future<bool> addFriend(FriendModel friend);
+  Future<bool> addFriend(String friendId);
   Future<bool> deleteFriend(String friendId);
   Future<List<UserModel>> findUsers(String nicknameOrCode);
 }

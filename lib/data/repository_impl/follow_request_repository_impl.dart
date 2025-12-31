@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:catdog/data/dto/follow_request_dto.dart';
 import 'package:catdog/data/mapper/follow_request_mapper.dart';
 import 'package:catdog/domain/model/follow_request_model.dart';
 import 'package:catdog/domain/repository/follow_request_repository.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -9,26 +13,44 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
   FollowRequestRepositoryImpl(this._client);
   final SupabaseClient _client;
   @override
-  Future<bool> sendFollowRequest(String friendId) async {
+  Future<String> sendFollowRequest(String friendId) async {
     final myId = _client.auth.currentUser?.id;
     if (myId != null) {
+      if (myId.compareTo(friendId) < 0) {
+        final response = await _client
+            .from('friends')
+            .select()
+            .eq('user_a_id', myId)
+            .eq('user_b_id', friendId);
+        if (response.isNotEmpty) {
+          return "FRIEND";
+        }
+      } else {
+        final response = await _client
+            .from('friends')
+            .select()
+            .eq('user_a_id', friendId)
+            .eq('user_b_id', myId);
+        if (response.isNotEmpty) {
+          return "FRIEND";
+        }
+      }
+
       final uuid = const Uuid();
       final followRequest = FollowRequestModel(
         id: uuid.v4(),
         fromUserId: myId,
         toUserId: friendId,
-        status: 'PENDING',
-        type: 'FRIEND',
       );
       final dto = FollowRequestMapper.toDto(followRequest);
       try {
         await _client.from('follow_requests').upsert(dto.toJson());
-        return true;
+        return "SUCCESS";
       } catch (e) {
-        return false;
+        return "FAIL";
       }
     }
-    return false;
+    return "FAIL";
   }
 
   @override
@@ -104,5 +126,41 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
       }
     }
     return false;
+  }
+
+  // 로그인시 db 토큰 테이블에 업데이트
+  @override
+  StreamSubscription<dynamic>? authSubscribe() {
+    return _client.auth.onAuthStateChange.listen((event) async {
+      if (event.event == AuthChangeEvent.signedIn) {
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+        if (fcmToken != null) {
+          final userId = _client.auth.currentUser?.id;
+          print("토큰!!!!! : $fcmToken");
+          if (userId != null) {
+            await _client.from('fcm_tokens').upsert({
+              'user_id': userId,
+              'token': fcmToken,
+              'platform': Platform.isIOS ? 'IOS' : 'ANDROID',
+            }, onConflict: 'user_id, token');
+          }
+        }
+      }
+    });
+  }
+
+  // 앱 사용중 토큰 변경시 db에 업데이트
+  @override
+  StreamSubscription<dynamic>? tokenSubscribe() {
+    return FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) async {
+      final userId = _client.auth.currentUser?.id;
+      if (userId != null) {
+        await _client.from('fcm_tokens').upsert({
+          'user_id': userId,
+          'token': fcmToken,
+          'platform': Platform.isIOS ? 'IOS' : 'ANDROID',
+        }, onConflict: 'user_id, token');
+      }
+    });
   }
 }

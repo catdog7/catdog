@@ -51,9 +51,10 @@ class FriendSearchViewModel extends _$FriendSearchViewModel {
     state = AsyncData(state.value!.copyWith(isLoading: false, users: users));
   }
 
-  Future<void> sendFollowRequest(String friendId) async {
+  Future<String> sendFollowRequest(String friendId) async {
     //
     final useCase = ref.read(friendUseCaseProvider);
     print("친구 요청 보냄");
+    return await useCase.sendFollowRequest(friendId);
   }
 }

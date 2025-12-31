@@ -1,5 +1,4 @@
 import 'package:catdog/domain/model/friend_info_model.dart';
-import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/ui/widgets/more_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -14,10 +13,9 @@ class FriendWidget extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 18,
-          backgroundColor: Colors.grey,
           backgroundImage: friend.profileImageUrl != null
               ? NetworkImage(friend.profileImageUrl!)
-              : null,
+              : AssetImage('assets/images/default_image.webp'),
         ),
         SizedBox(width: 8),
         Expanded(

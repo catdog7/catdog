@@ -26,7 +26,7 @@ class AlarmWidget extends StatelessWidget {
         Expanded(
           child: Text(
             user.nickname,
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
           ),
         ),
         InkWell(
@@ -40,24 +40,26 @@ class AlarmWidget extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: const Color(0xFFD9D9D9)),
             ),
             child: Text(
               "삭제",
-              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: const Color(0xFF666666),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
         SizedBox(width: 5),
         Ink(
           decoration: BoxDecoration(
-            color: const Color(0xFFFDCA40),
+            color: const Color(0xFF121416),
             borderRadius: BorderRadius.circular(5),
           ),
           child: InkWell(
             onTap: () {
               onAccepted(user.userId);
-              //print("친구 요청 수락");
             },
             child: Container(
               height: 35,
@@ -65,9 +67,15 @@ class AlarmWidget extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: const Color(0xFFFDCA40)),
+                border: Border.all(color: const Color(0xFF121416)),
               ),
-              child: Text("친구 수락", style: TextStyle(color: Colors.black)),
+              child: Text(
+                "친구 수락",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ),

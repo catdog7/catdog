@@ -1,30 +1,30 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'friend_search_view_model.dart';
+part of 'friend_alarm_view_model.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$friendSearchViewModelHash() =>
-    r'a729d8472606ecd94e32696d4cee8b4a0ce75355';
+String _$friendAlarmViewModelHash() =>
+    r'c2367e86e3b33cb9cfc3eef655c0cbf647be3bb7';
 
-/// See also [FriendSearchViewModel].
-@ProviderFor(FriendSearchViewModel)
-final friendSearchViewModelProvider =
+/// See also [FriendAlarmViewModel].
+@ProviderFor(FriendAlarmViewModel)
+final friendAlarmViewModelProvider =
     AutoDisposeAsyncNotifierProvider<
-      FriendSearchViewModel,
-      SearchState
+      FriendAlarmViewModel,
+      FriendState
     >.internal(
-      FriendSearchViewModel.new,
-      name: r'friendSearchViewModelProvider',
+      FriendAlarmViewModel.new,
+      name: r'friendAlarmViewModelProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$friendSearchViewModelHash,
+          : _$friendAlarmViewModelHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$FriendSearchViewModel = AutoDisposeAsyncNotifier<SearchState>;
+typedef _$FriendAlarmViewModel = AutoDisposeAsyncNotifier<FriendState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

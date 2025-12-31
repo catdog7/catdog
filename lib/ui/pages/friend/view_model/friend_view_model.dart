@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:catdog/core/config/friend_dependency.dart';
 import 'package:catdog/domain/model/friend_info_model.dart';
 import 'package:catdog/ui/pages/friend/state/friend_state.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'friend_view_model.g.dart';
@@ -9,6 +11,10 @@ part 'friend_view_model.g.dart';
 class FriendViewModel extends _$FriendViewModel {
   @override
   Future<FriendState> build() async {
+    final link = ref.keepAlive();
+    Timer(const Duration(minutes: 5), () {
+      link.close();
+    });
     final useCase = ref.watch(friendUseCaseProvider);
     final friends = await useCase.getMyFriends();
     return FriendState(isLoading: false, friends: friends);
@@ -23,6 +29,7 @@ class FriendViewModel extends _$FriendViewModel {
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(friendUseCaseProvider);
       final newList = await useCase.getMyFriends();
+      print("친구 목록 리프레시!!!");
       return FriendState(isLoading: false, friends: newList);
     });
   }
@@ -62,5 +69,26 @@ class FriendViewModel extends _$FriendViewModel {
       state = AsyncData(state.value!.copyWith(isLoading: false));
       print("친구 삭제 완료!!!!!!");
     }
+  }
+
+  Future<bool> initFcmToken() async {
+    final messaging = FirebaseMessaging.instance;
+
+    // APNS 토큰 준비 확인
+    // final apnsToken = await messaging.getAPNSToken();
+    // if (apnsToken == null) {
+    //   print('APNS token not ready yet');
+    //   return false;
+    // }
+
+    final fcmToken = await messaging.getToken();
+    if (fcmToken == null) return false;
+
+    return true;
+  }
+
+  (StreamSubscription?, StreamSubscription?) fcmSubscribe() {
+    final useCase = ref.read(friendUseCaseProvider);
+    return useCase.fcmSubscribe();
   }
 }

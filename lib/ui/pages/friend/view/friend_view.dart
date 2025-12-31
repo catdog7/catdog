@@ -1,10 +1,13 @@
+import 'dart:async';
+
 import 'package:catdog/ui/pages/friend/view/friend_alarm_view.dart';
 import 'package:catdog/ui/pages/friend/view/friend_search_view.dart';
 import 'package:catdog/ui/pages/friend/view/widget/friend_widget.dart';
+import 'package:catdog/ui/pages/friend/view_model/friend_alarm_view_model.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class FriendView extends HookConsumerWidget {
@@ -12,6 +15,51 @@ class FriendView extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(friendViewModelProvider);
     final vm = ref.read(friendViewModelProvider.notifier);
+    final alarm = ref.watch(friendAlarmViewModelProvider);
+
+    final hasAlarm = alarm.when(
+      data: (list) => list.friends.isNotEmpty,
+      loading: () => false,
+      error: (_, __) => false,
+    );
+
+    // useEffect(() {
+    //   final sub = FirebaseMessaging.onMessage.listen((payload) {
+    //     final notification = payload.notification;
+    //     if (notification != null && context.mounted) {
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(
+    //           content: Text(
+    //             '${notification.title ?? ''} ${notification.body ?? ''}',
+    //           ),
+    //         ),
+    //       );
+    //     }
+    //   });
+    //   return sub.cancel;
+    // }, const []);
+
+    // useEffect(() {
+    //   StreamSubscription? authSub;
+    //   StreamSubscription? tokenSub;
+
+    //   Future(() async {
+    //     final result = await vm.initFcmToken();
+    //     if (result) {
+    //       final subs = vm.fcmSubscribe();
+    //       authSub = subs.$1;
+    //       tokenSub = subs.$2;
+    //     } else {
+    //       print("실패😭😭😭😭😭😭😭");
+    //     }
+    //   });
+
+    //   return () {
+    //     authSub?.cancel();
+    //     tokenSub?.cancel();
+    //   };
+    // }, const []);
+
     return state.when(
       skipError: true,
       skipLoadingOnRefresh: true,
@@ -27,8 +75,9 @@ class FriendView extends HookConsumerWidget {
       data: (data) {
         return Scaffold(
           appBar: AppBar(
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 20, top: 20),
+            centerTitle: false,
+            title: Padding(
+              padding: const EdgeInsets.only(top: 10),
               child: Text(
                 "친구",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
@@ -76,9 +125,9 @@ class FriendView extends HookConsumerWidget {
                           child: Container(
                             width: 4,
                             height: 4,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.red,
+                              color: hasAlarm ? Colors.red : Colors.transparent,
                             ),
                           ),
                         ),
