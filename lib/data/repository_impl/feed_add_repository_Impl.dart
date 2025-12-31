@@ -2,10 +2,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FeedRepositoryImpl {
+class FeedAddRepositoryImpl {
   //클래스를 만들면서 필요한 생성자 만들어주기
   final SupabaseClient _supabase;
-  FeedRepositoryImpl(this._supabase);
+  FeedAddRepositoryImpl(this._supabase);
 
   // 데이터를 보내는 함수이기 떄문에 Future붙여주면서 async, await붙여주기
   // 이미지와 내용을 업로드해주는 매서드 생성
@@ -32,7 +32,7 @@ class FeedRepositoryImpl {
 
 }
 // Riverpod으로 레파지토리 제공
-final feedRepositoryProvider = Provider((ref) {
+final feedAddRepositoryProvider = Provider((ref) {
   final supabase = Supabase.instance.client;
-  return FeedRepositoryImpl(supabase);
+  return FeedAddRepositoryImpl(supabase);
 });
