@@ -6,20 +6,27 @@ import 'package:catdog/domain/model/friend_model.dart';
 import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/domain/repository/friend_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class FriendRepositoryImpl implements FriendRepository {
   FriendRepositoryImpl(this._client);
   final SupabaseClient _client;
 
   @override
-  Future<bool> addFriend(FriendModel friend) async {
+  Future<bool> addFriend(String friendId) async {
     try {
       final myId = _client.auth.currentUser?.id;
+      const uuid = Uuid();
       if (myId != null) {
-        if (myId.compareTo(friend.userAId) < 0) {
-          friend = friend.copyWith(userAId: myId);
+        FriendModel friend = FriendModel(
+          id: uuid.v4(),
+          userAId: myId,
+          userBId: myId,
+        );
+        if (myId.compareTo(friendId) < 0) {
+          friend = friend.copyWith(userBId: friendId);
         } else {
-          friend = friend.copyWith(userBId: myId);
+          friend = friend.copyWith(userAId: friendId);
         }
         final dto = FriendMapper.toDto(friend);
         await _client.from('friends').insert(dto.toJson());

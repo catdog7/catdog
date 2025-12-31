@@ -14,7 +14,7 @@ class SearchWidget extends StatelessWidget {
           radius: 18,
           backgroundImage: user.profileImageUrl != null
               ? NetworkImage(user.profileImageUrl!)
-              : null,
+              : AssetImage('assets/images/default_image.webp'),
         ),
         SizedBox(width: 8),
         Expanded(
@@ -25,13 +25,19 @@ class SearchWidget extends StatelessWidget {
         ),
         InkWell(
           onTap: () async {
-            final result = await onTap(user.userId);
             print("친구 요청 누름");
-            if (result) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${user.nickname}에게 친구요청을 보냈습니다.')),
-              );
-            }
+            // final result = await onTap(user.userId);
+            // String message = "";
+            // if (result == "SUCCESS") {
+            //   message = '${user.nickname}에게 친구요청을 보냈습니다.';
+            // } else if (result == "FRIEND") {
+            //   message = '이미 친구 목록에 있습니다.';
+            // } else {
+            //   message = '친구 요청에 실패했습니다.';
+            // }
+            // ScaffoldMessenger.of(
+            //   context,
+            // ).showSnackBar(SnackBar(content: Text(message)));
           },
           child: Container(
             height: 35,
