@@ -1,13 +1,13 @@
-import 'package:catdog/domain/use_case/upload_feed_use_case.dart';
+import 'package:catdog/domain/use_case/upload_feed_add_use_case.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-part 'feed_view_model.g.dart';
+part 'feed_add_view_model.g.dart';
 
 
 @riverpod
-class FeedViewModel extends _$FeedViewModel{
+class FeedAddViewModel extends _$FeedAddViewModel{
 
   @override
   XFile? build(){
@@ -58,8 +58,8 @@ Future<void> uploadPost(String content) async {
     // });
 
     // use case를 만들어줬으니 use case를 불러오면됨 데이터를 직접불러오는게 아니라
-    final uploadFeedUseCase = ref.read(uploadFeedUseCaseProvider);
-    await uploadFeedUseCase.execute(image!, content);
+    final feedAddUseCase = ref.read(feedAddUseCaseProvider);
+    await feedAddUseCase.execute(image!, content);
 
     // 5. 업로드 성공 후 상태 초기화
     state = null; 
