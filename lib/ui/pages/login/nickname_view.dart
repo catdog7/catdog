@@ -1,18 +1,18 @@
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
-import 'package:catdog/ui/pages/home/home_page.dart';
-import 'package:catdog/ui/pages/login/login_page.dart';
+import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NicknamePage extends ConsumerStatefulWidget {
-  const NicknamePage({super.key});
+class NicknameView extends ConsumerStatefulWidget {
+  const NicknameView({super.key});
 
   @override
-  ConsumerState<NicknamePage> createState() => _NicknamePageState();
+  ConsumerState<NicknameView> createState() => _NicknameViewState();
 }
 
-class _NicknamePageState extends ConsumerState<NicknamePage> {
+class _NicknameViewState extends ConsumerState<NicknameView> {
   final TextEditingController _controller = TextEditingController();
   bool _isLoading = false;
 
@@ -50,7 +50,7 @@ class _NicknamePageState extends ConsumerState<NicknamePage> {
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const HomeView()),
           (route) => false,
         );
       }
@@ -274,7 +274,7 @@ class _NicknamePageState extends ConsumerState<NicknamePage> {
                               if (mounted) {
                                 Navigator.of(context).pushAndRemoveUntil(
                                   MaterialPageRoute(
-                                    builder: (context) => const LoginPage(),
+                                    builder: (context) => const LoginView(),
                                   ),
                                   (route) => false,
                                 );

@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
-import 'package:catdog/ui/pages/home/home_page.dart';
-import 'package:catdog/ui/pages/login/nickname_page.dart';
+import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/login/nickname_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-class LoginPage1 extends ConsumerStatefulWidget {
-  const LoginPage1({super.key});
+class LoginView1 extends ConsumerStatefulWidget {
+  const LoginView1({super.key});
 
   @override
-  ConsumerState<LoginPage1> createState() => _LoginPage1State();
+  ConsumerState<LoginView1> createState() => _LoginView1State();
 }
 
-class _LoginPage1State extends ConsumerState<LoginPage1> {
+class _LoginView1State extends ConsumerState<LoginView1> {
   late final SupabaseClient client;
   final uuid = const Uuid();
   String status = 'Ready to test';
@@ -64,11 +64,11 @@ class _LoginPage1State extends ConsumerState<LoginPage1> {
 
       Widget targetPage;
       if (!hasNickname) {
-        print('LoginPage1: Navigating to NicknamePage');
-        targetPage = const NicknamePage();
+        print('LoginView1: Navigating to NicknameView');
+        targetPage = const NicknameView();
       } else {
-        print('LoginPage1: Navigating to HomePage');
-        targetPage = const HomePage();
+        print('LoginPage1: Navigating to HomeView');
+        targetPage = const HomeView();
       }
 
       if (mounted) {
@@ -82,7 +82,7 @@ class _LoginPage1State extends ConsumerState<LoginPage1> {
       print('LoginPage1: Navigation Error: $e');
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const HomeView()),
           (route) => false,
         );
       }

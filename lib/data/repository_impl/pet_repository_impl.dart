@@ -22,6 +22,24 @@ class PetRepositoryImpl implements PetRepository {
   }
 
   @override
+  Future<bool> hasPets(String userId) async {
+    try {
+      // limit 1로 최소한의 데이터만 조회하여 효율성 향상
+      final response = await _client
+          .from('pets')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1)
+          .maybeSingle();
+      
+      return response != null;
+    } catch (e) {
+      print('hasPets error: $e');
+      return false;
+    }
+  }
+
+  @override
   Future<void> addPet(PetModel pet) async {
     final dto = PetMapper.toDto(pet);
     await _client.from('pets').insert(dto.toJson());

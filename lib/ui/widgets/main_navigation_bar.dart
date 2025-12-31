@@ -4,12 +4,14 @@ class MainNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
   final VoidCallback onWritePressed;
+  final bool isDisabled;
 
   const MainNavigationBar({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
     required this.onWritePressed,
+    this.isDisabled = false,
   });
 
   @override
@@ -67,6 +69,7 @@ class MainNavigationBar extends StatelessWidget {
                           label: '홈',
                           isActive: selectedIndex == 0,
                           onTap: () => onItemSelected(0),
+                          isDisabled: isDisabled,
                         ),
                       ),
                     ),
@@ -78,6 +81,7 @@ class MainNavigationBar extends StatelessWidget {
                           label: '게시글',
                           isActive: selectedIndex == 1,
                           onTap: () => onItemSelected(1),
+                          isDisabled: isDisabled,
                         ),
                       ),
                     ),
@@ -111,6 +115,7 @@ class MainNavigationBar extends StatelessWidget {
                           label: '친구',
                           isActive: selectedIndex == 2,
                           onTap: () => onItemSelected(2),
+                          isDisabled: isDisabled,
                         ),
                       ),
                     ),
@@ -122,6 +127,7 @@ class MainNavigationBar extends StatelessWidget {
                           label: '내정보',
                           isActive: selectedIndex == 3,
                           onTap: () => onItemSelected(3),
+                          isDisabled: isDisabled,
                         ),
                       ),
                     ),
@@ -141,20 +147,23 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
+  final bool isDisabled;
 
   const _NavItem({
     required this.icon,
     required this.label,
     this.isActive = false,
     required this.onTap,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final disabledColor = const Color(0xFF8C8C8C);
     final activeColor = const Color(0xFFFCBC0D);
     final inactiveColor = Colors.grey;
-    final iconColor = isActive ? activeColor : inactiveColor;
-    final textColor = isActive ? activeColor : inactiveColor;
+    final iconColor = isDisabled ? disabledColor : (isActive ? activeColor : inactiveColor);
+    final textColor = isDisabled ? disabledColor : (isActive ? activeColor : inactiveColor);
 
     return GestureDetector(
       onTap: onTap,

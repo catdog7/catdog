@@ -10,6 +10,10 @@ class PetUseCase {
     return _repository.getPets(userId);
   }
 
+  Future<bool> hasPets(String userId) {
+    return _repository.hasPets(userId);
+  }
+
   Future<void> addPet(PetModel pet) {
     return _repository.addPet(pet);
   }

@@ -1,18 +1,18 @@
 import 'package:catdog/core/config/common_dependency.dart';
-import 'package:catdog/ui/pages/login/login_page.dart';
+import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-class DataTestPage extends ConsumerStatefulWidget {
-  const DataTestPage({super.key});
+class DataTestView extends ConsumerStatefulWidget {
+  const DataTestView({super.key});
 
   @override
-  ConsumerState<DataTestPage> createState() => _DataTestPageState();
+  ConsumerState<DataTestView> createState() => _DataTestViewState();
 }
 
-class _DataTestPageState extends ConsumerState<DataTestPage> {
+class _DataTestViewState extends ConsumerState<DataTestView> {
   late final SupabaseClient client;
   final uuid = const Uuid();
   String status = 'Ready to test data';
@@ -232,7 +232,7 @@ class _DataTestPageState extends ConsumerState<DataTestPage> {
                 await client.auth.signOut();
                 if (mounted) {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                    MaterialPageRoute(builder: (context) => const LoginView()),
                     (route) => false,
                   );
                 }
