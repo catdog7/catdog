@@ -6,7 +6,7 @@ part of 'friend_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$friendViewModelHash() => r'880ae2f1f81200af904e63e16774e77ba8314fb2';
+String _$friendViewModelHash() => r'26af617db09b89b2fd034369486656f436b508f3';
 
 /// See also [FriendViewModel].
 @ProviderFor(FriendViewModel)

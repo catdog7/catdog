@@ -106,10 +106,4 @@ class FriendUseCase {
   Future<bool> rejectFollowRequest(String friendId) async {
     return await _followRepo.rejectFollowRequest(friendId);
   }
-
-  (StreamSubscription?, StreamSubscription?) fcmSubscribe() {
-    final authSub = _followRepo.authSubscribe();
-    final tockenSub = _followRepo.tokenSubscribe();
-    return (authSub, tockenSub);
-  }
 }

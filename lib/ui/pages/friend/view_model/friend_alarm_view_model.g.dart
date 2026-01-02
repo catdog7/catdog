@@ -7,7 +7,7 @@ part of 'friend_alarm_view_model.dart';
 // **************************************************************************
 
 String _$friendAlarmViewModelHash() =>
-    r'c2367e86e3b33cb9cfc3eef655c0cbf647be3bb7';
+    r'27161f05d90391764433dcb0a39e0560dae1502a';
 
 /// See also [FriendAlarmViewModel].
 @ProviderFor(FriendAlarmViewModel)

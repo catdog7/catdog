@@ -86,9 +86,4 @@ class FriendViewModel extends _$FriendViewModel {
 
     return true;
   }
-
-  (StreamSubscription?, StreamSubscription?) fcmSubscribe() {
-    final useCase = ref.read(friendUseCaseProvider);
-    return useCase.fcmSubscribe();
-  }
 }

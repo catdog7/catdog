@@ -7,7 +7,7 @@ part of 'friend_search_view_model.dart';
 // **************************************************************************
 
 String _$friendSearchViewModelHash() =>
-    r'a729d8472606ecd94e32696d4cee8b4a0ce75355';
+    r'4fbb0f73d1813c260a22423499f6397d05cf615b';
 
 /// See also [FriendSearchViewModel].
 @ProviderFor(FriendSearchViewModel)

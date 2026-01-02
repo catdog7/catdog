@@ -8,6 +8,4 @@ abstract interface class FollowRequestRepository {
   Future<List<FollowRequestModel>> getAllFollowRequest();
   Future<bool> rejectFollowRequest(String friendId);
   Future<bool> acceptFollowRequest(String friendId);
-  StreamSubscription? authSubscribe();
-  StreamSubscription? tokenSubscribe();
 }
