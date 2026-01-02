@@ -101,6 +101,7 @@ class FriendView extends HookConsumerWidget {
               ),
               InkWell(
                 onTap: () {
+                  ref.read(friendAlarmViewModelProvider.notifier).refresh();
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) {

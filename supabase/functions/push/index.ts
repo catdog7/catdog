@@ -30,24 +30,97 @@ const fb_private_key = Deno.env.get("FIREBASE_PRIVATE_KEY")!.replace(
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
 
-  //일단 INSERT만 했을 경우
+  switch (payload.type) {
+    case "INSERT":
+      await handleInsert(payload);
+      break;
 
-  //친구 요청 받을 유저의 토큰
-  const { data: data_to_user } = await supabase.from("fcm_tokens")
+    case "UPDATE":
+      await handleUpdate(payload);
+      break;
+  }
+
+  return new Response(
+    JSON.stringify({ success: true }),
+    { headers: { "Content-Type": "application/json" } },
+  );
+});
+
+/* =========================
+  INSERT: 친구 요청
+========================= */
+async function handleInsert(payload: WebhookPayload) {
+  const { from_user_id, to_user_id } = payload.record;
+
+  // 알림 받을 유저 토큰
+  const { data: toUserToken } = await supabase
+    .from("fcm_tokens")
     .select("token")
-    .eq("user_id", payload.record.to_user_id)
+    .eq("user_id", to_user_id)
     .single();
 
-  //친구요청 보낸 유저의 닉네임
-  const { data: data_from_user } = await supabase.from("users").select(
-    "nickname",
-  ).eq(
-    "id",
-    payload.record.from_user_id,
-  ).single();
+  if (!toUserToken?.token) return;
 
-  const fcmToken = data_to_user?.token as string;
+  // 요청 보낸 유저 닉네임
+  const { data: fromUser } = await supabase
+    .from("users")
+    .select("nickname")
+    .eq("id", from_user_id)
+    .single();
 
+  await sendFCM({
+    token: toUserToken.token,
+    title: "친구 요청",
+    body: `${fromUser?.nickname}님이 친구 요청을 보냈습니다.`,
+  });
+}
+
+async function handleUpdate(payload: WebhookPayload) {
+  const newStatus = payload.record.status;
+  const oldStatus = payload.old_record?.status;
+
+  // 상태 변화 없으면 무시
+  if (newStatus === oldStatus) return;
+
+  if (newStatus == "PENDING") {
+    handleInsert(payload);
+  }
+
+  if (newStatus === "ACCEPTED") {
+    const { from_user_id, to_user_id } = payload.record;
+
+    // 요청 보낸 사람에게 알림
+    const { data: fromUserToken } = await supabase
+      .from("fcm_tokens")
+      .select("token")
+      .eq("user_id", from_user_id)
+      .single();
+
+    if (!fromUserToken?.token) return;
+
+    // 요청 받은 유저 닉네임
+    const { data: toUser } = await supabase
+      .from("users")
+      .select("nickname")
+      .eq("id", to_user_id)
+      .single();
+    await sendFCM({
+      token: fromUserToken.token,
+      title: "친구 요청 수락",
+      body: `${toUser?.nickname}님이 친구 요청을 수락했습니다.`,
+    });
+  }
+}
+
+async function sendFCM({
+  token,
+  title,
+  body,
+}: {
+  token: string;
+  title: string;
+  body: string;
+}) {
   const accessToken = await getAccessToken({
     clientEmail: fb_client_email,
     privateKey: fb_private_key,
@@ -63,25 +136,25 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         message: {
-          token: fcmToken,
-          notification: {
-            title: "친구 요청",
-            body: `${data_from_user?.nickname}님이 친구 요청을 보냈습니다.`,
+          token,
+          "android": {
+            "priority": "high",
           },
+          "apns": {
+            "headers": {
+              "apns-priority": "10",
+            },
+          },
+          notification: { title, body },
         },
       }),
     },
   );
 
-  const resData = await res.json();
-  if (res.status < 200 || 299 < res.status) {
-    throw resData;
+  if (!res.ok) {
+    throw await res.json();
   }
-
-  return new Response(JSON.stringify(resData), {
-    headers: { "Content-Type": "application/json" },
-  });
-});
+}
 
 const getAccessToken = ({
   clientEmail,

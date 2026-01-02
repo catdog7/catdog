@@ -26,18 +26,18 @@ class SearchWidget extends StatelessWidget {
         InkWell(
           onTap: () async {
             print("친구 요청 누름");
-            // final result = await onTap(user.userId);
-            // String message = "";
-            // if (result == "SUCCESS") {
-            //   message = '${user.nickname}에게 친구요청을 보냈습니다.';
-            // } else if (result == "FRIEND") {
-            //   message = '이미 친구 목록에 있습니다.';
-            // } else {
-            //   message = '친구 요청에 실패했습니다.';
-            // }
-            // ScaffoldMessenger.of(
-            //   context,
-            // ).showSnackBar(SnackBar(content: Text(message)));
+            final result = await onTap(user.userId);
+            String message = "";
+            if (result == "SUCCESS") {
+              message = '${user.nickname}에게 친구요청을 보냈습니다.';
+            } else if (result == "FRIEND") {
+              message = '이미 친구 목록에 있습니다.';
+            } else {
+              message = '친구 요청에 실패했습니다.';
+            }
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
           },
           child: Container(
             height: 35,
