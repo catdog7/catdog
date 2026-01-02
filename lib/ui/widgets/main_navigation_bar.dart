@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MainNavigationBar extends StatelessWidget {
   final int selectedIndex;
@@ -33,7 +34,9 @@ class MainNavigationBar extends StatelessWidget {
               Container(
                 padding: EdgeInsets.only(
                   top: 4,
-                  bottom: MediaQuery.of(context).padding.bottom, // 아이폰 safe area 하단 패딩
+                  bottom: MediaQuery.of(context).padding.bottom > 0 
+                      ? MediaQuery.of(context).padding.bottom 
+                      : 12.0, // 안드로이드 등 하단 패딩이 없는 경우 최소 여백 부여
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -65,7 +68,7 @@ class MainNavigationBar extends StatelessWidget {
                           ),
                         ),
                         child: _NavItem(
-                          icon: Icons.home,
+                          iconName: 'home',
                           label: '홈',
                           isActive: selectedIndex == 0,
                           onTap: () => onItemSelected(0),
@@ -77,7 +80,7 @@ class MainNavigationBar extends StatelessWidget {
                       child: Container(
                         height: 52,
                         child: _NavItem(
-                          icon: Icons.sticky_note_2,
+                          iconName: 'feed',
                           label: '게시글',
                           isActive: selectedIndex == 1,
                           onTap: () => onItemSelected(1),
@@ -111,7 +114,7 @@ class MainNavigationBar extends StatelessWidget {
                       child: Container(
                         height: 52,
                         child: _NavItem(
-                          icon: Icons.group,
+                          iconName: 'freind', // 사용자가 제공한 파일명 오타 유지
                           label: '친구',
                           isActive: selectedIndex == 2,
                           onTap: () => onItemSelected(2),
@@ -123,7 +126,7 @@ class MainNavigationBar extends StatelessWidget {
                       child: Container(
                         height: 52,
                         child: _NavItem(
-                          icon: Icons.account_circle,
+                          iconName: 'my',
                           label: '내정보',
                           isActive: selectedIndex == 3,
                           onTap: () => onItemSelected(3),
@@ -143,14 +146,14 @@ class MainNavigationBar extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  final IconData icon;
+  final String iconName;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
   final bool isDisabled;
 
   const _NavItem({
-    required this.icon,
+    required this.iconName,
     required this.label,
     this.isActive = false,
     required this.onTap,
@@ -161,20 +164,25 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final disabledColor = const Color(0xFF8C8C8C);
     final activeColor = const Color(0xFFFCBC0D);
-    final inactiveColor = Colors.grey;
-    final iconColor = isDisabled ? disabledColor : (isActive ? activeColor : inactiveColor);
+    final inactiveColor = const Color(0xFF666666);
+    
     final textColor = isDisabled ? disabledColor : (isActive ? activeColor : inactiveColor);
+    final suffix = isActive ? 'on' : 'off';
+    final iconPath = 'assets/icon/icon_${iconName}_$suffix.svg';
 
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 24,
-            color: iconColor,
-            fill: isActive ? 1.0 : 0.0, // 활성일 때 채워진 아이콘
+          SvgPicture.asset(
+            iconPath,
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(
+              textColor,
+              BlendMode.srcIn,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -182,6 +190,7 @@ class _NavItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               color: textColor,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
         ],

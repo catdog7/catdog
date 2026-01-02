@@ -598,12 +598,19 @@ class _PetFormCard extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: onImageTap,
-                      child: const Padding(
-                        padding: EdgeInsets.only(top: 6),
-                        child: Text(
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.grey,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
                           '이미지 등록하기',
                           style: TextStyle(
-                            decoration: TextDecoration.underline,
                             color: Colors.grey,
                             fontSize: 15,
                             fontFamily: 'Pretendard',

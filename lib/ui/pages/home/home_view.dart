@@ -4,6 +4,7 @@ import 'package:catdog/ui/pages/home/view/pet_register_view.dart';
 import 'package:catdog/ui/widgets/main_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // HomeContent의 모달 상태를 공유하기 위한 Provider
 final showModalProvider = StateProvider<bool>((ref) => false);
@@ -33,22 +34,43 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 기존 화면 (NavigationBody)
-          NavigationBody(selectedIndex: _selectedIndex),
-
-          // 반투명 레이어 (Barrier) - 앱바와 네비게이션바 포함 전체 화면
-          if (showModal) ...[
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.4),
-              ),
+    return Stack(
+      children: [
+        // 기존 화면 (Scaffold 전체)
+        Scaffold(
+          backgroundColor: Colors.white,
+          body: IgnorePointer(
+            ignoring: showModal, // 모달이 떠있으면 터치 무시
+            child: NavigationBody(selectedIndex: _selectedIndex),
+          ),
+          bottomNavigationBar: IgnorePointer(
+            ignoring: showModal, // 모달이 떠있으면 네비게이션바 터치 무시
+            child: MainNavigationBar(
+              selectedIndex: _selectedIndex,
+              onItemSelected: _onItemTapped,
+              onWritePressed: () {
+                if (showModal) return; // 모달이 떠있으면 무시
+                print('Write button tapped');
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const FeedAddView()),
+                );
+              },
+              isDisabled: false, // 네비게이션바는 항상 원래 색상 유지
             ),
-            // 팝업 카드 (네비게이션바까지 모두 덮음)
-            Center(
+          ),
+        ),
+
+        // 반투명 레이어 (Barrier) - 앱바와 네비게이션바 포함 전체 화면
+        if (showModal) ...[
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.4),
+            ),
+          ),
+          // 팝업 카드
+          Center(
+            child: Material(
+              color: Colors.transparent,
               child: Container(
                 width: screenWidth * 0.893, // 335/375 ≈ 0.893
                 decoration: ShapeDecoration(
@@ -66,15 +88,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       child: Column(
                         children: [
                           // 프로필 이미지
-                          Container(
+                          Image.asset(
+                            "assets/icon/register_cat_dog.webp",
                             width: 65,
                             height: 64,
-                            decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage("https://placehold.co/65x64"),
-                                fit: BoxFit.fill,
-                              ),
-                            ),
+                            fit: BoxFit.fill,
                           ),
                           const SizedBox(height: 12),
                           // 환영 메시지
@@ -118,7 +136,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => PetRegisterView(),
+                                    builder: (context) => const PetRegisterView(),
                                   ),
                                 );
                               },
@@ -152,21 +170,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
             ),
-          ],
+          ),
         ],
-      ),
-      bottomNavigationBar: MainNavigationBar(
-        selectedIndex: _selectedIndex,
-        onItemSelected: _onItemTapped,
-        onWritePressed: () {
-          if (showModal) return; // 모달이 떠있으면 무시
-          print('Write button tapped');
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const FeedAddView()),
-          );
-        },
-        isDisabled: showModal, // 모달이 떠있으면 네비게이션바 비활성화 효과
-      ),
+      ],
     );
   }
 }

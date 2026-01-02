@@ -70,6 +70,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'CatDog',
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -85,6 +86,14 @@ class _MyAppState extends ConsumerState<MyApp> {
         useMaterial3: true,
       ),
       scaffoldMessengerKey: scaffoldMessengerKey,
+      // 딥링크 처리 시 Flutter Navigator가 해당 경로를 찾지 못해 발생하는 에러 방지
+      onGenerateRoute: (settings) {
+        // Supabase OAuth 콜백 등 딥링크 경로는 여기서 처리하지 않고 무시함
+        return MaterialPageRoute(
+          builder: (_) => const SizedBox.shrink(),
+          settings: settings,
+        );
+      },
       home: const SplashView(),
     );
   }
