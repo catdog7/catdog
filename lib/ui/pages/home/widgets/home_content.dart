@@ -1,6 +1,7 @@
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/pet_dependency.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/home/view/my_pets_view.dart';
 import 'package:catdog/ui/pages/home/view/pet_register_view.dart';
 import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:flutter/material.dart';
@@ -93,10 +94,37 @@ class _HomeContentState extends ConsumerState<HomeContent> {
           ),
         ],
       ),
-      body: const Center(
-        child: Text(
-          '홈 화면',
-          style: TextStyle(fontSize: 24, color: Colors.black54),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFDCA40),
+              foregroundColor: Colors.black,
+              minimumSize: const Size(double.infinity, 52),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: showModal
+                ? null
+                : () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const MyPetsView(),
+                      ),
+                    );
+                  },
+            child: const Text(
+              '내 반려동물 보기',
+              style: TextStyle(
+                fontSize: 16,
+                fontFamily: 'Pretendard',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ),
     );

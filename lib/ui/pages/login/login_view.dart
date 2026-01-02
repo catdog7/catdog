@@ -25,12 +25,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
   void initState() {
     super.initState();
     client = ref.read(supabaseClientProvider);
+
     _authSubscription = client.auth.onAuthStateChange.listen((data) {
-      if (mounted) {
-        final session = data.session;
-        if (session != null) {
-          _handlePostLoginNavigation(session.user.id);
-        }
+      final session = data.session;
+      if (session != null && !_isNavigating) {
+        _handlePostLoginNavigation(session.user.id);
       }
     });
   }
@@ -43,81 +42,72 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   Future<void> _handlePostLoginNavigation(String userId) async {
     if (_isNavigating) return;
-    setState(() => _isLoading = true);
     _isNavigating = true;
 
     try {
       final useCase = ref.read(userUseCaseProvider);
       final hasNickname = await useCase.hasNickname(userId);
 
-      Widget targetPage;
-      if (!hasNickname) {
-        targetPage = const NicknameView();
-      } else {
-        targetPage = const HomeView();
+      if (!mounted) {
+        _isNavigating = false;
+        return;
       }
 
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => targetPage),
-          (route) => false,
-        );
-      }
+      final targetPage =
+          hasNickname ? const HomeView() : const NicknameView();
+
+      // 로딩 상태 한 번 더 해제 (네비게이션 직전)
+      setState(() => _isLoading = false);
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => targetPage),
+        (_) => false,
+      );
     } catch (e) {
-      print('LoginPage: Navigation Error: $e');
+      debugPrint('Login navigation error: $e');
+      _isNavigating = false;
       if (mounted) {
+        setState(() => _isLoading = false);
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeView()),
-          (route) => false,
+          MaterialPageRoute(builder: (_) => const HomeView()),
+          (_) => false,
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _googleLogin() async {
-    if (_isLoading) return; // 이미 로딩 중이면 중복 실행 방지
-    
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+      _isNavigating = false; // 네비게이션 상태 초기화
+    });
+
     try {
-      setState(() => _isLoading = true);
-      
-      // 구글 계정 선택 화면을 강제로 표시하기 위해 queryParams 추가
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'io.supabase.catdog://login-callback/',
         authScreenLaunchMode: LaunchMode.externalApplication,
         queryParams: {
-          'prompt': 'select_account', // 계정 선택 화면 강제 표시
+          'prompt': 'select_account',
         },
       );
       
-      // OAuth 로그인 후 딥링크로 돌아오면 onAuthStateChange가 트리거됨
-      // 타임아웃 설정: 10초 후에도 세션이 없으면 로딩 해제
-      await Future.delayed(const Duration(seconds: 10));
-      
-      if (mounted) {
-        final session = client.auth.currentSession;
-        if (session != null) {
-          _handlePostLoginNavigation(session.user.id);
-        } else {
-          // 세션이 없으면 로딩 해제 (OAuth 취소되었거나 실패)
-          setState(() => _isLoading = false);
-          _isNavigating = false;
-        }
-      }
+      // OAuth 로그인은 비동기로 앱으로 돌아오며 onAuthStateChange가 트리거됩니다.
+      // 사용자가 브라우저를 수동으로 닫을 경우 로딩 상태가 계속 유지될 수 있으므로,
+      // 탭을 다시 눌렀을 때 로딩이 풀리도록 로직을 구성했습니다.
     } catch (e) {
-      print('Google Login Error: $e');
+      debugPrint('Google login error: $e');
       if (mounted) {
         setState(() => _isLoading = false);
-        _isNavigating = false;
       }
     }
   }
 
   Future<void> _appleLogin() async {
     // TODO: Apple 로그인 구현
-    print('Apple login not implemented yet');
+    debugPrint('Apple login not implemented yet');
   }
 
   @override
@@ -126,11 +116,11 @@ class _LoginViewState extends ConsumerState<LoginView> {
     final screenWidth = screenSize.width;
     final screenHeight = screenSize.height;
     final safeAreaBottom = MediaQuery.of(context).padding.bottom;
-    
+
     // 반응형 이미지 크기 (화면 너비의 60-70%)
     final desImageWidth = screenWidth * 0.64; // 240/375 ≈ 0.64
     final titleImageWidth = screenWidth * 0.693; // 260/375 ≈ 0.693
-    
+
     // 반응형 패딩
     final horizontalPadding = screenWidth * 0.053; // 20/375 ≈ 0.053
     final termsPadding = screenWidth * 0.099; // 37/375 ≈ 0.099
@@ -151,7 +141,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final availableHeight = constraints.maxHeight;
-            
+
             return Column(
               children: [
                 // 상단 콘텐츠 영역 (Expanded로 남은 공간 차지)
@@ -207,7 +197,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     ),
                   ),
                 ),
-                
+
                 // 약관 동의 텍스트 (항상 맨 아래 고정)
                 Padding(
                   padding: EdgeInsets.only(
@@ -235,3 +225,4 @@ class _LoginViewState extends ConsumerState<LoginView> {
     );
   }
 }
+
