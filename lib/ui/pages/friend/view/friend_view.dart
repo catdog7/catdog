@@ -22,7 +22,9 @@ class FriendView extends HookConsumerWidget {
       loading: () => false,
       error: (_, __) => false,
     );
-
+    FirebaseMessaging.onMessage.listen((message) {
+      vm.refresh();
+    });
     // useEffect(() {
     //   final sub = FirebaseMessaging.onMessage.listen((payload) {
     //     final notification = payload.notification;

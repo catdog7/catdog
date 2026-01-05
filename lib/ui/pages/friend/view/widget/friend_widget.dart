@@ -21,13 +21,14 @@ class FriendWidget extends StatelessWidget {
         Expanded(
           child: Text(
             friend.nickname,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
         ),
         MoreWidget(
           menus: [
             MenuAction(title: '친구 취소', onTap: (_) => onTap(friend.userId)),
-            //MenuAction(title: '친구 차단', onTap: (_) => print("친구 차단 누름")),
           ],
         ),
       ],

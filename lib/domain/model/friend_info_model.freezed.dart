@@ -20,6 +20,7 @@ mixin _$FriendInfoModel {
   String get userId => throw _privateConstructorUsedError;
   String get nickname => throw _privateConstructorUsedError;
   bool get isFriend => throw _privateConstructorUsedError;
+  String? get status => throw _privateConstructorUsedError;
   String? get profileImageUrl => throw _privateConstructorUsedError;
 
   /// Create a copy of FriendInfoModel
@@ -40,6 +41,7 @@ abstract class $FriendInfoModelCopyWith<$Res> {
     String userId,
     String nickname,
     bool isFriend,
+    String? status,
     String? profileImageUrl,
   });
 }
@@ -62,6 +64,7 @@ class _$FriendInfoModelCopyWithImpl<$Res, $Val extends FriendInfoModel>
     Object? userId = null,
     Object? nickname = null,
     Object? isFriend = null,
+    Object? status = freezed,
     Object? profileImageUrl = freezed,
   }) {
     return _then(
@@ -78,6 +81,10 @@ class _$FriendInfoModelCopyWithImpl<$Res, $Val extends FriendInfoModel>
                 ? _value.isFriend
                 : isFriend // ignore: cast_nullable_to_non_nullable
                       as bool,
+            status: freezed == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as String?,
             profileImageUrl: freezed == profileImageUrl
                 ? _value.profileImageUrl
                 : profileImageUrl // ignore: cast_nullable_to_non_nullable
@@ -101,6 +108,7 @@ abstract class _$$FriendInfoModelImplCopyWith<$Res>
     String userId,
     String nickname,
     bool isFriend,
+    String? status,
     String? profileImageUrl,
   });
 }
@@ -122,6 +130,7 @@ class __$$FriendInfoModelImplCopyWithImpl<$Res>
     Object? userId = null,
     Object? nickname = null,
     Object? isFriend = null,
+    Object? status = freezed,
     Object? profileImageUrl = freezed,
   }) {
     return _then(
@@ -138,6 +147,10 @@ class __$$FriendInfoModelImplCopyWithImpl<$Res>
             ? _value.isFriend
             : isFriend // ignore: cast_nullable_to_non_nullable
                   as bool,
+        status: freezed == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as String?,
         profileImageUrl: freezed == profileImageUrl
             ? _value.profileImageUrl
             : profileImageUrl // ignore: cast_nullable_to_non_nullable
@@ -154,6 +167,7 @@ class _$FriendInfoModelImpl implements _FriendInfoModel {
     required this.userId,
     required this.nickname,
     required this.isFriend,
+    this.status,
     this.profileImageUrl,
   });
 
@@ -164,11 +178,13 @@ class _$FriendInfoModelImpl implements _FriendInfoModel {
   @override
   final bool isFriend;
   @override
+  final String? status;
+  @override
   final String? profileImageUrl;
 
   @override
   String toString() {
-    return 'FriendInfoModel(userId: $userId, nickname: $nickname, isFriend: $isFriend, profileImageUrl: $profileImageUrl)';
+    return 'FriendInfoModel(userId: $userId, nickname: $nickname, isFriend: $isFriend, status: $status, profileImageUrl: $profileImageUrl)';
   }
 
   @override
@@ -181,13 +197,20 @@ class _$FriendInfoModelImpl implements _FriendInfoModel {
                 other.nickname == nickname) &&
             (identical(other.isFriend, isFriend) ||
                 other.isFriend == isFriend) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.profileImageUrl, profileImageUrl) ||
                 other.profileImageUrl == profileImageUrl));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, userId, nickname, isFriend, profileImageUrl);
+  int get hashCode => Object.hash(
+    runtimeType,
+    userId,
+    nickname,
+    isFriend,
+    status,
+    profileImageUrl,
+  );
 
   /// Create a copy of FriendInfoModel
   /// with the given fields replaced by the non-null parameter values.
@@ -206,6 +229,7 @@ abstract class _FriendInfoModel implements FriendInfoModel {
     required final String userId,
     required final String nickname,
     required final bool isFriend,
+    final String? status,
     final String? profileImageUrl,
   }) = _$FriendInfoModelImpl;
 
@@ -215,6 +239,8 @@ abstract class _FriendInfoModel implements FriendInfoModel {
   String get nickname;
   @override
   bool get isFriend;
+  @override
+  String? get status;
   @override
   String? get profileImageUrl;
 

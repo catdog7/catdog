@@ -8,4 +8,7 @@ abstract interface class FollowRequestRepository {
   Future<List<FollowRequestModel>> getAllFollowRequest();
   Future<bool> rejectFollowRequest(String friendId);
   Future<bool> acceptFollowRequest(String friendId);
+  Future<bool> deleteFollowRequest(String friendId);
+  Future<List<FollowRequestModel>> getMyRequests();
+  Future<bool> checkFollowPending(String freindId);
 }

@@ -42,14 +42,39 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     final supabase = ref.read(supabaseClientProvider);
+    FcmService.instance(supabase).init();
     FirebaseMessaging.onMessage.listen((message) {
       final notification = message.notification;
       if (notification != null) {
         debugPrint("!!!!!!!FCM 알림옴!!!!!!!!!");
+        String message = "";
+        if (notification.title == "PENDING") {
+          message = '님이 친구를 요청 했습니다.';
+        } else {
+          message = '님이 친구 요청을 수락 했습니다.';
+        }
         scaffoldMessengerKey.currentState?.showSnackBar(
           SnackBar(
-            content: Text(
-              '${notification.title ?? ''} ${notification.body ?? ''}',
+            backgroundColor: const Color(0xFF575E6A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadiusGeometry.circular(8),
+            ),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(20),
+            duration: const Duration(seconds: 2),
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    '${notification.body ?? ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(message),
+              ],
             ),
           ),
         );
@@ -57,7 +82,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         debugPrint("FCM 메세지가 null");
       }
     });
-    FcmService.instance(supabase).init();
   }
 
   @override

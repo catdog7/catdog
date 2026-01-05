@@ -7,7 +7,6 @@ part 'search_state.freezed.dart';
 abstract class SearchState with _$SearchState {
   const factory SearchState({
     required bool isLoading,
-    required List<String> friendIds,
     required List<FriendInfoModel> users,
   }) = _SearchState;
 }

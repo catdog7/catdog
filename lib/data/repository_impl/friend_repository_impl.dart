@@ -22,6 +22,7 @@ class FriendRepositoryImpl implements FriendRepository {
           id: uuid.v4(),
           userAId: myId,
           userBId: myId,
+          createdAt: DateTime.now(),
         );
         if (myId.compareTo(friendId) < 0) {
           friend = friend.copyWith(userBId: friendId);
@@ -120,6 +121,48 @@ class FriendRepositoryImpl implements FriendRepository {
       return [];
     } catch (e) {
       return [];
+    }
+  }
+
+  //친구 테이블에 있는지 확인
+  @override
+  Future<bool> isFriend(String friendId) async {
+    try {
+      final myId = _client.auth.currentUser?.id;
+      if (myId != null) {
+        //user A의 Id와 user B의 Id 순서 비교
+        if (myId.compareTo(friendId) < 0) {
+          final result = await _client
+              .from('friends')
+              .select()
+              .eq('user_a_id', myId)
+              .eq('user_b_id', friendId)
+              .maybeSingle();
+          if (result != null) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          final result = await _client
+              .from('friends')
+              .select()
+              .eq('user_a_id', friendId)
+              .eq('user_b_id', myId)
+              .maybeSingle();
+
+          if (result != null) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+      print("친구 가져오기 실패");
+      return false;
+    } catch (e) {
+      print("친구 가져오기 실패");
+      return false;
     }
   }
 }

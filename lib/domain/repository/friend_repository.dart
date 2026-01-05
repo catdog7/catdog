@@ -6,4 +6,5 @@ abstract interface class FriendRepository {
   Future<bool> addFriend(String friendId);
   Future<bool> deleteFriend(String friendId);
   Future<List<UserModel>> findUsers(String nicknameOrCode);
+  Future<bool> isFriend(String friendId);
 }

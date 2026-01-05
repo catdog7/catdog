@@ -30,3 +30,9 @@ FriendUseCase friendUseCase(ref) {
   final _followRepo = ref.watch(followRequestRepositoryProvider);
   return FriendUseCase(_userRepo, _friendRepo, _followRepo);
 }
+
+// @riverpod
+// FcmRepository fcmRepository(FcmRepositoryRef ref) {
+//   final client = ref.watch(supabaseClientProvider);
+//   return FcmRepositoryImpl(FirebaseMessaging.instance, client);
+// }

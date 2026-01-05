@@ -26,6 +26,8 @@ class AlarmWidget extends StatelessWidget {
         Expanded(
           child: Text(
             user.nickname,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
           ),
         ),
