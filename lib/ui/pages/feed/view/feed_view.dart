@@ -1,3 +1,5 @@
+import 'package:catdog/data/dto/feed_dto.dart';
+import 'package:catdog/ui/pages/feed/view_model/feed_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -6,23 +8,32 @@ class FeedView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final feedState = ref.watch(feedViewModelProvider);
     
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       // appBar: AppBar(),
       body: SafeArea(
-        child:ListView.builder(
-             itemCount: 10,
-             itemBuilder: (context, index) {
-               return MyFeedCard();
-             },
-        ),
+        child:feedState.isLoading
+          ? const Center(child: CircularProgressIndicator()) // 로딩 중일 때
+          : feedState.errorMessage != null
+              ? Center(child: Text(feedState.errorMessage!)) // 에러 발생 시
+              : ListView.builder(
+                  itemCount: feedState.feeds.length,
+                  itemBuilder: (context, index) {
+                    final feed = feedState.feeds[index];
+                    // 3. 각 피드 데이터를 카드로 전달합니다.
+                    return myFeedCard(feed); 
+                  },
+                ),
+          
+        
       ),
     );
   }
 }
 
- Widget MyFeedCard(){
+ Widget myFeedCard(FeedDto feed){
   return Container(
     // padding: EdgeInsets.symmetric(horizontal: 20),
     width: double.infinity,
@@ -41,7 +52,7 @@ class FeedView extends HookConsumerWidget {
               //프로필 이미지 
               CircleAvatar(radius: 18,backgroundColor: Color(0xffD9D9D9)),
               SizedBox(width: 10),
-              Text("닉네임",style: TextStyle(
+              Text(feed.userId.length > 5 ? feed.userId.substring(0, 5) : feed.userId,style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -49,7 +60,7 @@ class FeedView extends HookConsumerWidget {
               Spacer(),
               GestureDetector(
                onTap: () {
-                print("수정 삭제 메뉴 열기");
+                
                },
                  child: Icon(Icons.more_vert),
               )
@@ -61,35 +72,29 @@ class FeedView extends HookConsumerWidget {
           width: double.infinity,
           height: 300,
           color: Color(0xffD9D9D9),
-          child: Icon(Icons.image,color: Colors.grey),
+          child: Image.network(
+            feed.imageUrl, 
+            fit: BoxFit.cover,
+            // 이미지 로딩 중 실패할 경우 대비
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                   Icon(Icons.favorite_border, size: 24),
-                   SizedBox(width: 5),
-                   Text("45"),
-                   SizedBox(width: 15),
-                   Icon(Icons.chat_bubble_outline, size: 24),
-                   SizedBox(width: 5),
-                   Text("2"),
-                ],
-              ),
-              SizedBox(height: 10),
-              Text(
-                "고양이가 어떻게 세모네모",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                   Text(
+                feed.content ?? "",
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                 maxLines: 2,
-                overflow: TextOverflow.ellipsis,// 글이 넘치면 처리해주는 코드
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
+              // ✅ 4. 실제 생성 날짜(createdAt) 연결
               Text(
-                "2025년 12월 5일",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                feed.createdAt?.toString().split(' ')[0] ?? "",
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
           ),
