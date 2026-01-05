@@ -47,23 +47,40 @@ class FriendUseCase {
   }
 
   Future<bool> deleteFriend(String friendId) async {
-    return await _friendRepo.deleteFriend(friendId);
+    // 내가 보낸 요청이 있으면 삭제, 상대가 보낸 것은 거절, 친구테이블에서 지우기
+    final result = await Future.wait([
+      _followRepo.rejectFollowRequest(friendId),
+      _followRepo.deleteFollowRequest(friendId),
+      _friendRepo.deleteFriend(friendId),
+    ]);
+
+    return result[2];
   }
 
   Future<List<FriendInfoModel>> searchUsers(String nicknameOrCode) async {
+    //유저테이블에서 유저 가져오기
     final users = await _friendRepo.findUsers(nicknameOrCode);
-    List<FriendInfoModel> result = [];
-    for (final user in users) {
-      result.add(
-        FriendInfoModel(
-          userId: user.id,
-          nickname: user.nickname,
-          isFriend: false,
-          profileImageUrl: user.profileImageUrl,
-        ),
-      );
+    if (users.isNotEmpty) {
+      List<FriendInfoModel> result = [];
+      for (final user in users) {
+        final results = await Future.wait([
+          _friendRepo.isFriend(user.id),
+          _followRepo.checkFollowPending(user.id),
+        ]);
+
+        result.add(
+          FriendInfoModel(
+            userId: user.id,
+            nickname: user.nickname,
+            isFriend: results[0],
+            status: results[1] ? "PENDING" : null,
+            profileImageUrl: user.profileImageUrl,
+          ),
+        );
+      }
+      return result;
     }
-    return result;
+    return [];
   }
 
   Future<String> sendFollowRequest(String friendId) async {
@@ -75,22 +92,34 @@ class FriendUseCase {
     if (followRequests.isNotEmpty) {
       List<FriendInfoModel> result = [];
       for (final request in followRequests) {
-        if (request.status == "PENDING") {
-          final user = await _userRepo.getUser(request.fromUserId);
-          if (user != null) {
-            result.add(
-              FriendInfoModel(
-                userId: user.id,
-                nickname: user.nickname,
-                profileImageUrl: user.profileImageUrl,
-                isFriend: false,
-              ),
-            );
-          }
+        final user = await _userRepo.getUser(request.fromUserId);
+        if (user != null) {
+          final isFriend = await _friendRepo.isFriend(user.id);
+          result.add(
+            FriendInfoModel(
+              userId: user.id,
+              nickname: user.nickname,
+              profileImageUrl: user.profileImageUrl,
+              isFriend: isFriend,
+              status: request.status,
+            ),
+          );
         }
       }
       return result;
     }
+    return [];
+  }
+
+  Future<List<String>> getMyRequests() async {
+    final myRequests = await _followRepo.getMyRequests();
+    if (myRequests.isNotEmpty) {
+      return myRequests
+          //.where((e) => e.status == "PENDING")
+          .map((e) => e.toUserId)
+          .toList();
+    }
+    print("내가 보낸 요청 없음");
     return [];
   }
 

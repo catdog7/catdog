@@ -18,7 +18,6 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$SearchState {
   bool get isLoading => throw _privateConstructorUsedError;
-  List<String> get friendIds => throw _privateConstructorUsedError;
   List<FriendInfoModel> get users => throw _privateConstructorUsedError;
 
   /// Create a copy of SearchState
@@ -35,11 +34,7 @@ abstract class $SearchStateCopyWith<$Res> {
     $Res Function(SearchState) then,
   ) = _$SearchStateCopyWithImpl<$Res, SearchState>;
   @useResult
-  $Res call({
-    bool isLoading,
-    List<String> friendIds,
-    List<FriendInfoModel> users,
-  });
+  $Res call({bool isLoading, List<FriendInfoModel> users});
 }
 
 /// @nodoc
@@ -56,21 +51,13 @@ class _$SearchStateCopyWithImpl<$Res, $Val extends SearchState>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? isLoading = null,
-    Object? friendIds = null,
-    Object? users = null,
-  }) {
+  $Res call({Object? isLoading = null, Object? users = null}) {
     return _then(
       _value.copyWith(
             isLoading: null == isLoading
                 ? _value.isLoading
                 : isLoading // ignore: cast_nullable_to_non_nullable
                       as bool,
-            friendIds: null == friendIds
-                ? _value.friendIds
-                : friendIds // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
             users: null == users
                 ? _value.users
                 : users // ignore: cast_nullable_to_non_nullable
@@ -90,11 +77,7 @@ abstract class _$$SearchStateImplCopyWith<$Res>
   ) = __$$SearchStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    bool isLoading,
-    List<String> friendIds,
-    List<FriendInfoModel> users,
-  });
+  $Res call({bool isLoading, List<FriendInfoModel> users});
 }
 
 /// @nodoc
@@ -110,21 +93,13 @@ class __$$SearchStateImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({
-    Object? isLoading = null,
-    Object? friendIds = null,
-    Object? users = null,
-  }) {
+  $Res call({Object? isLoading = null, Object? users = null}) {
     return _then(
       _$SearchStateImpl(
         isLoading: null == isLoading
             ? _value.isLoading
             : isLoading // ignore: cast_nullable_to_non_nullable
                   as bool,
-        friendIds: null == friendIds
-            ? _value._friendIds
-            : friendIds // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
         users: null == users
             ? _value._users
             : users // ignore: cast_nullable_to_non_nullable
@@ -139,21 +114,11 @@ class __$$SearchStateImplCopyWithImpl<$Res>
 class _$SearchStateImpl implements _SearchState {
   const _$SearchStateImpl({
     required this.isLoading,
-    required final List<String> friendIds,
     required final List<FriendInfoModel> users,
-  }) : _friendIds = friendIds,
-       _users = users;
+  }) : _users = users;
 
   @override
   final bool isLoading;
-  final List<String> _friendIds;
-  @override
-  List<String> get friendIds {
-    if (_friendIds is EqualUnmodifiableListView) return _friendIds;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_friendIds);
-  }
-
   final List<FriendInfoModel> _users;
   @override
   List<FriendInfoModel> get users {
@@ -164,7 +129,7 @@ class _$SearchStateImpl implements _SearchState {
 
   @override
   String toString() {
-    return 'SearchState(isLoading: $isLoading, friendIds: $friendIds, users: $users)';
+    return 'SearchState(isLoading: $isLoading, users: $users)';
   }
 
   @override
@@ -174,10 +139,6 @@ class _$SearchStateImpl implements _SearchState {
             other is _$SearchStateImpl &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
-            const DeepCollectionEquality().equals(
-              other._friendIds,
-              _friendIds,
-            ) &&
             const DeepCollectionEquality().equals(other._users, _users));
   }
 
@@ -185,7 +146,6 @@ class _$SearchStateImpl implements _SearchState {
   int get hashCode => Object.hash(
     runtimeType,
     isLoading,
-    const DeepCollectionEquality().hash(_friendIds),
     const DeepCollectionEquality().hash(_users),
   );
 
@@ -201,14 +161,11 @@ class _$SearchStateImpl implements _SearchState {
 abstract class _SearchState implements SearchState {
   const factory _SearchState({
     required final bool isLoading,
-    required final List<String> friendIds,
     required final List<FriendInfoModel> users,
   }) = _$SearchStateImpl;
 
   @override
   bool get isLoading;
-  @override
-  List<String> get friendIds;
   @override
   List<FriendInfoModel> get users;
 

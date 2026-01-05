@@ -1,7 +1,7 @@
 import 'package:catdog/ui/pages/friend/view/widget/alarm_widget.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_alarm_view_model.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,6 +13,9 @@ class FriendAlarmPage extends ConsumerWidget {
     final state = ref.watch(friendAlarmViewModelProvider);
     final vm = ref.read(friendAlarmViewModelProvider.notifier);
     final friendvm = ref.read(friendViewModelProvider.notifier);
+    FirebaseMessaging.onMessage.listen((message) {
+      vm.refresh();
+    });
     return state.when(
       skipError: true,
       skipLoadingOnRefresh: true,

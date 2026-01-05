@@ -10,7 +10,10 @@ class FriendAlarmViewModel extends _$FriendAlarmViewModel {
   @override
   Future<FriendState> build() async {
     final useCase = ref.watch(friendUseCaseProvider);
-    final requests = await useCase.getAllFollowRequest();
+    final result = await useCase.getAllFollowRequest();
+    final requests = result
+        .where((e) => !e.isFriend && e.status == "PENDING")
+        .toList();
     return FriendState(isLoading: false, friends: requests);
   }
 
@@ -20,7 +23,10 @@ class FriendAlarmViewModel extends _$FriendAlarmViewModel {
     }
 
     final useCase = ref.watch(friendUseCaseProvider);
-    final requests = await useCase.getAllFollowRequest();
+    final result = await useCase.getAllFollowRequest();
+    final requests = result
+        .where((e) => !e.isFriend && e.status == "PENDING")
+        .toList();
 
     state = AsyncData(FriendState(isLoading: false, friends: requests));
   }

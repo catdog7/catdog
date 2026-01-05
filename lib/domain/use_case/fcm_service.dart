@@ -24,6 +24,7 @@ class FcmService {
     _initialized = true;
 
     FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission();
 
     if (Platform.isIOS) {
       // APNs 토큰 확인
@@ -32,9 +33,6 @@ class FcmService {
         await Future.delayed(Duration(seconds: 2)); // 잠시 대기
         apnsToken = await messaging.getAPNSToken();
       }
-    } else {
-      // 권한 요청 (Android 13 이상)
-      NotificationSettings settings = await messaging.requestPermission();
     }
 
     //앱 시작 시 현재 FCM 토큰 저장
@@ -70,10 +68,10 @@ class FcmService {
       'user_id': userId,
       'token': token,
       'platform': Platform.isIOS ? 'IOS' : 'ANDROID',
-    }, onConflict: 'user_id, token');
+    }, onConflict: 'user_id'); // user_id만 있게 바꿔야함!!
   }
 
-  // 선택 기능: 로그아웃 시 토큰 삭제
+  // 로그아웃 시 토큰 삭제
   Future<void> _removeToken() async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;

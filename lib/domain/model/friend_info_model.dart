@@ -8,6 +8,7 @@ class FriendInfoModel with _$FriendInfoModel {
     required String userId,
     required String nickname,
     required bool isFriend,
+    String? status,
     String? profileImageUrl,
   }) = _FriendInfoModel;
 }

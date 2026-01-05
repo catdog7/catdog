@@ -66,44 +66,62 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
 
   // 친구테이블에 없으면(아직 친구가 아니면) 친구 요청 테이블에 추가
   // 친구가 아니면 중복으로 요청이 가능하고 수락했을 때도 중복으로 수락 알림이 감
+  // @override
+  // Future<String> sendFollowRequest(String friendId) async {
+  //   final myId = _client.auth.currentUser?.id;
+  //   if (myId != null) {
+  //     if (myId.compareTo(friendId) < 0) {
+  //       final response = await _client
+  //           .from('friends')
+  //           .select()
+  //           .eq('user_a_id', myId)
+  //           .eq('user_b_id', friendId);
+  //       if (response.isNotEmpty) {
+  //         return "FRIEND";
+  //       }
+  //     } else {
+  //       final response = await _client
+  //           .from('friends')
+  //           .select()
+  //           .eq('user_a_id', friendId)
+  //           .eq('user_b_id', myId);
+  //       if (response.isNotEmpty) {
+  //         return "FRIEND";
+  //       }
+  //     }
+
+  //     final uuid = const Uuid();
+  //     final followRequest = FollowRequestModel(
+  //       id: uuid.v4(),
+  //       fromUserId: myId,
+  //       toUserId: friendId,
+  //     );
+  //     final dto = FollowRequestMapper.toDto(followRequest);
+  //     try {
+  //       await _client.from('follow_requests').insert(dto.toJson());
+  //       // _client.from('follow_requests').upsert({
+  //       //   'from_user_id': myId,
+  //       //   'to_user_id': friendId,
+  //       //   'status': 'PENDING',
+  //       // }, onConflict: 'from_user_id,to_user_id');
+  //       return "SUCCESS";
+  //     } catch (e) {
+  //       return "FAIL";
+  //     }
+  //   }
+  //   return "FAIL";
+  // }
   @override
   Future<String> sendFollowRequest(String friendId) async {
     final myId = _client.auth.currentUser?.id;
     if (myId != null) {
-      if (myId.compareTo(friendId) < 0) {
-        final response = await _client
-            .from('friends')
-            .select()
-            .eq('user_a_id', myId)
-            .eq('user_b_id', friendId);
-        if (response.isNotEmpty) {
-          return "FRIEND";
-        }
-      } else {
-        final response = await _client
-            .from('friends')
-            .select()
-            .eq('user_a_id', friendId)
-            .eq('user_b_id', myId);
-        if (response.isNotEmpty) {
-          return "FRIEND";
-        }
-      }
-
-      final uuid = const Uuid();
-      final followRequest = FollowRequestModel(
-        id: uuid.v4(),
-        fromUserId: myId,
-        toUserId: friendId,
-      );
-      final dto = FollowRequestMapper.toDto(followRequest);
       try {
-        await _client.from('follow_requests').insert(dto.toJson());
-        // _client.from('follow_requests').upsert({
-        //   'from_user_id': myId,
-        //   'to_user_id': friendId,
-        //   'status': 'PENDING',
-        // }, onConflict: 'from_user_id, to_user_id');
+        //거절이면 삭제 후 추가
+        final result = await deleteFollowRequest(friendId);
+        await _client.from('follow_requests').upsert({
+          'from_user_id': myId,
+          'to_user_id': friendId,
+        });
         return "SUCCESS";
       } catch (e) {
         return "FAIL";
@@ -130,14 +148,17 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
     return false;
   }
 
+  //내가 받은 요청들 가져오기
   @override
   Future<List<FollowRequestModel>> getAllFollowRequest() async {
     final userId = _client.auth.currentUser?.id;
     if (userId != null) {
+      //일단 요청 다 가져오기
       final response1 = await _client
           .from('follow_requests')
           .select()
-          .eq('to_user_id', userId);
+          .eq('to_user_id', userId)
+          .order('created_at');
 
       final result1 = response1
           .map(
@@ -146,7 +167,18 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
           )
           .toList();
 
-      return result1;
+      final seenUserIds = <String>{};
+
+      //from_user_id당 하나의 요청만 필터링
+      final result2 = result1.where((item) {
+        if (seenUserIds.contains(item.fromUserId)) {
+          return false;
+        }
+        seenUserIds.add(item.fromUserId);
+        return true;
+      }).toList();
+
+      return result2;
     }
     return [];
   }
@@ -185,5 +217,74 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
       }
     }
     return false;
+  }
+
+  @override
+  Future<bool> deleteFollowRequest(String friendId) async {
+    final myId = _client.auth.currentUser?.id;
+    if (myId != null) {
+      try {
+        await _client
+            .from('follow_requests')
+            .delete()
+            .eq('from_user_id', myId)
+            .eq('to_user_id', friendId);
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  //내가 보낸 요청들 가져오기
+  @override
+  Future<List<FollowRequestModel>> getMyRequests() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId != null) {
+      final response1 = await _client
+          .from('follow_requests')
+          .select()
+          .eq('from_user_id', userId);
+
+      final result1 = response1
+          .map(
+            (json) =>
+                FollowRequestMapper.toDomain(FollowRequestDto.fromJson(json)),
+          )
+          .toList();
+
+      return result1;
+    }
+    return [];
+  }
+
+  @override
+  Future<bool> checkFollowPending(String freindId) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId != null) {
+        final result = await _client
+            .from('follow_requests')
+            .select()
+            .eq('from_user_id', userId)
+            .eq('to_user_id', freindId)
+            .maybeSingle();
+        if (result != null) {
+          if (FollowRequestMapper.toDomain(
+                FollowRequestDto.fromJson(result),
+              ).status ==
+              "PENDING") {
+            return true;
+          }
+          return false;
+        } else {
+          return false;
+        }
+      }
+      return false;
+    } catch (e) {
+      print("Follow Status Check Fail");
+      return false;
+    }
   }
 }

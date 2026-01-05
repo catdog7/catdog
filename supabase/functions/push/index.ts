@@ -57,7 +57,8 @@ async function handleInsert(payload: WebhookPayload) {
     .from("fcm_tokens")
     .select("token")
     .eq("user_id", to_user_id)
-    .single();
+    .order("created_at", { ascending: false })
+    .maybeSingle();
 
   if (!toUserToken?.token) return;
 
@@ -66,12 +67,12 @@ async function handleInsert(payload: WebhookPayload) {
     .from("users")
     .select("nickname")
     .eq("id", from_user_id)
-    .single();
+    .maybeSingle();
 
   await sendFCM({
     token: toUserToken.token,
-    title: "친구 요청",
-    body: `${fromUser?.nickname}님이 친구 요청을 보냈습니다.`,
+    title: "PENDING",
+    body: `${fromUser?.nickname}`,
   });
 }
 
@@ -82,32 +83,30 @@ async function handleUpdate(payload: WebhookPayload) {
   // 상태 변화 없으면 무시
   if (newStatus === oldStatus) return;
 
-  if (newStatus == "PENDING") {
-    handleInsert(payload);
-  }
+  const { from_user_id, to_user_id } = payload.record;
+
+  // 요청 보낸 사람에게 알림
+  const { data: fromUserToken } = await supabase
+    .from("fcm_tokens")
+    .select("token")
+    .eq("user_id", from_user_id)
+    .order("created_at", { ascending: false })
+    .maybeSingle();
+
+  if (!fromUserToken?.token) return;
+
+  // 요청 받은 유저 닉네임
+  const { data: toUser } = await supabase
+    .from("users")
+    .select("nickname")
+    .eq("id", to_user_id)
+    .maybeSingle();
 
   if (newStatus === "ACCEPTED") {
-    const { from_user_id, to_user_id } = payload.record;
-
-    // 요청 보낸 사람에게 알림
-    const { data: fromUserToken } = await supabase
-      .from("fcm_tokens")
-      .select("token")
-      .eq("user_id", from_user_id)
-      .single();
-
-    if (!fromUserToken?.token) return;
-
-    // 요청 받은 유저 닉네임
-    const { data: toUser } = await supabase
-      .from("users")
-      .select("nickname")
-      .eq("id", to_user_id)
-      .single();
     await sendFCM({
       token: fromUserToken.token,
-      title: "친구 요청 수락",
-      body: `${toUser?.nickname}님이 친구 요청을 수락했습니다.`,
+      title: "ACCEPTED",
+      body: `${toUser?.nickname}`,
     });
   }
 }
