@@ -12,13 +12,13 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<UserModel?> getUser(String id) async {
     try {
-      final response = await _client
-          .from('users')
-          .select()
-          .eq('id', id)
-          .maybeSingle();
-      
-      if (response == null) return null;
+    final response = await _client
+        .from('users')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+    
+    if (response == null) return null;
       
       // UserDto의 required 필드들이 null인 경우를 처리
       final responseCopy = Map<String, dynamic>.from(response);

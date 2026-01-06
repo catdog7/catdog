@@ -4,9 +4,7 @@ import 'package:catdog/ui/pages/home/view/pet_register_view.dart';
 import 'package:catdog/ui/widgets/main_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-// HomeContent의 모달 상태를 공유하기 위한 Provider
 final showModalProvider = StateProvider<bool>((ref) => false);
 
 class HomeView extends ConsumerStatefulWidget {
@@ -18,10 +16,11 @@ class HomeView extends ConsumerStatefulWidget {
 
 class _HomeViewState extends ConsumerState<HomeView> {
   int _selectedIndex = 0;
+  int _homeContentKey = 0;
 
   void _onItemTapped(int index) {
     final showModal = ref.read(showModalProvider);
-    if (showModal) return; // 모달이 떠있으면 탭 무시
+    if (showModal) return;
     
     setState(() {
       _selectedIndex = index;
@@ -36,38 +35,38 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
     return Stack(
       children: [
-        // 기존 화면 (Scaffold 전체)
         Scaffold(
           backgroundColor: Colors.white,
           body: IgnorePointer(
-            ignoring: showModal, // 모달이 떠있으면 터치 무시
-            child: NavigationBody(selectedIndex: _selectedIndex),
+            ignoring: showModal,
+            child: NavigationBody(
+              selectedIndex: _selectedIndex,
+              homeContentKey: _selectedIndex == 0 ? ValueKey(_homeContentKey) : null,
+            ),
           ),
           bottomNavigationBar: IgnorePointer(
-            ignoring: showModal, // 모달이 떠있으면 네비게이션바 터치 무시
+            ignoring: showModal,
             child: MainNavigationBar(
               selectedIndex: _selectedIndex,
               onItemSelected: _onItemTapped,
               onWritePressed: () {
-                if (showModal) return; // 모달이 떠있으면 무시
+                if (showModal) return;
                 print('Write button tapped');
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const FeedAddView()),
                 );
               },
-              isDisabled: false, // 네비게이션바는 항상 원래 색상 유지
+              isDisabled: false,
             ),
           ),
         ),
 
-        // 반투명 레이어 (Barrier) - 앱바와 네비게이션바 포함 전체 화면
         if (showModal) ...[
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.4),
             ),
           ),
-          // 팝업 카드
           Center(
             child: Material(
               color: Colors.transparent,
@@ -82,12 +81,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // 상단 콘텐츠
                     Padding(
                       padding: const EdgeInsets.only(top: 24, left: 20, right: 20),
                       child: Column(
                         children: [
-                          // 프로필 이미지
                           Image.asset(
                             "assets/icon/register_cat_dog.webp",
                             width: 65,
@@ -95,7 +92,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                             fit: BoxFit.fill,
                           ),
                           const SizedBox(height: 12),
-                          // 환영 메시지
                           const SizedBox(
                             width: 295,
                             child: Text(
@@ -113,7 +109,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         ],
                       ),
                     ),
-                    // 하단 버튼
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.only(
@@ -133,12 +128,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         children: [
                           Expanded(
                             child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
+                              onTap: () async {
+                                await Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => const PetRegisterView(),
                                   ),
                                 );
+                                if (mounted && _selectedIndex == 0) {
+                                  setState(() {
+                                    _homeContentKey++;
+                                  });
+                                }
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
