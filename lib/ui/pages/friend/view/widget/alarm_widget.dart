@@ -62,6 +62,31 @@ class AlarmWidget extends StatelessWidget {
           child: InkWell(
             onTap: () {
               onAccepted(user.userId);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: const Color(0xFF575E6A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(8),
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(20),
+                  duration: const Duration(seconds: 2),
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          '${user.nickname ?? ''}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text("님의 친구 요청을 수락 했습니다."),
+                    ],
+                  ),
+                ),
+              );
             },
             child: Container(
               height: 35,

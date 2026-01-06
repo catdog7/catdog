@@ -45,10 +45,11 @@ class _MyAppState extends ConsumerState<MyApp> {
     FcmService.instance(supabase).init();
     FirebaseMessaging.onMessage.listen((message) {
       final notification = message.notification;
+      final data = message.data;
       if (notification != null) {
         debugPrint("!!!!!!!FCM 알림옴!!!!!!!!!");
         String message = "";
-        if (notification.title == "PENDING") {
+        if (data['action'] == "INSERT") {
           message = '님이 친구를 요청 했습니다.';
         } else {
           message = '님이 친구 요청을 수락 했습니다.';
@@ -68,7 +69,7 @@ class _MyAppState extends ConsumerState<MyApp> {
                 const SizedBox(width: 12),
                 Flexible(
                   child: Text(
-                    '${notification.body ?? ''}',
+                    '${data['who'] ?? ''}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
