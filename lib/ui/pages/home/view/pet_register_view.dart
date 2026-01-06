@@ -3,6 +3,7 @@ import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/pet_dependency.dart';
 import 'package:catdog/domain/model/pet_model.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/home/view/pet_edit_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,15 +11,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-// 동물 카드 데이터 클래스
 class _PetCardData {
   final String id;
   final TextEditingController nameController;
-  final TextEditingController ageController; // 나이 입력 필드용 controller
+  final TextEditingController ageController;
   String selectedSpecies;
   DateTime? selectedBirthDate;
   XFile? selectedImage;
+  String? existingImageUrl;
   bool isAgeUnknown;
+  bool isExisting;
 
   _PetCardData({
     required this.id,
@@ -27,8 +29,32 @@ class _PetCardData {
     required this.selectedSpecies,
     this.selectedBirthDate,
     this.selectedImage,
+    this.existingImageUrl,
     this.isAgeUnknown = false,
+    this.isExisting = false,
   });
+
+  factory _PetCardData.fromPetModel(PetModel pet) {
+    final nameController = TextEditingController(text: pet.name);
+    final ageController = TextEditingController();
+    
+    if (pet.birthDatePrecision == 'UNKNOWN') {
+      ageController.text = '모름';
+    } else if (pet.birthDate != null) {
+      ageController.text = DateFormat('yyyy년 M월 d일').format(pet.birthDate!);
+    }
+    
+    return _PetCardData(
+      id: pet.id,
+      nameController: nameController,
+      ageController: ageController,
+      selectedSpecies: pet.species,
+      selectedBirthDate: pet.birthDate,
+      existingImageUrl: pet.image2dUrl,
+      isAgeUnknown: pet.birthDatePrecision == 'UNKNOWN',
+      isExisting: true,
+    );
+  }
 }
 
 class PetRegisterView extends ConsumerStatefulWidget {
@@ -39,19 +65,16 @@ class PetRegisterView extends ConsumerStatefulWidget {
 }
 
 class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
-  final List<_PetCardData> _petCards = [
-    _PetCardData(
-      id: '1',
-      nameController: TextEditingController(),
-      ageController: TextEditingController(),
-      selectedSpecies: 'DOG',
-      selectedBirthDate: null,
-      selectedImage: null,
-      isAgeUnknown: false,
-    ),
-  ];
+  List<_PetCardData> _petCards = [];
   final _uuid = const Uuid();
   bool _isLoading = false;
+  bool _isInitialLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExistingPets();
+  }
 
   @override
   void dispose() {
@@ -62,16 +85,65 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
     super.dispose();
   }
 
+  Future<void> _loadExistingPets() async {
+    final client = ref.read(supabaseClientProvider);
+    final userId = client.auth.currentUser?.id;
+    if (userId == null) {
+      setState(() {
+        _isInitialLoading = false;
+        if (_petCards.isEmpty) {
+          _petCards.add(_PetCardData(
+            id: 'new_1',
+            nameController: TextEditingController(),
+            ageController: TextEditingController(),
+            selectedSpecies: 'DOG',
+            selectedBirthDate: null,
+            selectedImage: null,
+            isAgeUnknown: false,
+            isExisting: false,
+          ));
+        }
+      });
+      return;
+    }
+
+    try {
+      final pets = await ref.read(petUseCaseProvider).getMyPets(userId);
+      setState(() {
+        _petCards = pets.map((pet) => _PetCardData.fromPetModel(pet)).toList();
+        _isInitialLoading = false;
+      });
+    } catch (e) {
+      debugPrint('_loadExistingPets error: $e');
+      setState(() {
+        _isInitialLoading = false;
+        if (_petCards.isEmpty) {
+          _petCards.add(_PetCardData(
+            id: 'new_1',
+            nameController: TextEditingController(),
+            ageController: TextEditingController(),
+            selectedSpecies: 'DOG',
+            selectedBirthDate: null,
+            selectedImage: null,
+            isAgeUnknown: false,
+            isExisting: false,
+          ));
+        }
+      });
+    }
+  }
+
   void _addPetCard() {
     setState(() {
       _petCards.add(_PetCardData(
-        id: '${_petCards.length + 1}',
+        id: 'new_${DateTime.now().millisecondsSinceEpoch}',
         nameController: TextEditingController(),
         ageController: TextEditingController(),
         selectedSpecies: 'DOG',
         selectedBirthDate: null,
         selectedImage: null,
         isAgeUnknown: false,
+        isExisting: false,
       ));
     });
   }
@@ -80,8 +152,19 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
     setState(() {
       final index = _petCards.indexWhere((card) => card.id == id);
       if (index != -1) {
-        _petCards[index].nameController.dispose();
-        _petCards[index].ageController.dispose();
+        final card = _petCards[index];
+        card.nameController.dispose();
+        card.ageController.dispose();
+        
+        if (card.isExisting) {
+          ref.read(petUseCaseProvider).removePet(card.id).catchError((e) {
+            debugPrint('Pet delete error: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('동물 삭제 중 오류가 발생했습니다.')),
+            );
+          });
+        }
+        
         _petCards.removeAt(index);
       }
     });
@@ -122,7 +205,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
               ),
               child: Column(
                 children: [
-                  // 드래그 바
                   const SizedBox(height: 8),
                   Container(
                     width: 40,
@@ -135,7 +217,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
 
                   const SizedBox(height: 16),
 
-                  // 년 / 월 / 일 타이틀
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Row(
@@ -152,7 +233,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
 
                   const SizedBox(height: 8),
 
-                  // 날짜 휠
                   Expanded(
                     child: CupertinoDatePicker(
                       mode: CupertinoDatePickerMode.date,
@@ -166,7 +246,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
                     ),
                   ),
 
-                  // 나이 모름
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: GestureDetector(
@@ -196,7 +275,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
                     ),
                   ),
 
-                  // 버튼
                   Padding(
                     padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).padding.bottom + 20),
                     child: Row(
@@ -226,10 +304,8 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
                               ),
                             ),
                             onPressed: () {
-                              // 1️⃣ 완전히 포커스 제거 (중요)
                               FocusManager.instance.primaryFocus?.unfocus();
 
-                              // 2️⃣ 상태 업데이트
                               setState(() {
                                 if (tempIsAgeUnknown) {
                                   cardData.selectedBirthDate = null;
@@ -242,7 +318,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
                                 }
                               });
 
-                              // 3️⃣ 한 프레임 뒤에 모달 닫기
                               Future.microtask(() {
                                 Navigator.pop(context);
                               });
@@ -266,7 +341,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
   }
 
   Future<void> _savePet() async {
-    // 모든 카드 검증
     for (var card in _petCards) {
       if (card.nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -292,66 +366,73 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
         throw Exception('로그인이 필요합니다.');
       }
 
-      // 모든 카드 저장
       for (var card in _petCards) {
-        String? imageUrl;
+        String? imageUrl = card.existingImageUrl;
+        
         if (card.selectedImage != null) {
           try {
-            // 이미지 업로드
             final fileName = "${DateTime.now().millisecondsSinceEpoch}_${card.id}.jpg";
             final bytes = await card.selectedImage!.readAsBytes();
             await client.storage.from("pet_image").uploadBinary(fileName, bytes);
             imageUrl = client.storage.from('pet_image').getPublicUrl(fileName);
           } catch (e) {
             print('Image upload error: $e');
-            // 이미지 업로드 실패 시에도 계속 진행 (이미지 없이 저장)
-            // 403 에러는 Supabase Storage RLS 정책 설정이 필요합니다
-            imageUrl = null;
           }
         }
 
-        // PetModel 생성
         final pet = PetModel(
-          id: _uuid.v4(),
+          id: card.isExisting ? card.id : _uuid.v4(),
           userId: userId,
           name: card.nameController.text.trim(),
           species: card.selectedSpecies,
           birthDate: card.selectedBirthDate,
           birthDatePrecision: card.isAgeUnknown ? 'UNKNOWN' : 'EXACT',
           image2dUrl: imageUrl,
-          createdAt: DateTime.now(),
+          createdAt: card.isExisting ? null : DateTime.now(),
           updatedAt: DateTime.now(),
         );
 
-        // 저장
-        await ref.read(petUseCaseProvider).addPet(pet);
+        if (card.isExisting) {
+          await ref.read(petUseCaseProvider).updatePet(pet);
+        } else {
+          await ref.read(petUseCaseProvider).addPet(pet);
+        }
       }
 
-      // 모달 상태 업데이트 (동물이 있으므로 팝업 숨김)
       ref.read(showModalProvider.notifier).state = false;
 
       if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${_petCards.length}마리의 반려동물이 등록되었습니다.')),
+        setState(() => _isLoading = false);
+        
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const RegistrationCompleteDialog(),
         );
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       }
     } catch (e) {
       print('Pet save error: $e');
       if (mounted) {
+        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('등록 중 오류가 발생했습니다: $e')),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isInitialLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return GestureDetector(
       onTap: () {
         FocusManager.instance.primaryFocus?.unfocus();
@@ -362,19 +443,16 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
         body: SafeArea(
         child: Column(
           children: [
-            // 상단 헤더
             _Header(
               onClose: () => Navigator.of(context).pop(),
             ),
 
-            // 카드 영역
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      // 동물 카드들
                       ..._petCards.asMap().entries.map((entry) {
                         final index = entry.key;
                         final cardData = entry.value;
@@ -394,19 +472,19 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
                             isAgeUnknown: cardData.isAgeUnknown,
                             onBirthDateTap: () => _selectBirthDate(cardData),
                             selectedImage: cardData.selectedImage,
+                            existingImageUrl: cardData.existingImageUrl,
                             onImageTap: () => _pickImage(cardData),
                             onImageRemove: () {
                               setState(() {
                                 cardData.selectedImage = null;
+                                cardData.existingImageUrl = null;
                               });
                             },
-                            showRemoveButton: index != 0,
+                            showRemoveButton: _petCards.length > 1,
                             onRemove: () => _removePetCard(cardData.id),
                           ),
                         );
                       }),
-
-                      // 추가하기 버튼
                       _AddButton(onPressed: _addPetCard),
                     ],
                   ),
@@ -414,7 +492,6 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
               ),
             ),
 
-            // 완료 버튼
             Padding(
               padding: const EdgeInsets.all(20),
               child: _CompleteButton(
@@ -459,13 +536,22 @@ class _Header extends StatelessWidget {
                 color: Color(0xFF1C1B1F),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.format_list_bulleted, size: 24, color: Color(0xFF1C1B1F)),
+            TextButton(
               onPressed: () {
-                // TODO: 리스트 기능 구현
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const PetEditView(),
+                  ),
+                );
               },
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
+              child: const Text(
+                '편집',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1C1B1F),
+                ),
+              ),
             ),
           ],
         ),
@@ -485,6 +571,7 @@ class _PetFormCard extends StatelessWidget {
   final bool isAgeUnknown;
   final VoidCallback onBirthDateTap;
   final XFile? selectedImage;
+  final String? existingImageUrl;
   final VoidCallback onImageTap;
   final VoidCallback onImageRemove;
   final bool showRemoveButton;
@@ -500,6 +587,7 @@ class _PetFormCard extends StatelessWidget {
     required this.isAgeUnknown,
     required this.onBirthDateTap,
     required this.selectedImage,
+    this.existingImageUrl,
     required this.onImageTap,
     required this.onImageRemove,
     required this.showRemoveButton,
@@ -581,7 +669,6 @@ class _PetFormCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-            // 이미지 등록
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -622,7 +709,7 @@ class _PetFormCard extends StatelessWidget {
                   ],
                 ),
               const Spacer(),
-              if (selectedImage != null)
+              if (selectedImage != null || existingImageUrl != null)
                 SizedBox(
                   width: 70,
                   height: 70,
@@ -638,8 +725,11 @@ class _PetFormCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             image: DecorationImage(
-                              image: FileImage(File(selectedImage!.path)),
+                              image: selectedImage != null
+                                  ? FileImage(File(selectedImage!.path)) as ImageProvider
+                                  : NetworkImage(existingImageUrl!) as ImageProvider,
                               fit: BoxFit.cover,
+                              onError: (exception, stackTrace) {},
                             ),
                           ),
                         ),
@@ -769,7 +859,6 @@ class _InputField extends StatelessWidget {
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {
-            // 포커스 해제 후 onTap 실행
             FocusScope.of(context).unfocus();
             onTap?.call();
           },
@@ -894,6 +983,74 @@ class _CompleteButton extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+    );
+  }
+}
+
+class RegistrationCompleteDialog extends StatelessWidget {
+  const RegistrationCompleteDialog({super.key});
+
+  static const Color semanticBackgroundWhite = Color(0xFFFFFFFF);
+  static const Color semanticTextBlack = Color(0xFF121416);
+  static const Color semanticLineNormal = Color(0x26000000);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        width: 335,
+        decoration: BoxDecoration(
+          color: semanticBackgroundWhite,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 24, left: 20, right: 20),
+              child: Text(
+                '내 동물 등록이 완료되었습니다.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: semanticTextBlack,
+                  height: 1.35,
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    backgroundColor: semanticTextBlack,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

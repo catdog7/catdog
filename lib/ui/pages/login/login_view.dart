@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
 import 'package:catdog/ui/pages/login/login_view1.dart';
 import 'package:catdog/ui/pages/login/nickname_view.dart';
+import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginView extends ConsumerStatefulWidget {
@@ -30,7 +34,14 @@ class _LoginViewState extends ConsumerState<LoginView> {
       final session = data.session;
       if (session != null && !_isNavigating) {
         _handlePostLoginNavigation(session.user.id);
+      } else {
+        // 세션이 없거나 에러 상황일 때 로딩을 풀어줌
+        if (mounted) setState(() => _isLoading = false);
       }
+    }, onError: (error) {
+      // 에러 발생 시 처리
+      if (mounted) setState(() => _isLoading = false);
+      debugPrint('Auth State Error: $error');
     });
   }
 
@@ -87,7 +98,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
     try {
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'io.supabase.catdog://login-callback/',
+        redirectTo: 'io.supabase.catdog://login-callback',
         authScreenLaunchMode: LaunchMode.externalApplication,
         queryParams: {
           'prompt': 'select_account',
@@ -106,8 +117,97 @@ class _LoginViewState extends ConsumerState<LoginView> {
   }
 
   Future<void> _appleLogin() async {
-    // TODO: Apple 로그인 구현
-    debugPrint('Apple login not implemented yet');
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+      _isNavigating = false; // 네비게이션 상태 초기화
+    });
+
+    try {
+      // iOS/macOS에서는 네이티브 Sign in with Apple 사용
+      if (!kIsWeb && (Theme.of(context).platform == TargetPlatform.iOS || 
+                      Theme.of(context).platform == TargetPlatform.macOS)) {
+        await _appleLoginNative();
+      } else {
+        // Android, Web, Windows, Linux에서는 OAuth 방식 사용
+        await client.auth.signInWithOAuth(
+          OAuthProvider.apple,
+          redirectTo: kIsWeb ? null : 'io.supabase.catdog://login-callback',
+          authScreenLaunchMode: kIsWeb 
+              ? LaunchMode.platformDefault 
+              : LaunchMode.externalApplication,
+        );
+      }
+    } catch (e) {
+      debugPrint('Apple login error: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  /// iOS/macOS 네이티브 Sign in with Apple
+  Future<void> _appleLoginNative() async {
+    try {
+      // Nonce 생성 및 해싱
+      final rawNonce = client.auth.generateRawNonce();
+      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+      // Apple ID 자격 증명 요청
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        throw const AuthException(
+            'Could not find ID Token from generated credential.');
+      }
+
+      // Supabase에 ID Token으로 로그인
+      final authResponse = await client.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
+      );
+
+      // Apple은 첫 로그인 시에만 full name을 제공
+      // user metadata에 저장
+      if (credential.givenName != null || credential.familyName != null) {
+        final nameParts = <String>[];
+        if (credential.givenName != null) nameParts.add(credential.givenName!);
+        if (credential.familyName != null) nameParts.add(credential.familyName!);
+        final fullName = nameParts.join(' ');
+
+        await client.auth.updateUser(
+          UserAttributes(
+            data: {
+              'full_name': fullName,
+              'given_name': credential.givenName,
+              'family_name': credential.familyName,
+            },
+          ),
+        );
+      }
+
+      // 로그인 성공 후 네비게이션 처리
+      if (authResponse.session != null && 
+          authResponse.user != null && 
+          !_isNavigating) {
+        await _handlePostLoginNavigation(authResponse.user!.id);
+      }
+    } catch (e) {
+      debugPrint('Native Apple login error: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+      rethrow;
+    }
   }
 
   @override

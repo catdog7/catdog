@@ -39,7 +39,7 @@ class MainNavigationBar extends StatelessWidget {
                       : 12.0, // 안드로이드 등 하단 패딩이 없는 경우 최소 여백 부여
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+      color: Colors.white,
                   border: Border(
                     // left border 제거 (하단 바와 겹치지 않도록)
                     top: BorderSide(
@@ -52,11 +52,11 @@ class MainNavigationBar extends StatelessWidget {
                     // bottom border 제거 (하단 바와 겹치지 않도록)
                   ),
                 ),
-                child: Row(
+      child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
+        children: [
                     Expanded(
                       child: Container(
                         height: 52,
@@ -89,11 +89,11 @@ class MainNavigationBar extends StatelessWidget {
                       ),
                     ),
                     // FAB 공간 (게시글과 친구 사이) - 버튼이 여기에 위치
-                    GestureDetector(
-                      onTap: onWritePressed,
-                      child: Container(
-                        width: 56,
-                        height: 56,
+          GestureDetector(
+            onTap: onWritePressed,
+            child: Container(
+              width: 56,
+              height: 56,
                         alignment: Alignment.center,
                         child: Container(
                           width: 48,
@@ -133,9 +133,9 @@ class MainNavigationBar extends StatelessWidget {
                           isDisabled: isDisabled,
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
               ),
             ],
           ),
@@ -171,29 +171,35 @@ class _NavItem extends StatelessWidget {
     final iconPath = 'assets/icon/icon_${iconName}_$suffix.svg';
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
+      behavior: HitTestBehavior.opaque, // 전체 영역 터치 가능하게
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        alignment: Alignment.center,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(
-            iconPath,
-            width: 24,
-            height: 24,
-            colorFilter: ColorFilter.mode(
-              textColor,
-              BlendMode.srcIn,
-            ),
+            SvgPicture.asset(
+              iconPath,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                textColor,
+                BlendMode.srcIn,
+              ),
           ),
-          const SizedBox(height: 4),
+            const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
-              color: textColor,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                color: textColor,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+              ),
             ),
+          ],
           ),
-        ],
       ),
     );
   }
