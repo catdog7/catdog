@@ -62,7 +62,7 @@ class FriendSearchPage extends HookConsumerWidget {
               ),
               leading: InkWell(
                 onTap: () {
-                  //friendvm.refresh();
+                  friendvm.refresh();
                   Navigator.of(context).pop();
                 },
                 child: Icon(Icons.arrow_back_ios),

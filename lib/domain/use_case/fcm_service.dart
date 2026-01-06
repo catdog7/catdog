@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FcmService {
@@ -63,12 +62,60 @@ class FcmService {
   Future<void> _saveToken(String token) async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
-    debugPrint("!!!!!토큰!!!!!! : $token");
-    await _supabase.from('fcm_tokens').upsert({
-      'user_id': userId,
-      'token': token,
-      'platform': Platform.isIOS ? 'IOS' : 'ANDROID',
-    }, onConflict: 'user_id'); // user_id만 있게 바꿔야함!!
+    try {
+      // 현재 이 유저-토큰 조합이 이미 있는지 확인
+      final existing = await _supabase
+          .from('fcm_tokens')
+          .select()
+          .eq('user_id', userId)
+          .eq('token', token)
+          .maybeSingle();
+
+      final String now = DateTime.now().toUtc().toIso8601String();
+
+      if (existing != null) {
+        // 이미 있다면 마지막 활동 시간 갱신
+        await _supabase
+            .from('fcm_tokens')
+            .update({'created_at': now})
+            .eq('id', existing['id']);
+        print('기존 토큰 시간 갱신 완료');
+      } else {
+        //새로운 기기/계정 접속인 경우 개수 확인
+        final List<dynamic> tokens = await _supabase
+            .from('fcm_tokens')
+            .select('id, created_at')
+            .eq('user_id', userId)
+            .order('created_at', ascending: true); // 가장 오래된 것이 위로
+
+        const int maxSlots = 3;
+
+        if (tokens.length >= maxSlots) {
+          //꽉 찼다면 가장 오래된(created_at이 가장 작은) 행을 업데이트
+          final String oldestId = tokens[0]['id'].toString();
+          await _supabase
+              .from('fcm_tokens')
+              .update({
+                'token': token,
+                'platform': Platform.isIOS ? "IOS" : "ANDROID",
+                'created_at': now,
+              })
+              .eq('id', oldestId);
+          print('오래된 토큰 슬롯 교체 완료');
+        } else {
+          //여유가 있다면 새로 추가
+          await _supabase.from('fcm_tokens').insert({
+            'user_id': userId,
+            'token': token,
+            'platform': Platform.isIOS ? "IOS" : "ANDROID",
+            'created_at': now,
+          });
+          print('새 토큰 등록 완료');
+        }
+      }
+    } catch (e) {
+      print('Token Sync Error: $e');
+    }
   }
 
   // 로그아웃 시 토큰 삭제
