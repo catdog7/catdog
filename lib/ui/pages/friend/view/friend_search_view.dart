@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:catdog/ui/pages/comment/view/comment_view.dart';
 import 'package:catdog/ui/pages/friend/view/widget/friend_widget.dart';
 import 'package:catdog/ui/pages/friend/view/widget/search_widget.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_search_view_model.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -54,7 +56,9 @@ class FriendSearchPage extends HookConsumerWidget {
             FocusScope.of(context).unfocus();
           },
           child: Scaffold(
+            backgroundColor: Colors.white,
             appBar: AppBar(
+              backgroundColor: Colors.white,
               centerTitle: true,
               title: Text(
                 "검색",
@@ -67,6 +71,27 @@ class FriendSearchPage extends HookConsumerWidget {
                 },
                 child: Icon(Icons.arrow_back_ios),
               ),
+              ///////////코멘트 테스트하려고 만듦////////////////
+              // actions: [
+              //   InkWell(
+              //     onTap: () {
+              //       //
+              //       showModalBottomSheet(
+              //         context: context,
+              //         isScrollControlled: true, // 이게 핵심입니다!
+              //         backgroundColor: Colors.transparent, // 둥근 모서리를 위해 필수
+              //         builder: (context) => CommentView(),
+              //       );
+              //     },
+              //     child: Container(
+              //       width: 35,
+              //       height: 35,
+              //       color: Colors.transparent,
+              //       child: Icon(CupertinoIcons.bubble_middle_bottom),
+              //     ),
+              //   ),
+              // ],
+              ////////////////////////////////////////
             ),
             body: Column(
               children: [

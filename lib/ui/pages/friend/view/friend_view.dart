@@ -8,6 +8,7 @@ import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class FriendView extends HookConsumerWidget {
@@ -76,7 +77,9 @@ class FriendView extends HookConsumerWidget {
       ),
       data: (data) {
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
+            backgroundColor: Colors.white,
             centerTitle: false,
             title: Padding(
               padding: const EdgeInsets.only(top: 10),
@@ -149,7 +152,15 @@ class FriendView extends HookConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.group, size: 50, color: Colors.grey[400]),
+                      SvgPicture.asset(
+                        'assets/icon/icon_freind_on.svg',
+                        width: 50,
+                        height: 50,
+                        colorFilter: ColorFilter.mode(
+                          Color(0xFFB2B2B2),
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       Text(
                         "아직 친구가 없어요.",
                         style: TextStyle(

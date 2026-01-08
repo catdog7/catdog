@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:catdog/core/config/common_dependency.dart';
+import 'package:catdog/core/config/fcm_dependency.dart';
 import 'package:catdog/core/utils/app_keys.dart';
 import 'package:catdog/domain/use_case/fcm_service.dart';
 import 'package:catdog/firebase_options.dart';
+import 'package:catdog/ui/pages/friend/state/fcm_event.dart';
 import 'package:catdog/ui/pages/splash/splash_view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,20 +17,20 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp();
   debugPrint('백그라운드 FCM 메시지 수신됨!');
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',
     anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -38,9 +42,49 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
+  StreamSubscription<FcmEvent>? _sub;
   @override
   void initState() {
     super.initState();
+    // // FCM 초기화
+    // Future.microtask(() {
+    //   ref.watch(fcmBootstrapProvider);
+    // });
+
+    // // 전역 FCM 이벤트 구독 (UI 처리)
+    // _sub = ref.read(fcmEventStreamProvider.stream).listen((event) {
+    //   final message = switch (event.type) {
+    //     FcmEventType.friendRequest => '님이 친구를 요청 했습니다.',
+    //     FcmEventType.friendAccepted => '님이 친구 요청을 수락 했습니다.',
+    //   };
+
+    //   scaffoldMessengerKey.currentState?.showSnackBar(
+    //     SnackBar(
+    //       backgroundColor: const Color(0xFF575E6A),
+    //       shape: RoundedRectangleBorder(
+    //         borderRadius: BorderRadiusGeometry.circular(8),
+    //       ),
+    //       behavior: SnackBarBehavior.floating,
+    //       margin: const EdgeInsets.all(20),
+    //       duration: const Duration(seconds: 2),
+    //       content: Row(
+    //         children: [
+    //           const Icon(Icons.check_circle, color: Colors.white),
+    //           const SizedBox(width: 12),
+    //           Flexible(
+    //             child: Text(
+    //               '${event.who ?? ''}',
+    //               maxLines: 1,
+    //               overflow: TextOverflow.ellipsis,
+    //             ),
+    //           ),
+    //           Text(message),
+    //         ],
+    //       ),
+    //     ),
+    //   );
+    // });
+
     final supabase = ref.read(supabaseClientProvider);
     FcmService.instance(supabase).init();
     FirebaseMessaging.onMessage.listen((message) {
@@ -89,6 +133,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   void dispose() {
     final supabase = ref.read(supabaseClientProvider);
     FcmService.instance(supabase).dispose();
+    //_sub?.cancel();
     super.dispose();
   }
 
