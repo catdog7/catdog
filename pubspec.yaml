@@ -2,7 +2,7 @@ name: catdog
 description: "A new Flutter project."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 2.0.1+15
 
 environment:
   sdk: ^3.10.4
@@ -86,6 +86,7 @@ dev_dependencies:
   # fake_cloud_firestore: ^4.0.0   # Firestore mock(단위 테스트용)
 
   flutter_lints: ^5.0.0          # Dart/Flutter lint 규칙
+  flutter_launcher_icons: ^0.13.1  # 앱 아이콘 자동 생성
 
 
 
@@ -97,3 +98,11 @@ flutter:
     - assets/images/splash/
     - assets/icon/
     - .env
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/icon.png"
