@@ -30,7 +30,9 @@ class FriendAlarmPage extends ConsumerWidget {
       ),
       data: (data) {
         return Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
+            backgroundColor: Colors.white,
             centerTitle: true,
             title: Text(
               "친구요청",
@@ -44,55 +46,81 @@ class FriendAlarmPage extends ConsumerWidget {
               child: Icon(Icons.arrow_back_ios),
             ),
           ),
-          body: Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      height: 36,
-                      child: Text(
-                        "총",
+          body: data.friends.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.notifications,
+                        size: 24,
+                        color: const Color(0xFFB2B2B2),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "친구 요청이 없습니다.",
                         style: TextStyle(
-                          fontSize: 16,
                           color: const Color(0xFF666666),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 36,
-                      alignment: Alignment.center,
-                      child: Text(
-                        " ${data.friends.length}건",
-                        style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: data.friends.length,
-                    itemBuilder: (context, index) {
-                      final user = data.friends[index];
-                      return Container(
-                        height: 55,
-                        child: AlarmWidget(
-                          user: user,
-                          onDeleted: vm.rejectRequest,
-                          onAccepted: vm.acceptFollowRequest,
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    bottom: 100,
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            alignment: Alignment.center,
+                            height: 36,
+                            child: Text(
+                              "총",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: const Color(0xFF666666),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 36,
+                            alignment: Alignment.center,
+                            child: Text(
+                              " ${data.friends.length}건",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: data.friends.length,
+                          itemBuilder: (context, index) {
+                            final user = data.friends[index];
+                            return Container(
+                              height: 55,
+                              child: AlarmWidget(
+                                user: user,
+                                onDeleted: vm.rejectRequest,
+                                onAccepted: vm.acceptFollowRequest,
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
         );
       },
     );
