@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
-import 'package:catdog/ui/pages/login/login_view1.dart';
 import 'package:catdog/ui/pages/login/nickname_view.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -23,6 +22,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
   late final SupabaseClient client;
   bool _isLoading = false;
   bool _isNavigating = false;
+  bool _showEmailPassword = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   StreamSubscription<AuthState>? _authSubscription;
 
   @override
@@ -48,12 +50,63 @@ class _LoginViewState extends ConsumerState<LoginView> {
   @override
   void dispose() {
     _authSubscription?.cancel();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _emailPasswordLogin() async {
+    if (_isLoading) return;
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('아이디와 비밀번호를 입력해주세요.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _isNavigating = false;
+    });
+
+    try {
+      final response = await client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.session != null && !_isNavigating) {
+        await _handlePostLoginNavigation(response.user!.id);
+      }
+    } catch (e) {
+      debugPrint('Email password login error: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        String errorMessage = '로그인에 실패했습니다.';
+        if (e.toString().contains('Invalid login credentials')) {
+          errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handlePostLoginNavigation(String userId) async {
     if (_isNavigating) return;
     _isNavigating = true;
+    setState(() => _isLoading = true);
 
     try {
       final useCase = ref.read(userUseCaseProvider);
@@ -67,21 +120,21 @@ class _LoginViewState extends ConsumerState<LoginView> {
       final targetPage =
           hasNickname ? const HomeView() : const NicknameView();
 
-      // 로딩 상태 한 번 더 해제 (네비게이션 직전)
-      setState(() => _isLoading = false);
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => targetPage),
-        (_) => false,
-      );
+      if (mounted) {
+        setState(() => _isLoading = false);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => targetPage),
+          (route) => false,
+        );
+      }
     } catch (e) {
       debugPrint('Login navigation error: $e');
       _isNavigating = false;
       if (mounted) {
         setState(() => _isLoading = false);
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomeView()),
-          (_) => false,
+          MaterialPageRoute(builder: (context) => const HomeView()),
+          (route) => false,
         );
       }
     }
@@ -227,16 +280,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFD),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const LoginView1()),
-          );
-        },
-        backgroundColor: Colors.grey,
-        child: const Icon(Icons.bug_report, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -271,27 +314,173 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
                           SizedBox(height: availableHeight * 0.12), // 간격 증가
 
-                          // 구글 로그인 버튼
-                          GestureDetector(
-                            onTap: _isLoading ? null : _googleLogin,
-                            child: Image.asset(
-                              'assets/images/google.webp',
-                              width: double.infinity,
-                              fit: BoxFit.contain,
+                          // 아이디/비밀번호 로그인 영역
+                          if (_showEmailPassword) ...[
+                            // 아이디 입력 필드
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFE0E0E0)),
+                              ),
+                              child: TextField(
+                                controller: _emailController,
+                                decoration: const InputDecoration(
+                                  hintText: '아이디 (이메일)',
+                                  hintStyle: TextStyle(
+                                    color: Color(0xFF999999),
+                                    fontFamily: 'Pretendard',
+                                    fontSize: 16,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                ),
+                                keyboardType: TextInputType.emailAddress,
+                                enabled: !_isLoading,
+                              ),
                             ),
-                          ),
 
-                          SizedBox(height: availableHeight * 0.025), // 간격 증가
+                            SizedBox(height: 12),
 
-                          // 애플 로그인 버튼
-                          GestureDetector(
-                            onTap: _isLoading ? null : _appleLogin,
-                            child: Image.asset(
-                              'assets/images/ios.webp',
-                              width: double.infinity,
-                              fit: BoxFit.contain,
+                            // 비밀번호 입력 필드
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFE0E0E0)),
+                              ),
+                              child: TextField(
+                                controller: _passwordController,
+                                decoration: const InputDecoration(
+                                  hintText: '비밀번호',
+                                  hintStyle: TextStyle(
+                                    color: Color(0xFF999999),
+                                    fontFamily: 'Pretendard',
+                                    fontSize: 16,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                ),
+                                obscureText: true,
+                                enabled: !_isLoading,
+                              ),
                             ),
-                          ),
+
+                            SizedBox(height: 20),
+
+                            // 로그인 버튼
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _emailPasswordLogin,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFDCA40),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                        ),
+                                      )
+                                    : const Text(
+                                        '로그인',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Pretendard',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                              ),
+                            ),
+
+                            SizedBox(height: 16),
+
+                            // 돌아가기 텍스트
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _showEmailPassword = false;
+                                    _emailController.clear();
+                                    _passwordController.clear();
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  child: const Text(
+                                    '돌아가기',
+                                    style: TextStyle(
+                                      color: Color(0xFF999999),
+                                      fontFamily: 'Pretendard',
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          // 소셜 로그인 영역 (기본 표시)
+                          if (!_showEmailPassword) ...[
+                            // 구글 로그인 버튼
+                            GestureDetector(
+                              onTap: _isLoading ? null : _googleLogin,
+                              child: Image.asset(
+                                'assets/images/google.webp',
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+
+                            SizedBox(height: availableHeight * 0.025),
+
+                            // 애플 로그인 버튼
+                            GestureDetector(
+                              onTap: _isLoading ? null : _appleLogin,
+                              child: Image.asset(
+                                'assets/images/ios.webp',
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+
+                            SizedBox(height: 16),
+
+                            // 아이디, 비밀번호 로그인 텍스트
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _showEmailPassword = true;
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  child: const Text(
+                                    '아이디, 비밀번호 로그인',
+                                    style: TextStyle(
+                                      color: Color(0xFF999999),
+                                      fontFamily: 'Pretendard',
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
