@@ -42,4 +42,45 @@ class FeedViewModel extends _$FeedViewModel {
       );
     }
   }
+  //피드 삭제함수 
+  Future<void> deleteFeed(String feedId) async {
+  try {
+    final repository = ref.read(feedRepositoryProvider);
+    await repository.deleteFeed(feedId); // ✅ DB에서 먼저 지우고
+
+    // ✅ 내 로컬 상태(리스트)에서도 해당 피드를 지워서 화면을 새로고침합니다.
+    final updatedFeeds = state.feeds.where((feed) => feed.id != feedId).toList();
+    state = state.copyWith(feeds: updatedFeeds);
+    
+    print("삭제 성공!");
+  } catch (e) {
+    print("삭제 중 에러 발생: $e");
+    state = state.copyWith(errorMessage: "삭제에 실패했습니다.");
+  }
+}
+
+//피드 수정 함수
+// lib/ui/pages/feed/view_model/feed_view_model.dart
+
+// ✅ newImagePath를 선택적 매개변수({ })로 추가합니다.
+// lib/ui/pages/feed/view_model/feed_view_model.dart
+
+Future<void> updateFeed(String feedId, String newContent, {String? newImagePath}) async {
+  try {
+    state = state.copyWith(isLoading: true); // 로딩 시작
+    
+    final repository = ref.read(feedRepositoryProvider);
+
+    // Repository 호출 (이미지 경로 전달)
+    await repository.updateFeed(feedId, newContent, newImagePath: newImagePath);
+
+    // ✅ 전체 리스트를 다시 불러오거나(fetchFeeds), 로컬 상태를 영리하게 업데이트합니다.
+    await fetchFeeds(); 
+    
+    print("수정 완료 및 새로고침 성공!");
+  } catch (e) {
+    state = state.copyWith(isLoading: false, errorMessage: "수정 실패: $e");
+    print("수정 실패: $e");
+  }
+}
 }
