@@ -25,7 +25,7 @@ class FriendSearchPage extends HookConsumerWidget {
     void onSearchChanged(String value) {
       isTyping.value = true;
       debounce.value?.cancel();
-      debounce.value = Timer(const Duration(milliseconds: 300), () async {
+      debounce.value = Timer(const Duration(milliseconds: 200), () async {
         await followvm.searchUsers(value);
         isTyping.value = false;
       });
@@ -78,8 +78,8 @@ class FriendSearchPage extends HookConsumerWidget {
               //       //
               //       showModalBottomSheet(
               //         context: context,
-              //         isScrollControlled: true, // 이게 핵심입니다!
-              //         backgroundColor: Colors.transparent, // 둥근 모서리를 위해 필수
+              //         isScrollControlled: true,
+              //         backgroundColor: Colors.transparent,
               //         builder: (context) => CommentView(),
               //       );
               //     },
@@ -218,7 +218,6 @@ class FriendSearchPage extends HookConsumerWidget {
                               children: [
                                 Container(
                                   height: 36,
-                                  //color: Colors.amber,
                                   alignment: Alignment.bottomLeft,
                                   padding: EdgeInsets.only(left: 20, top: 10),
                                   child: Text(
@@ -233,7 +232,6 @@ class FriendSearchPage extends HookConsumerWidget {
                                 ),
                                 Container(
                                   height: 36,
-                                  //color: Colors.amber,
                                   alignment: Alignment.bottomLeft,
                                   padding: EdgeInsets.only(top: 10),
                                   child: Text(

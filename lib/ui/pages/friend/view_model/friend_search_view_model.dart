@@ -30,35 +30,6 @@ class FriendSearchViewModel extends _$FriendSearchViewModel {
     final useCase = ref.read(friendUseCaseProvider);
     final users = await useCase.searchUsers(nicknameOrCode);
     state = AsyncData(state.value!.copyWith(isLoading: false, users: users));
-    // if (users.isEmpty) {
-    //   state = AsyncData(state.value!.copyWith(isLoading: false, users: []));
-    //   return;
-    // }
-
-    // final friendIds = state.value!.friendIds;
-    // final alarmIds = state.value!.alarms;
-
-    // List<FriendInfoModel> updatedUsers = users;
-
-    // if (friendIds.isNotEmpty) {
-    //   updatedUsers = updatedUsers.map((user) {
-    //     return friendIds.contains(user.userId)
-    //         ? user.copyWith(isFriend: true)
-    //         : user;
-    //   }).toList();
-    // }
-
-    // if (alarmIds.isNotEmpty) {
-    //   updatedUsers = updatedUsers.map((user) {
-    //     return alarmIds.contains(user.userId)
-    //         ? user.copyWith(status: "PENDING")
-    //         : user;
-    //   }).toList();
-    // }
-
-    // state = AsyncData(
-    //   state.value!.copyWith(isLoading: false, users: updatedUsers),
-    // );
   }
 
   Future<String> sendFollowRequest(String friendId) async {

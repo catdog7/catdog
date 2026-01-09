@@ -34,7 +34,8 @@ class CommentRepositoryImpl implements CommentRepository {
       final response = await _client
           .from('comments')
           .select()
-          .eq('feed_id', feedId);
+          .eq('feed_id', feedId)
+          .order('created_at', ascending: false);
       return response
           .map((json) => CommentMapper.toDomain(CommentDto.fromJson(json)))
           .toList();
