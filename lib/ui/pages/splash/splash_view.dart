@@ -62,7 +62,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
       final client = ref.read(supabaseClientProvider);
       final useCase = ref.read(userUseCaseProvider);
 
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await Future.delayed(const Duration(milliseconds: 3000));
 
       final session = client.auth.currentSession;
 
@@ -144,13 +144,13 @@ class _SplashViewState extends ConsumerState<SplashView> {
           Positioned(
             left: 0,
             right: 0,
-            top: screenHeight * 0.5 - 200.0,
+            bottom: 0,
             child: Opacity(
               opacity: _catLoaded ? 1.0 : 0.0,
-              child: Center(
+              child: Align(
+                alignment: Alignment.bottomCenter,
                 child: SizedBox(
-                  width: screenWidth * 0.3,
-                  height: screenWidth * 0.3,
+                  width: screenWidth,
                   child: _buildImage(
                     assetPath: 'assets/images/splash/splash_cat.webp',
                     isLoaded: _catLoaded,

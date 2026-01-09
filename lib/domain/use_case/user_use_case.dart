@@ -21,13 +21,28 @@ class UserUseCase {
       await _repository.createUserIfNotExists(id, inviteCode);
       return false; // 새로 생성된 user는 nickname이 없음
     }
+
+    // invite_code를 생성해서 업데이트해줌
+    if (user.inviteCode.isEmpty) {
+      final inviteCode = await generateUniqueInviteCode();
+      final updatedUser = user.copyWith(inviteCode: inviteCode);
+      await _repository.updateUser(updatedUser);
+    }
     
     // Repository에서 직접 nickname만 조회하여 체크 (더 정확함)
     return _repository.hasNickname(id);
   }
 
-  Future<void> registerUser(UserModel user) {
-    return _repository.addUser(user);
+  Future<void> registerUser(UserModel user) async {
+    UserModel userToRegister = user;
+    
+    // inviteCode가 없으면 생성
+    if (userToRegister.inviteCode.isEmpty) {
+      final inviteCode = await generateUniqueInviteCode();
+      userToRegister = userToRegister.copyWith(inviteCode: inviteCode);
+    }
+    
+    return _repository.addUser(userToRegister);
   }
 
   Future<void> updateProfile(UserModel user) {
