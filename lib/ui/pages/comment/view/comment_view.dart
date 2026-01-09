@@ -80,48 +80,58 @@ class CommentView extends HookConsumerWidget {
               ),
             ),
 
-            _buildInputArea(context),
-
-            SizedBox(height: keyboardHeight),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputArea(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey[100]!)),
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            const CircleAvatar(
-              radius: 18,
-              backgroundImage: AssetImage('assets/images/default_image.webp'),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xFFD9D9D9)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: "댓글을 남겨보세요.",
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFFB3B3B3),
+            // 댓글 입력창
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: Colors.grey[100]!)),
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 18,
+                      backgroundImage: AssetImage(
+                        'assets/images/default_image.webp',
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Color(0xFFD9D9D9)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: TextField(
+                          minLines: 1,
+                          maxLines: 2,
+                          controller: comment,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (value) {
+                            // if (value.trim().isNotEmpty) {
+                            //   _handleSubmitted(value); // 전송 로직 실행
+                            // }
+                            print("댓글 입력 : ${comment.text}");
+                            comment.clear();
+                          },
+                          decoration: InputDecoration(
+                            hintText: "댓글을 남겨보세요.",
+                            border: InputBorder.none,
+                            hintStyle: TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFFB3B3B3),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+
+            SizedBox(height: keyboardHeight),
           ],
         ),
       ),

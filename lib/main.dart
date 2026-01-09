@@ -48,7 +48,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     super.initState();
     // // FCM 초기화
     // Future.microtask(() {
-    //   ref.watch(fcmBootstrapProvider);
+    //   ref.read(fcmBootstrapProvider);
     // });
 
     // // 전역 FCM 이벤트 구독 (UI 처리)

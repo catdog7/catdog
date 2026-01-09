@@ -112,7 +112,8 @@ class FriendRepositoryImpl implements FriendRepository {
             .from('users')
             .select()
             .or('nickname.ilike.%$friendId%, invite_code.ilike.%$friendId%')
-            .neq('id', userId);
+            .neq('id', userId)
+            .order('nickname', ascending: true);
         final result = response
             .map((json) => UserMapper.toModel(UserDto.fromJson(json)))
             .toList();

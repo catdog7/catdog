@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:catdog/ui/pages/friend/view/friend_alarm_view.dart';
 import 'package:catdog/ui/pages/friend/view/friend_search_view.dart';
 import 'package:catdog/ui/pages/friend/view/widget/friend_widget.dart';
@@ -7,7 +5,6 @@ import 'package:catdog/ui/pages/friend/view_model/friend_alarm_view_model.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -26,43 +23,6 @@ class FriendView extends HookConsumerWidget {
     FirebaseMessaging.onMessage.listen((message) {
       vm.refresh();
     });
-    // useEffect(() {
-    //   final sub = FirebaseMessaging.onMessage.listen((payload) {
-    //     final notification = payload.notification;
-    //     if (notification != null && context.mounted) {
-    //       ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           content: Text(
-    //             '${notification.title ?? ''} ${notification.body ?? ''}',
-    //           ),
-    //         ),
-    //       );
-    //     }
-    //   });
-    //   return sub.cancel;
-    // }, const []);
-
-    // useEffect(() {
-    //   StreamSubscription? authSub;
-    //   StreamSubscription? tokenSub;
-
-    //   Future(() async {
-    //     final result = await vm.initFcmToken();
-    //     if (result) {
-    //       final subs = vm.fcmSubscribe();
-    //       authSub = subs.$1;
-    //       tokenSub = subs.$2;
-    //     } else {
-    //       print("실패😭😭😭😭😭😭😭");
-    //     }
-    //   });
-
-    //   return () {
-    //     authSub?.cancel();
-    //     tokenSub?.cancel();
-    //   };
-    // }, const []);
-
     return state.when(
       skipError: true,
       skipLoadingOnRefresh: true,
@@ -232,7 +192,7 @@ class FriendView extends HookConsumerWidget {
                       //     //await ref.read(friendRepositoryProvider).addFriend(FriendModel(id: uuid.v4(), userAId: myId!, userBId: userBId));
                       //   },
                       // ),
-                      Container(height: 8, color: Colors.grey[200]),
+                      Container(height: 8, color: Color(0xFFF8FAFE)),
                       Row(
                         children: [
                           Container(
