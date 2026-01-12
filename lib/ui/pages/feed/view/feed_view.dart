@@ -1,149 +1,316 @@
+import 'package:catdog/core/config/common_dependency.dart';
+import 'package:catdog/core/config/user_dependency.dart';
 import 'package:catdog/data/dto/feed_dto.dart';
+import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/ui/pages/feed/view/feed_edit_view.dart';
+import 'package:catdog/ui/pages/feed/view/widget/feed_empty_state.dart';
+import 'package:catdog/ui/pages/feed/state/feed_state.dart';
 import 'package:catdog/ui/pages/feed/view_model/feed_view_model.dart';
+import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
 import 'package:catdog/ui/widgets/more_widget.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FeedView extends HookConsumerWidget {
+class FeedView extends ConsumerStatefulWidget {
   const FeedView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FeedView> createState() => _FeedViewState();
+}
+
+class _FeedViewState extends ConsumerState<FeedView> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    // FeedView가 재생성될 때 스크롤을 최상단으로 이동
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final feedState = ref.watch(feedViewModelProvider);
+    
+    // 게시글 목록이 로드되면 스크롤을 최상단으로 이동
+    ref.listen<FeedState>(feedViewModelProvider, (previous, next) {
+      if (previous != null && previous.isLoading && !next.isLoading && next.feeds.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(0);
+          }
+        });
+      }
+    });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      // appBar: AppBar(),
+      backgroundColor: const Color(0xFFFFFFFF),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFFFFFF),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: const Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            '게시글',
+            style: TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF000000),
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: feedState.isLoading
-            ? const Center(child: CircularProgressIndicator()) // 로딩 중일 때
+            ? const Center(child: CircularProgressIndicator())
             : feedState.errorMessage != null
-            ? Center(child: Text(feedState.errorMessage!)) // 에러 발생 시
-            : ListView.builder(
-                itemCount: feedState.feeds.length,
-                itemBuilder: (context, index) {
-                  final feed = feedState.feeds[index];
-                  // 3. 각 피드 데이터를 카드로 전달합니다.
-                  return myFeedCard(context,ref, feed, );
-                },
+            ? Center(child: Text(feedState.errorMessage!))
+            : feedState.feeds.isEmpty
+            ? const FeedEmptyState()
+            : Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: ListView.separated(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.only(top: 10, bottom: 20),
+                  itemCount: feedState.feeds.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                  itemBuilder: (context, index) {
+                    final feed = feedState.feeds[index];
+                    return myFeedCard(context, ref, feed);
+                  },
+                ),
               ),
       ),
     );
   }
 }
 
-Widget myFeedCard(BuildContext context,WidgetRef ref, FeedDto feed) {
-  return Container(
-    // padding: EdgeInsets.symmetric(horizontal: 20),
-    width: double.infinity,
-    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(16),
-      color: Colors.white,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              //프로필 이미지
-              CircleAvatar(radius: 18, backgroundColor: Color(0xffD9D9D9)),
-              SizedBox(width: 10),
-              Text(
-                feed.userId.length > 5
-                    ? feed.userId.substring(0, 5)
-                    : feed.userId,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              Spacer(),
-              //수정 삭제기능 추가
-              // PopupMenuButton<String>(
-              //   offset: Offset(17, 62),
-              //   color: Color(0xFFFFFFFF),
-              //   icon: const Icon(Icons.more_vert), // 1. 아이콘
-              //   onSelected: (String value) {
-              //     // 2. 선택 이벤트
-              //     if (value == 'edit') {
-              //       print("수정 클릭");
-              //     } else if (value == 'delete') {
-              //       print("삭제 클릭");
-              //     }
-              //   },
-              //   itemBuilder: (context) => [
-              //     // 3. 메뉴 아이템 생성 (화살표 함수 사용)
-              //     const PopupMenuItem(
-              //       value: 'edit',
-              //       height: 25,
-              //       child: Center(child: Text('수정',style: TextStyle(fontSize: 12),)),
-              //     ),
-              //     const PopupMenuDivider(),
-              //     const PopupMenuItem(
-              //       value: 'delete',
-              //       height: 25,
-              //       child: Center(
-              //         child: Text('삭제', style: TextStyle(fontSize: 12)),
-              //       ),
-              //     ),
-              //   ],
-              // ),
-              // PopupMenuButton 자리를 MoreWidget으로 교체
-              MoreWidget(
-                menus: [
-                  MenuAction(title: '수정', 
-                  onTap: (_) {
-                     Navigator.push(context, MaterialPageRoute(builder: (context) => FeedEditView(feed: feed),));
-                  
-                  }),
-                  MenuAction(
-                    title: '삭제',
-                    onTap: (_){
-                      ref.read(feedViewModelProvider.notifier).deleteFeed(feed.id);
-                      print("삭제 확인창 띄우기");} // 나중에 여기서 다이얼로그 호출
+Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
+  final client = ref.read(supabaseClientProvider);
+  final currentUserId = client.auth.currentUser?.id;
+  final isMyFeed = currentUserId != null && feed.userId == currentUserId;
+
+  return FutureBuilder<UserModel?>(
+    future: ref.read(userUseCaseProvider).getUserProfile(feed.userId),
+    builder: (context, snapshot) {
+      final user = snapshot.data;
+      final nickname = user?.nickname ?? '';
+      final profileImageUrl = user?.profileImageUrl;
+      
+      return Container(
+        width: 335,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFFFFF),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0x0D000000),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 6,
+              offset: const Offset(0, 0),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (isMyFeed) {
+                      // 내 게시글이면 홈으로 이동 (홈 탭 활성화)
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const HomeView(initialIndex: 0),
+                        ),
+                        (route) => false,
+                      );
+                    } else {
+                      // 다른 사람 게시글이면 친구 홈으로 이동
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => FriendHomeView(friendUserId: feed.userId),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFFD9D9D9),
+                    ),
+                    child: profileImageUrl != null && profileImageUrl.isNotEmpty
+                        ? ClipOval(
+                            child: Image.network(
+                              profileImageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.person, size: 18),
+                            ),
+                          )
+                        : const Icon(Icons.person, size: 18),
                   ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          height: 300,
-          color: Color(0xffD9D9D9),
-          child: Image.network(
-            feed.imageUrl,
-            fit: BoxFit.cover,
-            // 이미지 로딩 중 실패할 경우 대비
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.broken_image),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                feed.content ?? "",
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      if (isMyFeed) {
+                        // 내 게시글이면 홈으로 이동 (홈 탭 활성화)
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) => const HomeView(initialIndex: 0),
+                          ),
+                          (route) => false,
+                        );
+                      } else {
+                        // 다른 사람 게시글이면 친구 홈으로 이동
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => FriendHomeView(friendUserId: feed.userId),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(
+                      nickname.isNotEmpty ? nickname : '사용자',
+                      style: const TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF000000),
+                      ),
+                    ),
+                  ),
+                ),
+                if (isMyFeed)
+                  MoreWidget(
+                    menus: [
+                      MenuAction(
+                        title: '수정',
+                        onTap: (_) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => FeedEditView(feed: feed)),
+                          );
+                        },
+                      ),
+                      MenuAction(
+                        title: '삭제',
+                        onTap: (_) {
+                          ref.read(feedViewModelProvider.notifier).deleteFeed(feed.id);
+                        },
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: SizedBox(
+                  width: 295,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(0),
+                    child: Image.network(
+                      feed.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Container(
+                            color: const Color(0xFFD9D9D9),
+                            child: const Icon(Icons.broken_image, size: 40),
+                          ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 4),
-              // ✅ 4. 실제 생성 날짜(createdAt) 연결
-              Text(
-                feed.createdAt?.toString().split(' ')[0] ?? "",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.favorite_border, size: 24, color: Color(0xFF010101)),
+                    const SizedBox(width: 2),
+                    Text(
+                      '0',
+                      style: const TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF010101),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.comment_outlined, size: 24, color: Color(0xFF010101)),
+                    const SizedBox(width: 2),
+                    Text(
+                      '0',
+                      style: const TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF010101),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              feed.content ?? '',
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF121416),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              feed.createdAt != null
+                  ? DateFormat('yyyy년 M월 d일', 'ko_KR').format(feed.createdAt!)
+                  : '',
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0x4D000000),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
+      );
+    },
   );
 }

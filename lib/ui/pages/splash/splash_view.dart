@@ -62,7 +62,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
       final client = ref.read(supabaseClientProvider);
       final useCase = ref.read(userUseCaseProvider);
 
-      await Future.delayed(const Duration(milliseconds: 3000));
+      await Future.delayed(const Duration(milliseconds: 2000));
 
       final session = client.auth.currentSession;
 

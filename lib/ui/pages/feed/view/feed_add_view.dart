@@ -9,40 +9,52 @@ class FeedAddView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //캡션 관리해주는 컨트롤러
     final captionController = useTextEditingController();
-    //생성된 provider을 watch로 지켜봄
     final selectedImage = ref.watch(feedAddViewModelProvider);
-    //기능을 호출하기 위한 notifier
     final viewModel = ref.read(feedAddViewModelProvider.notifier);
+    final textLength = useState<int>(0);
+
+    final isEnabled = selectedImage != null && textLength.value >= 1;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFFFFFF),
       appBar: AppBar(
+        backgroundColor: const Color(0xFFFFFFFF),
+        elevation: 0,
+        automaticallyImplyLeading: false,
         centerTitle: true,
-        title: Text("새 게시글", style: TextStyle(fontSize: 16)),
+        title: const Text(
+          '새 게시글',
+          style: TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF000000),
+          ),
+        ),
         actions: [
-          Container(alignment: Alignment.center),
-          // 닫기 버튼
-          InkWell(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Icon(Icons.close),
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(
+                Icons.close,
+                size: 24,
+                color: Color(0xFF000000),
+              ),
             ),
           ),
         ],
       ),
-      //바디 시작
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: double.infinity),
-            //이미지 피커 시작부분
-            InkWell(
+            const SizedBox(height: 16),
+            GestureDetector(
               onTap: () {
                 viewModel.pickImage();
               },
@@ -50,89 +62,149 @@ class FeedAddView extends HookConsumerWidget {
                 width: 68,
                 height: 68,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Color(0xfff2f2f2),
-                  // 사진이 선택되었다면 null 아니면 배경이미지
-                  image: selectedImage != null
-                      ? DecorationImage(
-                          image: FileImage(File(selectedImage.path)),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: const Color(0x0D000000),
+                    width: 1,
+                  ),
+                  color: const Color(0x0D000000),
                 ),
-                child: selectedImage == null
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                child: selectedImage != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.file(
+                          File(selectedImage.path),
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.camera_alt, size: 20),
-                          SizedBox(height: 4),
-                          Text("0/1"),
+                          const Icon(
+                            Icons.photo_camera_outlined,
+                            size: 24,
+                            color: Color(0xFF000000),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            selectedImage != null ? "1/1" : "0/1",
+                            style: const TextStyle(
+                              fontFamily: 'Pretendard',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0x4C000000),
+                            ),
+                          ),
                         ],
-                      )
-                    : null,
+                      ),
               ),
             ),
-            SizedBox(height: 30),
-
-            //캡션 시작 부분
-            Text("캡션"),
-            SizedBox(height: 10),
+            const SizedBox(height: 28),
+            const Text(
+              '캡션',
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF121416),
+              ),
+            ),
+            const SizedBox(height: 8),
             Container(
               width: double.infinity,
-              height: 176,
+              height: 158,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: Color(0xfff2f2f2),
+                border: Border.all(
+                  color: const Color(0x26000000),
+                  width: 1,
+                ),
+                color: const Color(0xFFFFFFFF),
               ),
-              child: TextFormField(
+              child: TextField(
                 controller: captionController,
-                maxLength: 500,
-                maxLines: 8,
-                decoration: InputDecoration(
-                  hintText: "어떤일이 있었나요?",
-                  hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
+                maxLines: null,
+                expands: true,
+                decoration: const InputDecoration(
+                  hintText: '어떤 일이 있었나요?',
+                  hintStyle: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0x4D000000),
+                  ),
                   border: InputBorder.none,
-                  counterText: "",
-                  contentPadding: EdgeInsets.all(16),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+                style: const TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF121416),
+                ),
+                onChanged: (value) {
+                  textLength.value = value.length > 100 ? 100 : value.length;
+                  if (value.length > 100) {
+                    captionController.value = TextEditingValue(
+                      text: value.substring(0, 100),
+                      selection: TextSelection.collapsed(offset: 100),
+                    );
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${textLength.value}/100',
+                style: const TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0x4D000000),
                 ),
               ),
             ),
-            Spacer(),
-            //완료 버튼
-            InkWell(
-              onTap: () async {
-                if (selectedImage == null) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text("사진을 선택해주세요")));
-                  return;
-                }
-                // 사용자가 입력한 글자(captionController.text)를 넘겨줍니다.
-                await viewModel.uploadPost(captionController.text);
-
-                // 3. 완료 후 화면 닫기 (선택 사항)
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: Ink(
-                width: double.infinity,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Color(0xfff2f2f2),
-                ),
-                child: Center(
-                  child: Text(
-                    "완료",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Center(
+                child: GestureDetector(
+                  onTap: isEnabled
+                      ? () async {
+                          await viewModel.uploadPost(captionController.text);
+                          if (context.mounted) {
+                            Navigator.pop(context, true);
+                          }
+                        }
+                      : null,
+                  child: Container(
+                    width: 335,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      color: isEnabled
+                          ? const Color(0xFFFDCA40)
+                          : const Color(0x0D000000),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '완료',
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isEnabled
+                              ? const Color(0xFF000000)
+                              : const Color(0x4D000000),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-            SizedBox(height: 30),
           ],
         ),
       ),

@@ -18,6 +18,52 @@ class FeedRepositoryImpl implements FeedRepository {
     
     return (response as List).map((json) => FeedDto.fromJson(json)).toList();
   }
+
+  @override
+  Future<List<FeedDto>> getMyRecentFeeds(String userId) async {
+    final oneWeekAgo = DateTime.now().subtract(const Duration(days: 7));
+    final response = await _supabase
+        .from('feeds')
+        .select()
+        .eq('user_id', userId)
+        .gte('created_at', oneWeekAgo.toIso8601String())
+        .order('updated_at', ascending: false, nullsFirst: false)
+        .order('created_at', ascending: false);
+    
+    final feeds = (response as List).map((json) => FeedDto.fromJson(json)).toList();
+    
+    // 클라이언트 측에서 updatedAt 우선 정렬 (최신이 위로)
+    feeds.sort((a, b) {
+      final timeA = a.updatedAt ?? a.createdAt;
+      final timeB = b.updatedAt ?? b.createdAt;
+      if (timeA == null && timeB == null) return 0;
+      if (timeA == null) return 1;
+      if (timeB == null) return -1;
+      return timeB.compareTo(timeA); // 내림차순
+    });
+    
+    return feeds;
+  }
+
+  @override
+  Future<List<FeedDto>> getFeedsForFriends(String userId, List<String> friendIds) async {
+    final List<String> allowedUserIds = [userId, ...friendIds];
+    
+    if (allowedUserIds.isEmpty) {
+      return [];
+    }
+    
+    // Supabase에서는 inFilter를 사용하거나, or 조건을 사용
+    String filterString = allowedUserIds.map((id) => 'user_id.eq.$id').join(',');
+    
+    final response = await _supabase
+        .from('feeds')
+        .select()
+        .or(filterString)
+        .order('created_at', ascending: false);
+    
+    return (response as List).map((json) => FeedDto.fromJson(json)).toList();
+  }
   //삭제 함수 기능
   @override
 Future<void> deleteFeed(String feedId) async {

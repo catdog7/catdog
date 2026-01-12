@@ -493,7 +493,7 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: _CompleteButton(
                 isLoading: _isLoading,
                 onPressed: _savePet,
