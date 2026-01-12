@@ -187,20 +187,18 @@ class FriendView extends HookConsumerWidget {
               : Center(
                   child: Column(
                     children: [
-                      // InkWell(
-                      //   onTap: () async {
-                      //     //await ref.read(friendRepositoryProvider).addFriend(FriendModel(id: uuid.v4(), userAId: myId!, userBId: userBId));
-                      //   },
-                      // ),
                       Container(height: 8, color: Color(0xFFF8FAFE)),
-                      Row(
-                        children: [
-                          Container(
-                            height: 36,
-                            //color: Colors.amber,
-                            alignment: Alignment.bottomLeft,
-                            padding: EdgeInsets.only(left: 20, top: 10),
-                            child: Text(
+                      SizedBox(height: 8),
+                      Container(
+                        height: 36,
+                        padding: EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 20,
+                        ),
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            Text(
                               "총",
                               textAlign: TextAlign.left,
                               style: TextStyle(
@@ -209,13 +207,7 @@ class FriendView extends HookConsumerWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
-                          Container(
-                            height: 36,
-                            //color: Colors.amber,
-                            alignment: Alignment.bottomLeft,
-                            padding: EdgeInsets.only(top: 10),
-                            child: Text(
+                            Text(
                               " ${data.friends.length}명",
                               textAlign: TextAlign.left,
                               style: TextStyle(
@@ -223,12 +215,12 @@ class FriendView extends HookConsumerWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.all(20.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
                           child: ListView.builder(
                             itemCount: data.friends.length,
                             itemBuilder: (context, index) {

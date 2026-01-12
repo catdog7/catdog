@@ -107,13 +107,10 @@ class FriendAlarmPage extends ConsumerWidget {
                           itemCount: data.friends.length,
                           itemBuilder: (context, index) {
                             final user = data.friends[index];
-                            return Container(
-                              height: 55,
-                              child: AlarmWidget(
-                                user: user,
-                                onDeleted: vm.rejectRequest,
-                                onAccepted: vm.acceptFollowRequest,
-                              ),
+                            return AlarmWidget(
+                              user: user,
+                              onDeleted: vm.rejectRequest,
+                              onAccepted: vm.acceptFollowRequest,
                             );
                           },
                         ),

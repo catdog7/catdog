@@ -12,11 +12,13 @@ class FriendWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 60,
+      color: Colors.transparent,
       child: Row(
         children: [
           Expanded(
             child: GestureDetector(
               onTap: () {
+                //다른 사람 홈페이지 이동
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
@@ -26,7 +28,7 @@ class FriendWidget extends StatelessWidget {
                 );
               },
               child: Container(
-                color: Colors.transparent,
+                //color: Colors.transparent,
                 height: 40,
                 child: Row(
                   children: [

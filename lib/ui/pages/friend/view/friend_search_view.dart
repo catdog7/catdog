@@ -80,7 +80,9 @@ class FriendSearchPage extends HookConsumerWidget {
               //         context: context,
               //         isScrollControlled: true,
               //         backgroundColor: Colors.transparent,
-              //         builder: (context) => CommentView(),
+              //         builder: (context) => CommentView(
+              //           feedId: "90d715f6-44e0-4817-bd4f-cf9c7c171944",
+              //         ),
               //       );
               //     },
               //     child: Container(
@@ -95,12 +97,13 @@ class FriendSearchPage extends HookConsumerWidget {
             ),
             body: Column(
               children: [
+                SizedBox(height: 10),
                 Container(
                   width: double.infinity,
                   margin: EdgeInsets.symmetric(horizontal: 20),
-                  height: 45,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Color(0xFFF2F2F2),
                     borderRadius: BorderRadius.circular(10),
                     border: hasText.value
                         ? Border.all(color: const Color(0xFFFDCA40), width: 2)
@@ -114,9 +117,10 @@ class FriendSearchPage extends HookConsumerWidget {
                         },
                         child: Container(
                           width: 35,
+                          color: Colors.transparent,
                           margin: EdgeInsets.only(right: 5),
                           alignment: Alignment.centerRight,
-                          child: Icon(Icons.search, color: Colors.grey),
+                          child: Icon(Icons.search, color: Color(0xFFAAAAAA)),
                         ),
                       ),
                       Expanded(
@@ -124,6 +128,7 @@ class FriendSearchPage extends HookConsumerWidget {
                           controller: searchText,
                           autofocus: true,
                           cursorWidth: 1.5,
+                          maxLines: 1,
                           cursorColor: Colors.grey,
                           textInputAction: TextInputAction.search,
                           decoration: InputDecoration(
@@ -131,7 +136,7 @@ class FriendSearchPage extends HookConsumerWidget {
                             hint: Text(
                               "친구의 닉네임 또는 초대코드를 입력하세요",
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: Color(0xFF616161),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -214,36 +219,33 @@ class FriendSearchPage extends HookConsumerWidget {
                     : Expanded(
                         child: Column(
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  height: 36,
-                                  alignment: Alignment.bottomLeft,
-                                  padding: EdgeInsets.only(left: 20, top: 10),
-                                  child: Text(
+                            SizedBox(height: 15),
+                            Container(
+                              height: 36,
+                              padding: EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 20,
+                              ),
+                              alignment: Alignment.centerLeft,
+                              child: Row(
+                                children: [
+                                  Text(
                                     "검색결과",
-                                    textAlign: TextAlign.left,
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                ),
-                                Container(
-                                  height: 36,
-                                  alignment: Alignment.bottomLeft,
-                                  padding: EdgeInsets.only(top: 10),
-                                  child: Text(
+                                  Text(
                                     " ${data.users.length}건",
-                                    textAlign: TextAlign.left,
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             data.users.isEmpty
                                 ? Expanded(
@@ -273,28 +275,20 @@ class FriendSearchPage extends HookConsumerWidget {
                                       padding: const EdgeInsets.only(
                                         left: 20.0,
                                         right: 20.0,
-                                        top: 10.0,
                                       ),
                                       child: ListView.builder(
                                         itemCount: data.users.length,
                                         itemBuilder: (context, index) {
                                           final user = data.users[index];
                                           if (user.isFriend) {
-                                            return Container(
-                                              height: 55,
-                                              child: FriendWidget(
-                                                friend: user,
-                                                onTap: friendvm.deleteFriend,
-                                              ),
+                                            return FriendWidget(
+                                              friend: user,
+                                              onTap: friendvm.deleteFriend,
                                             );
                                           } else {
-                                            return Container(
-                                              height: 55,
-                                              child: SearchWidget(
-                                                user: user,
-                                                onTap:
-                                                    followvm.sendFollowRequest,
-                                              ),
+                                            return SearchWidget(
+                                              user: user,
+                                              onTap: followvm.sendFollowRequest,
                                             );
                                           }
                                         },

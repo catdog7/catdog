@@ -18,6 +18,7 @@ class SearchWidget extends HookWidget {
           Expanded(
             child: GestureDetector(
               onTap: () {
+                // 다른 사람 홈페이지 이동
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {

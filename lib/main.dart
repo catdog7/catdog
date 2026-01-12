@@ -46,86 +46,43 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    // // FCM 초기화
-    // Future.microtask(() {
-    //   ref.read(fcmBootstrapProvider);
-    // });
+    // FCM 초기화
+    Future.microtask(() {
+      ref.read(fcmBootstrapProvider);
+    });
 
-    // // 전역 FCM 이벤트 구독 (UI 처리)
-    // _sub = ref.read(fcmEventStreamProvider.stream).listen((event) {
-    //   final message = switch (event.type) {
-    //     FcmEventType.friendRequest => '님이 친구를 요청 했습니다.',
-    //     FcmEventType.friendAccepted => '님이 친구 요청을 수락 했습니다.',
-    //   };
+    // 전역 FCM 이벤트 구독 (UI 처리)
+    _sub = ref.read(fcmEventStreamProvider.stream).listen((event) {
+      final message = switch (event.type) {
+        FcmEventType.friendRequest => '님이 친구를 요청 했습니다.',
+        FcmEventType.friendAccepted => '님이 친구 요청을 수락 했습니다.',
+      };
 
-    //   scaffoldMessengerKey.currentState?.showSnackBar(
-    //     SnackBar(
-    //       backgroundColor: const Color(0xFF575E6A),
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadiusGeometry.circular(8),
-    //       ),
-    //       behavior: SnackBarBehavior.floating,
-    //       margin: const EdgeInsets.all(20),
-    //       duration: const Duration(seconds: 2),
-    //       content: Row(
-    //         children: [
-    //           const Icon(Icons.check_circle, color: Colors.white),
-    //           const SizedBox(width: 12),
-    //           Flexible(
-    //             child: Text(
-    //               '${event.who ?? ''}',
-    //               maxLines: 1,
-    //               overflow: TextOverflow.ellipsis,
-    //             ),
-    //           ),
-    //           Text(message),
-    //         ],
-    //       ),
-    //     ),
-    //   );
-    // });
-
-    final supabase = ref.read(supabaseClientProvider);
-    FcmService.instance(supabase).init();
-    FirebaseMessaging.onMessage.listen((message) {
-      final notification = message.notification;
-      final data = message.data;
-      if (notification != null) {
-        debugPrint("!!!!!!!FCM 알림옴!!!!!!!!!");
-        String message = "";
-        if (data['action'] == "INSERT") {
-          message = '님이 친구를 요청 했습니다.';
-        } else {
-          message = '님이 친구 요청을 수락 했습니다.';
-        }
-        scaffoldMessengerKey.currentState?.showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF575E6A),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadiusGeometry.circular(8),
-            ),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(20),
-            duration: const Duration(seconds: 2),
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    '${data['who'] ?? ''}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(message),
-              ],
-            ),
+      scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF575E6A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(8),
           ),
-        );
-      } else {
-        debugPrint("FCM 메세지가 null");
-      }
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(20),
+          duration: const Duration(seconds: 2),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  '${event.who ?? ''}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(message),
+            ],
+          ),
+        ),
+      );
     });
   }
 

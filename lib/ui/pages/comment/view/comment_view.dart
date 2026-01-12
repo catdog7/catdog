@@ -1,140 +1,226 @@
+import 'package:catdog/domain/model/comment_info_model.dart';
 import 'package:catdog/ui/pages/comment/view/widget/comment_user_widget.dart';
+import 'package:catdog/ui/pages/comment/view_model/comment_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 //수정중
 class CommentView extends HookConsumerWidget {
-  CommentView({super.key});
+  const CommentView({super.key, required this.feedId});
+  final String feedId;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(commentViewModelProvider(feedId));
+    final vm = ref.read(commentViewModelProvider(feedId).notifier);
+    final uuid = Uuid();
     final comment = useTextEditingController();
-    final message1 =
-        """초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초
-        코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다..."""
-            .replaceAll('\n', '');
-    final message2 = "진짜";
-    final message3 =
-        """초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초
-        코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...
-        초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다...초코 너무 귀엽다..."""
-            .replaceAll('\n', '');
-
-    final messageList = [message1, message2, message3];
 
     final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final double screenHeight = MediaQuery.of(context).size.height;
     final double sheetHeight = keyboardHeight > 0
-        ? screenHeight * 0.47
-        : screenHeight * 0.52;
+        ? screenHeight * 0.45
+        : screenHeight * 0.5;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: Container(
-        height: sheetHeight + keyboardHeight,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+    final scrollController = useScrollController();
+
+    final showBackToTop = useState(false);
+    final hasText = useState(false);
+
+    useEffect(() {
+      void listener() {
+        if (scrollController.offset > 300) {
+          if (!showBackToTop.value) showBackToTop.value = true;
+        } else {
+          if (showBackToTop.value) showBackToTop.value = false;
+        }
+      }
+
+      scrollController.addListener(listener);
+      return () => scrollController.removeListener(listener);
+    }, [scrollController]);
+
+    void scrollToTop() {
+      scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+
+    return state.when(
+      skipError: true,
+      skipLoadingOnRefresh: true,
+      skipLoadingOnReload: false,
+      error: (error, _) => Text("에러: $error"),
+      loading: () => Center(
+        child: SizedBox(
+          width: double.infinity,
+          height: 100,
+          child: Center(child: CircularProgressIndicator()),
         ),
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Color(0xFFF2F2F2),
-                borderRadius: BorderRadius.circular(2),
-              ),
+      ),
+      data: (data) {
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Container(
+            height: sheetHeight + keyboardHeight,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             ),
-            Container(
-              height: 48,
-              alignment: Alignment.center,
-              child: Text(
-                "댓글",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const Divider(height: 1, color: Color(0xFFF2F2F2)),
-            Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  final message = messageList[index];
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: 66),
-                    child: CommentUserWidget(message: message),
-                  );
-                },
-              ),
-            ),
-
-            // 댓글 입력창
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.grey[100]!)),
-              ),
-              child: SafeArea(
-                child: Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 18,
-                      backgroundImage: AssetImage(
-                        'assets/images/default_image.webp',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Color(0xFFD9D9D9)),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: TextField(
-                          minLines: 1,
-                          maxLines: 2,
-                          controller: comment,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (value) {
-                            // if (value.trim().isNotEmpty) {
-                            //   _handleSubmitted(value); // 전송 로직 실행
-                            // }
-                            print("댓글 입력 : ${comment.text}");
-                            comment.clear();
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFF2F2F2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Container(
+                  height: 48,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "댓글",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                data.comments.isNotEmpty
+                    ? const Divider(
+                        height: 1,
+                        thickness: 1.5,
+                        color: Color(0xFFF2F2F2),
+                      )
+                    : SizedBox(),
+                Expanded(
+                  child: data.comments.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "아직 댓글이 없어요",
+                                style: TextStyle(
+                                  color: Color(0xFF333333),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "댓글을 남겨보세요!",
+                                style: TextStyle(
+                                  color: Color(0xFF666666),
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: EdgeInsets.zero,
+                          controller: scrollController,
+                          itemCount: data.comments.length,
+                          itemBuilder: (context, index) {
+                            final comment = data.comments[index];
+                            return ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: 66),
+                              child: CommentUserWidget(
+                                myId: data.myInfo?.id ?? "",
+                                comment: comment,
+                                onToggleLike: (commentId) {
+                                  vm.onToggleLike(commentId);
+                                },
+                                onDeleted: (commentId) {
+                                  print("vm deleteComment");
+                                  vm.deleteComment(commentId);
+                                },
+                              ),
+                            );
                           },
-                          decoration: InputDecoration(
-                            hintText: "댓글을 남겨보세요.",
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(
-                              fontSize: 15,
-                              color: Color(0xFFB3B3B3),
+                        ),
+                ),
+
+                // 댓글 입력창
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: Colors.grey[100]!)),
+                  ),
+                  child: SafeArea(
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 18,
+                          backgroundImage: AssetImage(
+                            'assets/images/default_image.webp',
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              border: hasText.value
+                                  ? Border.all(color: Color(0xFF666666))
+                                  : Border.all(color: Color(0xFFD9D9D9)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: TextField(
+                              minLines: 1,
+                              maxLines: 2,
+                              controller: comment,
+                              textInputAction: TextInputAction.done,
+                              onChanged: (value) {
+                                hasText.value = value.isNotEmpty;
+                              },
+                              onSubmitted: (value) async {
+                                vm.addComment(
+                                  CommentInfoModel(
+                                    id: uuid.v4(),
+                                    userId: data.myInfo?.id ?? "",
+                                    nickname: data.myInfo?.nickname ?? "",
+                                    content: comment.text,
+                                    isLike: false,
+                                    likeCount: 0,
+                                  ),
+                                );
+                                print("댓글 입력 : ${comment.text}");
+                                scrollToTop();
+                                comment.clear();
+                                hasText.value = false;
+                              },
+                              decoration: InputDecoration(
+                                hintText: "댓글을 남겨보세요.",
+                                border: InputBorder.none,
+                                hintStyle: TextStyle(
+                                  fontSize: 15,
+                                  color: Color(0xFFB3B3B3),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            SizedBox(height: keyboardHeight),
-          ],
-        ),
-      ),
+                SizedBox(height: keyboardHeight),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

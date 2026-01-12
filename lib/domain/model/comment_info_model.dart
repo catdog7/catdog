@@ -5,6 +5,7 @@ part 'comment_info_model.freezed.dart';
 @freezed
 class CommentInfoModel with _$CommentInfoModel {
   const factory CommentInfoModel({
+    required String id,
     required String userId,
     required String nickname,
     required String content,

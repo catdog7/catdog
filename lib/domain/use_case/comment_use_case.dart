@@ -31,6 +31,7 @@ class CommentUseCase {
 
       if (user != null) {
         return CommentInfoModel(
+          id: e.id,
           userId: e.userId,
           nickname: user.nickname,
           content: e.content,
@@ -52,8 +53,8 @@ class CommentUseCase {
     await _commentRepo.addComment(comment);
   }
 
-  Future<void> deleteComment(String commentId) async {
-    await _commentRepo.deleteComment(commentId);
+  Future<bool> deleteComment(String commentId) async {
+    return await _commentRepo.deleteComment(commentId);
   }
 
   Future<void> toggleLike(String commentId, bool updatedLike) async {
@@ -62,5 +63,9 @@ class CommentUseCase {
     } else {
       await _commentLikeRepo.deleteLiked(commentId);
     }
+  }
+
+  Future<UserModel?> getMyInfo() async {
+    return await _commentRepo.getMyInfo();
   }
 }
