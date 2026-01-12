@@ -280,6 +280,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFD),
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -474,7 +475,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                       color: Color(0xFF999999),
                                       fontFamily: 'Pretendard',
                                       fontSize: 14,
-                                      decoration: TextDecoration.underline,
                                     ),
                                   ),
                                 ),
@@ -495,7 +495,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     bottom: safeAreaBottom > 0 ? safeAreaBottom + screenHeight * 0.02 : screenHeight * 0.02,
                   ),
                   child: Text(
-                    '회원가입 시 댕냥댕냥 서비스의\n개인정보처리방침 및 이용약관에 동의한 것으로 간주합니다.',
+                    '회원가입 시 댕냥댕냥 서비스의\n개인정보처리방침 및 이용약관에 동의한것으로\n간주합니다.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.black.withOpacity(0.30),

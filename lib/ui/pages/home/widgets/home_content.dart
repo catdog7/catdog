@@ -1,6 +1,8 @@
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/pet_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
+import 'package:catdog/data/dto/feed_dto.dart';
+import 'package:catdog/data/repository_impl/feed_repository_impl.dart';
 import 'package:catdog/domain/model/pet_model.dart';
 import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
@@ -25,6 +27,7 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
   bool _showWritingTooltip = true;
   UserModel? _user;
   List<PetModel> _pets = [];
+  List<FeedDto> _recentFeeds = [];
   final GlobalKey _moreIconKey = GlobalKey();
   static const Color semanticBackgroundWhite = Color(0xFFFFFFFF);
   static const Color semanticBackgroundLight = Color(0xFFF8FAFE);
@@ -75,11 +78,25 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
       final user = await userUseCase.getUserProfile(userId);
       final pets = await ref.read(petUseCaseProvider).getMyPets(userId);
       final hasPets = await ref.read(petUseCaseProvider).hasPets(userId);
+      final feedRepository = ref.read(feedRepositoryProvider);
+      final recentFeeds = await feedRepository.getMyRecentFeeds(userId);
+      
+      // updatedAt 우선, 없으면 createdAt 기준으로 최신순 정렬
+      final sortedFeeds = List<FeedDto>.from(recentFeeds);
+      sortedFeeds.sort((a, b) {
+        final timeA = a.updatedAt ?? a.createdAt;
+        final timeB = b.updatedAt ?? b.createdAt;
+        if (timeA == null && timeB == null) return 0;
+        if (timeA == null) return 1;
+        if (timeB == null) return -1;
+        return timeB.compareTo(timeA); // 내림차순 (최신이 위로)
+      });
       
       if (mounted) {
         setState(() {
           _user = user;
           _pets = pets;
+          _recentFeeds = sortedFeeds;
         });
         ref.read(showModalProvider.notifier).state = !hasPets;
       }
@@ -103,6 +120,59 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
 
   String _getSpeciesLabel(String species) {
     return species == 'DOG' ? '강아지' : '고양이';
+  }
+
+  String _formatTimeAgo(DateTime? dateTime) {
+    if (dateTime == null) {
+      debugPrint('_formatTimeAgo: dateTime is null');
+      return '';
+    }
+    
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    // 디버깅 로그
+    debugPrint('_formatTimeAgo: now=$now, dateTime=$dateTime, difference.inSeconds=${difference.inSeconds}, difference.inMinutes=${difference.inMinutes}');
+    
+    // 음수 차이 (미래 시간)인 경우 "방금 전" 반환
+    if (difference.isNegative) {
+      debugPrint('_formatTimeAgo: negative difference, returning 방금 전');
+      return '방금 전';
+    }
+    
+    final totalSeconds = difference.inSeconds;
+    
+    // 60초 미만 (0~59초) = 방금 전
+    if (totalSeconds < 60) {
+      debugPrint('_formatTimeAgo: totalSeconds=$totalSeconds < 60, returning 방금 전');
+      return '방금 전';
+    }
+    
+    final totalMinutes = difference.inMinutes;
+    // 60분 미만 (1~59분) = N분 전
+    if (totalMinutes < 60) {
+      debugPrint('_formatTimeAgo: totalMinutes=$totalMinutes, returning ${totalMinutes}분 전');
+      return '${totalMinutes}분 전';
+    }
+    
+    final totalHours = difference.inHours;
+    // 24시간 미만 (1~23시간) = N시간 전
+    if (totalHours < 24) {
+      debugPrint('_formatTimeAgo: totalHours=$totalHours, returning ${totalHours}시간 전');
+      return '${totalHours}시간 전';
+    }
+    
+    final totalDays = difference.inDays;
+    // 7일 미만 (1~6일) = N일 전
+    if (totalDays < 7) {
+      debugPrint('_formatTimeAgo: totalDays=$totalDays, returning ${totalDays}일 전');
+      return '${totalDays}일 전';
+    }
+    
+    // 7일 이상 = M월 d일 형식
+    final formatted = DateFormat('M월 d일', 'ko_KR').format(dateTime);
+    debugPrint('_formatTimeAgo: totalDays=$totalDays >= 7, returning $formatted');
+    return formatted;
   }
 
   @override
@@ -491,18 +561,82 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
             ),
           ),
         ),
-        const SizedBox(height: 40),
-        const Icon(Icons.description_outlined, size: 40, color: semanticTextWeak),
-        const SizedBox(height: 12),
-        const Text(
-          '아직 게시글이 없어요',
-          style: TextStyle(
-            fontFamily: 'Pretendard',
-            color: semanticTextWeak,
-            fontSize: 15,
+        if (_recentFeeds.isEmpty)
+          Column(
+            children: [
+              const SizedBox(height: 40),
+              const Icon(Icons.description_outlined, size: 40, color: semanticTextWeak),
+              const SizedBox(height: 12),
+              const Text(
+                '아직 게시글이 없어요',
+                style: TextStyle(
+                  fontFamily: 'Pretendard',
+                  color: semanticTextWeak,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: _recentFeeds.map((feed) => _buildFeedCard(feed)).toList(),
+            ),
           ),
-        ),
       ],
+    );
+  }
+
+  Widget _buildFeedCard(FeedDto feed) {
+    // updatedAt이 있으면 updatedAt 사용, 없으면 createdAt 사용
+    final timeToUse = feed.updatedAt ?? feed.createdAt;
+    
+    // 디버깅 로그
+    debugPrint('_buildFeedCard: feed.id=${feed.id}, createdAt=${feed.createdAt}, updatedAt=${feed.updatedAt}, timeToUse=$timeToUse');
+    
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: semanticBackgroundWhite,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              feed.content ?? '',
+              style: const TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: semanticTextBlack,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            _formatTimeAgo(timeToUse),
+            style: const TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: semanticTextWeak,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

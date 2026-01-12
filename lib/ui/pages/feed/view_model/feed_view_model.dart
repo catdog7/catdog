@@ -1,3 +1,5 @@
+import 'package:catdog/core/config/common_dependency.dart';
+import 'package:catdog/core/config/friend_dependency.dart';
 import 'package:catdog/data/repository_impl/feed_repository_impl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:catdog/ui/pages/feed/state/feed_state.dart';
@@ -10,7 +12,7 @@ class FeedViewModel extends _$FeedViewModel {
   @override
   FeedState build() {
     // 뷰모델이 생성되자마자 데이터를 불러오도록 설정합니다.
-    Future.microtask(() => fetchFeeds());
+    Future.microtask(() => fetchFeedsForFriends());
     return  FeedState();
   }
 
@@ -38,6 +40,39 @@ class FeedViewModel extends _$FeedViewModel {
       // 4. 에러 발생 시 상태 업데이트
       state = state.copyWith(
         isLoading: false, 
+        errorMessage: "피드를 불러오지 못했습니다: $e"
+      );
+    }
+  }
+
+  Future<void> fetchFeedsForFriends() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    
+    try {
+      final client = ref.read(supabaseClientProvider);
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: "로그인이 필요합니다."
+        );
+        return;
+      }
+
+      final friendUseCase = ref.read(friendUseCaseProvider);
+      final friends = await friendUseCase.getMyFriends();
+      final friendIds = friends.map((friend) => friend.userId).toList();
+
+      final repository = ref.read(feedRepositoryProvider);
+      final feeds = await repository.getFeedsForFriends(userId, friendIds);
+      
+      state = state.copyWith(
+        feeds: feeds,
+        isLoading: false
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
         errorMessage: "피드를 불러오지 못했습니다: $e"
       );
     }
@@ -74,8 +109,8 @@ Future<void> updateFeed(String feedId, String newContent, {String? newImagePath}
     // Repository 호출 (이미지 경로 전달)
     await repository.updateFeed(feedId, newContent, newImagePath: newImagePath);
 
-    // ✅ 전체 리스트를 다시 불러오거나(fetchFeeds), 로컬 상태를 영리하게 업데이트합니다.
-    await fetchFeeds(); 
+    // ✅ 전체 리스트를 다시 불러오거나(fetchFeedsForFriends), 로컬 상태를 영리하게 업데이트합니다.
+    await fetchFeedsForFriends(); 
     
     print("수정 완료 및 새로고침 성공!");
   } catch (e) {

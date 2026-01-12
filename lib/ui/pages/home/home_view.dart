@@ -1,4 +1,5 @@
 import 'package:catdog/ui/pages/feed/view/feed_add_view.dart';
+import 'package:catdog/ui/pages/feed/view_model/feed_view_model.dart';
 import 'package:catdog/ui/pages/home/widgets/navigation_body.dart';
 import 'package:catdog/ui/pages/home/view/pet_register_view.dart';
 import 'package:catdog/ui/widgets/main_navigation_bar.dart';
@@ -8,15 +9,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final showModalProvider = StateProvider<bool>((ref) => false);
 
 class HomeView extends ConsumerStatefulWidget {
-  const HomeView({super.key});
+  final int initialIndex;
+  
+  const HomeView({super.key, this.initialIndex = 1});
 
   @override
   ConsumerState<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends ConsumerState<HomeView> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   int _homeContentKey = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   void _onItemTapped(int index) {
     final showModal = ref.read(showModalProvider);
@@ -24,6 +33,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
     
     setState(() {
       _selectedIndex = index;
+      // 홈 탭으로 돌아올 때마다 리프레시
+      if (index == 0) {
+        _homeContentKey++;
+      }
     });
   }
 
@@ -49,12 +62,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
             child: MainNavigationBar(
               selectedIndex: _selectedIndex,
               onItemSelected: _onItemTapped,
-              onWritePressed: () {
+              onWritePressed: () async {
                 if (showModal) return;
                 print('Write button tapped');
-                Navigator.of(context).push(
+                final result = await Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const FeedAddView()),
                 );
+                // 게시글 작성 완료 후 게시물 탭으로 이동
+                if (result == true && mounted) {
+                  // FeedViewModel 새로고침
+                  ref.read(feedViewModelProvider.notifier).fetchFeedsForFriends();
+                  setState(() {
+                    _selectedIndex = 1;
+                  });
+                }
               },
               isDisabled: false,
             ),

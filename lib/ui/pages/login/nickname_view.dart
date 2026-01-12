@@ -50,7 +50,7 @@ class _NicknameViewState extends ConsumerState<NicknameView> {
 
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomeView()),
+          MaterialPageRoute(builder: (context) => const HomeView(initialIndex: 0)),
           (route) => false,
         );
       }
