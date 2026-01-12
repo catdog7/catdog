@@ -21,7 +21,7 @@ class CommentLikeRepositoryImpl implements CommentLikeRepository {
           .count(CountOption.exact);
 
       final int likeCount = response.count;
-      print('좋아요 개수: $likeCount');
+      //print('좋아요 개수: $likeCount');
       return likeCount;
     } catch (e) {
       return 0;
@@ -43,7 +43,7 @@ class CommentLikeRepositoryImpl implements CommentLikeRepository {
             .maybeSingle(); // 데이터가 없으면 null 반환
 
         bool isLiked = data != null;
-        print('내가 좋아요 눌렀나?: $isLiked');
+        //print('내가 좋아요 눌렀나?: $isLiked');
         return isLiked;
       }
       return false;

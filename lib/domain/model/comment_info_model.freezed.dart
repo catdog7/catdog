@@ -17,6 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$CommentInfoModel {
+  String get id => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
   String get nickname => throw _privateConstructorUsedError;
   String get content => throw _privateConstructorUsedError;
@@ -40,6 +41,7 @@ abstract class $CommentInfoModelCopyWith<$Res> {
   ) = _$CommentInfoModelCopyWithImpl<$Res, CommentInfoModel>;
   @useResult
   $Res call({
+    String id,
     String userId,
     String nickname,
     String content,
@@ -65,6 +67,7 @@ class _$CommentInfoModelCopyWithImpl<$Res, $Val extends CommentInfoModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? userId = null,
     Object? nickname = null,
     Object? content = null,
@@ -75,6 +78,10 @@ class _$CommentInfoModelCopyWithImpl<$Res, $Val extends CommentInfoModel>
   }) {
     return _then(
       _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
             userId: null == userId
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
@@ -119,6 +126,7 @@ abstract class _$$CommentInfoModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
+    String id,
     String userId,
     String nickname,
     String content,
@@ -143,6 +151,7 @@ class __$$CommentInfoModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? userId = null,
     Object? nickname = null,
     Object? content = null,
@@ -153,6 +162,10 @@ class __$$CommentInfoModelImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$CommentInfoModelImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
         userId: null == userId
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
@@ -190,6 +203,7 @@ class __$$CommentInfoModelImplCopyWithImpl<$Res>
 
 class _$CommentInfoModelImpl implements _CommentInfoModel {
   const _$CommentInfoModelImpl({
+    required this.id,
     required this.userId,
     required this.nickname,
     required this.content,
@@ -199,6 +213,8 @@ class _$CommentInfoModelImpl implements _CommentInfoModel {
     this.profileImageUrl,
   });
 
+  @override
+  final String id;
   @override
   final String userId;
   @override
@@ -216,7 +232,7 @@ class _$CommentInfoModelImpl implements _CommentInfoModel {
 
   @override
   String toString() {
-    return 'CommentInfoModel(userId: $userId, nickname: $nickname, content: $content, createdAt: $createdAt, isLike: $isLike, likeCount: $likeCount, profileImageUrl: $profileImageUrl)';
+    return 'CommentInfoModel(id: $id, userId: $userId, nickname: $nickname, content: $content, createdAt: $createdAt, isLike: $isLike, likeCount: $likeCount, profileImageUrl: $profileImageUrl)';
   }
 
   @override
@@ -224,6 +240,7 @@ class _$CommentInfoModelImpl implements _CommentInfoModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$CommentInfoModelImpl &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.nickname, nickname) ||
                 other.nickname == nickname) &&
@@ -240,6 +257,7 @@ class _$CommentInfoModelImpl implements _CommentInfoModel {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    id,
     userId,
     nickname,
     content,
@@ -263,6 +281,7 @@ class _$CommentInfoModelImpl implements _CommentInfoModel {
 
 abstract class _CommentInfoModel implements CommentInfoModel {
   const factory _CommentInfoModel({
+    required final String id,
     required final String userId,
     required final String nickname,
     required final String content,
@@ -272,6 +291,8 @@ abstract class _CommentInfoModel implements CommentInfoModel {
     final String? profileImageUrl,
   }) = _$CommentInfoModelImpl;
 
+  @override
+  String get id;
   @override
   String get userId;
   @override

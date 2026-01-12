@@ -10,7 +10,7 @@ class FriendSearchViewModel extends _$FriendSearchViewModel {
   Future<SearchState> build() async {
     final useCase = ref.watch(friendUseCaseProvider);
     //요청 중 PENDING인 것의 상대 아이디만 모으기
-    final alarms = await useCase.getMyRequests();
+    //final alarms = await useCase.getMyRequests();
     return SearchState(isLoading: false, users: []);
   }
 
