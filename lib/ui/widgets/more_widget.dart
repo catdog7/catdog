@@ -48,7 +48,11 @@ class MoreWidget extends StatelessWidget {
 
         return items;
       },
-      child: Container(width: 40, child: Icon(Icons.more_vert)),
+      child: Container(
+        width: 40,
+        alignment: Alignment.centerRight,
+        child: Icon(Icons.more_vert),
+      ),
     );
   }
 }

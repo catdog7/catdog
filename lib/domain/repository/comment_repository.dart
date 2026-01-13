@@ -6,4 +6,5 @@ abstract interface class CommentRepository {
   Future<void> addComment(CommentModel comment);
   Future<bool> deleteComment(String commentId);
   Future<UserModel?> getMyInfo();
+  Future<int> getCommentCount(String feedId);
 }

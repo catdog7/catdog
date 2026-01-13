@@ -20,8 +20,8 @@ class CommentView extends HookConsumerWidget {
     final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final double screenHeight = MediaQuery.of(context).size.height;
     final double sheetHeight = keyboardHeight > 0
-        ? screenHeight * 0.45
-        : screenHeight * 0.5;
+        ? screenHeight * 0.47
+        : screenHeight * 0.52;
 
     final scrollController = useScrollController();
 
@@ -41,13 +41,24 @@ class CommentView extends HookConsumerWidget {
       return () => scrollController.removeListener(listener);
     }, [scrollController]);
 
-    void scrollToTop() {
-      scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
+    // void scrollToTop() {
+    //   // scrollController.animateTo(
+    //   //   0,
+    //   //   duration: const Duration(milliseconds: 500),
+    //   //   curve: Curves.easeInOut,
+    //   // );
+    //   // 컨트롤러가 현재 스크롤 뷰에 붙어 있는지 확인
+    //   if (scrollController.hasClients) {
+    //     scrollController.animateTo(
+    //       0,
+    //       duration: const Duration(milliseconds: 300),
+    //       curve: Curves.easeInOut,
+    //     );
+    //   } else {
+    //     // 연결된 스크롤 뷰가 없을 때
+    //     debugPrint("스크롤 컨트롤러가 아직 연결되지 않았습니다.");
+    //   }
+    // }
 
     return state.when(
       skipError: true,
@@ -195,7 +206,11 @@ class CommentView extends HookConsumerWidget {
                                   ),
                                 );
                                 print("댓글 입력 : ${comment.text}");
-                                scrollToTop();
+                                // WidgetsBinding.instance.addPostFrameCallback((
+                                //   _,
+                                // ) {
+                                //   scrollToTop();
+                                // });
                                 comment.clear();
                                 hasText.value = false;
                               },

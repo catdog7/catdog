@@ -1,8 +1,11 @@
 import 'package:catdog/core/utils/debouncer.dart';
+import 'package:catdog/core/utils/time_formatter.dart';
 import 'package:catdog/domain/model/comment_info_model.dart';
+import 'package:catdog/ui/pages/home/home_view.dart';
+import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
+import 'package:catdog/ui/widgets/delete_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:intl/intl.dart';
 
 class CommentUserWidget extends HookWidget {
   const CommentUserWidget({
@@ -48,82 +51,11 @@ class CommentUserWidget extends HookWidget {
       child: InkWell(
         onLongPress: myId == comment.userId
             ? () async {
-                final result = await showDialog(
+                final result = await DeleteDialog.show(
                   context: context,
-                  builder: (context) {
-                    return Dialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              "게시물을 삭제하시겠어요?",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                // 취소 버튼
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, false);
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      minimumSize: const Size(0, 50),
-                                      side: const BorderSide(
-                                        color: Color(0xFFE0E0E0),
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      "취소",
-                                      style: TextStyle(
-                                        color: Color(0xFF757575),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                // 삭제 버튼
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, true);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF1A1A1A),
-                                      foregroundColor: Colors.white,
-                                      minimumSize: const Size(0, 50),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                    child: const Text("삭제"),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                  title: '댓글을 삭제하시겠습니까?',
                 );
-                if (result) {
+                if (result == true) {
                   print("삭제 팝업 결과 true");
                   onDeleted(comment.id);
                 }
@@ -140,7 +72,19 @@ class CommentUserWidget extends HookWidget {
                   onTap: () {
                     //다른 사람 홈페이지로 이동
                     if (myId == comment.userId) {
-                      return;
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const HomeView(initialIndex: 0),
+                        ),
+                        (route) => false,
+                      );
+                    } else {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FriendHomeView(friendUserId: comment.userId),
+                        ),
+                      );
                     }
                     print("사진 눌러서 홈페이지 이동");
                   },
@@ -166,9 +110,23 @@ class CommentUserWidget extends HookWidget {
                         child: GestureDetector(
                           onTap: () {
                             if (myId == comment.userId) {
-                              return;
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const HomeView(initialIndex: 0),
+                                ),
+                                (route) => false,
+                              );
+                            } else {
+                              //다른 사람 홈페이지로 이동
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => FriendHomeView(
+                                    friendUserId: comment.userId,
+                                  ),
+                                ),
+                              );
                             }
-                            //다른 사람 홈페이지로 이동
                             print("${editedNickname}의 홈페이지로 이동");
                           },
                           child: Row(
@@ -182,10 +140,11 @@ class CommentUserWidget extends HookWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              Text(" "),
                               Text(
-                                DateFormat(
-                                  ' MM월 dd일',
-                                ).format(comment.createdAt ?? DateTime.now()),
+                                TimeFormatter.formatRelativeTime(
+                                  comment.createdAt,
+                                ),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 15,
@@ -224,12 +183,12 @@ class CommentUserWidget extends HookWidget {
                   child: Column(
                     children: [
                       likeUI.value
-                          ? Icon(
+                          ? const Icon(
                               Icons.favorite,
                               size: 20,
                               color: Color(0xFFFCBC0D),
                             )
-                          : Icon(
+                          : const Icon(
                               Icons.favorite_border,
                               size: 20,
                               color: Color(0xFFB3B3B3),

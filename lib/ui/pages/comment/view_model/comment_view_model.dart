@@ -44,11 +44,11 @@ class CommentViewModel extends _$CommentViewModel {
       return comment;
     }).toList();
 
-    state = AsyncData(
-      state.value!.copyWith(isLoading: false, comments: newList),
-    );
+    state = AsyncData(state.value!.copyWith(comments: newList));
 
     await useCase.toggleLike(commentId, isLiked);
+
+    state = AsyncData(state.value!.copyWith(isLoading: false));
   }
 
   Future<void> addComment(CommentInfoModel newComment) async {
@@ -59,7 +59,7 @@ class CommentViewModel extends _$CommentViewModel {
     state = AsyncData(state.value!.copyWith(isLoading: true));
     final useCase = ref.read(commentUseCaseProvider);
     List<CommentInfoModel> newList = state.value!.comments.toList();
-    newList = [newComment, ...newList];
+    newList = [...newList, newComment];
 
     //newList = sortComments(newList);
 
