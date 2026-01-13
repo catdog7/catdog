@@ -1,7 +1,7 @@
 import 'package:catdog/ui/pages/feed/view/feed_view.dart';
 import 'package:catdog/ui/pages/friend/view/friend_view.dart';
 import 'package:catdog/ui/pages/home/widgets/home_content.dart';
-import 'package:catdog/ui/pages/mypage/mypage_view.dart';
+import 'package:catdog/ui/pages/mypage/view/mypage_view.dart';
 import 'package:flutter/material.dart';
 
 class NavigationBody extends StatefulWidget {
