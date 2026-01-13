@@ -1,5 +1,5 @@
 import 'package:catdog/domain/model/friend_info_model.dart';
-import 'package:catdog/ui/pages/friend/view/friend_home_test_view.dart';
+import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
 import 'package:catdog/ui/widgets/more_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +22,7 @@ class FriendWidget extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
-                      return FriendHomeTestView(friend);
+                      return FriendHomeView(friendUserId: friend.userId);
                     },
                   ),
                 );

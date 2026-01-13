@@ -1,5 +1,5 @@
 import 'package:catdog/domain/model/friend_info_model.dart';
-import 'package:catdog/ui/pages/friend/view/friend_home_test_view.dart';
+import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -22,7 +22,7 @@ class SearchWidget extends HookWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
-                      return FriendHomeTestView(user);
+                      return FriendHomeView(friendUserId: user.userId);
                     },
                   ),
                 );

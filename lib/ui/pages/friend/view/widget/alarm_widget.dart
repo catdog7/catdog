@@ -1,5 +1,5 @@
 import 'package:catdog/domain/model/friend_info_model.dart';
-import 'package:catdog/ui/pages/friend/view/friend_home_test_view.dart';
+import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
 import 'package:flutter/material.dart';
 
 class AlarmWidget extends StatelessWidget {
@@ -23,9 +23,7 @@ class AlarmWidget extends StatelessWidget {
           //다른 사람 홈페이지 이동
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) {
-                return FriendHomeTestView(user);
-              },
+              builder: (context) => FriendHomeView(friendUserId: user.userId),
             ),
           );
         },

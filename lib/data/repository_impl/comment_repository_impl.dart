@@ -90,4 +90,21 @@ class CommentRepositoryImpl implements CommentRepository {
       return null;
     }
   }
+
+  @override
+  Future<int> getCommentCount(String feedId) async {
+    try {
+      final response = await _client
+          .from('comments')
+          .select('id')
+          .eq('feed_id', feedId)
+          .count(CountOption.exact);
+
+      final int likeCount = response.count;
+      //print('좋아요 개수: $likeCount');
+      return likeCount;
+    } catch (e) {
+      return 0;
+    }
+  }
 }

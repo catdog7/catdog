@@ -5,10 +5,13 @@ import 'package:catdog/domain/model/user_model.dart';
 import 'package:catdog/ui/pages/feed/view/feed_edit_view.dart';
 import 'package:catdog/ui/pages/feed/view/widget/feed_empty_state.dart';
 import 'package:catdog/ui/pages/feed/state/feed_state.dart';
+import 'package:catdog/ui/pages/feed/view/widget/feed_stats_widget.dart';
 import 'package:catdog/ui/pages/feed/view_model/feed_view_model.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
 import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
+import 'package:catdog/ui/widgets/delete_dialog.dart';
 import 'package:catdog/ui/widgets/more_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,10 +46,13 @@ class _FeedViewState extends ConsumerState<FeedView> {
   @override
   Widget build(BuildContext context) {
     final feedState = ref.watch(feedViewModelProvider);
-    
+
     // 게시글 목록이 로드되면 스크롤을 최상단으로 이동
     ref.listen<FeedState>(feedViewModelProvider, (previous, next) {
-      if (previous != null && previous.isLoading && !next.isLoading && next.feeds.isNotEmpty) {
+      if (previous != null &&
+          previous.isLoading &&
+          !next.isLoading &&
+          next.feeds.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
             _scrollController.jumpTo(0);
@@ -89,7 +95,8 @@ class _FeedViewState extends ConsumerState<FeedView> {
                   controller: _scrollController,
                   padding: const EdgeInsets.only(top: 10, bottom: 20),
                   itemCount: feedState.feeds.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final feed = feedState.feeds[index];
                     return myFeedCard(context, ref, feed);
@@ -112,17 +119,14 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
       final user = snapshot.data;
       final nickname = user?.nickname ?? '';
       final profileImageUrl = user?.profileImageUrl;
-      
+
       return Container(
         width: 335,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0x0D000000),
-            width: 1,
-          ),
+          border: Border.all(color: const Color(0x0D000000), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -150,7 +154,8 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
                       // 다른 사람 게시글이면 친구 홈으로 이동
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => FriendHomeView(friendUserId: feed.userId),
+                          builder: (context) =>
+                              FriendHomeView(friendUserId: feed.userId),
                         ),
                       );
                     }
@@ -182,7 +187,8 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
                         // 내 게시글이면 홈으로 이동 (홈 탭 활성화)
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
-                            builder: (context) => const HomeView(initialIndex: 0),
+                            builder: (context) =>
+                                const HomeView(initialIndex: 0),
                           ),
                           (route) => false,
                         );
@@ -190,7 +196,8 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
                         // 다른 사람 게시글이면 친구 홈으로 이동
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => FriendHomeView(friendUserId: feed.userId),
+                            builder: (context) =>
+                                FriendHomeView(friendUserId: feed.userId),
                           ),
                         );
                       }
@@ -214,14 +221,26 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
                         onTap: (_) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => FeedEditView(feed: feed)),
+                            MaterialPageRoute(
+                              builder: (context) => FeedEditView(feed: feed),
+                            ),
                           );
                         },
                       ),
                       MenuAction(
                         title: '삭제',
-                        onTap: (_) {
-                          ref.read(feedViewModelProvider.notifier).deleteFeed(feed.id);
+                        onTap: (_) async {
+                          // 삭제 확인 팝업
+                          final result = await DeleteDialog.show(
+                            context: context,
+                            title: '게시글을 삭제하시겠습니까?',
+                          );
+                          if (result == true) {
+                            print("삭제 팝업 결과 true");
+                            ref
+                                .read(feedViewModelProvider.notifier)
+                                .deleteFeed(feed.id);
+                          }
                         },
                       ),
                     ],
@@ -240,52 +259,17 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
                     child: Image.network(
                       feed.imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(
-                            color: const Color(0xFFD9D9D9),
-                            child: const Icon(Icons.broken_image, size: 40),
-                          ),
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: const Color(0xFFD9D9D9),
+                        child: const Icon(Icons.broken_image, size: 40),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.favorite_border, size: 24, color: Color(0xFF010101)),
-                    const SizedBox(width: 2),
-                    Text(
-                      '0',
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF010101),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.comment_outlined, size: 24, color: Color(0xFF010101)),
-                    const SizedBox(width: 2),
-                    Text(
-                      '0',
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF010101),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            FeedStatsWidget(feed.id),
             const SizedBox(height: 12),
             Text(
               feed.content ?? '',

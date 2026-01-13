@@ -1,7 +1,4 @@
 import 'package:catdog/data/dto/comment_like_dto.dart';
-import 'package:catdog/data/mapper/comment_like_mapper.dart';
-import 'package:catdog/data/mapper/comment_mapper.dart';
-import 'package:catdog/domain/model/comment_like_model.dart';
 import 'package:catdog/domain/repository/comment_like_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -16,7 +13,7 @@ class CommentLikeRepositoryImpl implements CommentLikeRepository {
     try {
       final response = await _client
           .from('comment_likes')
-          .select()
+          .select('id')
           .eq('comment_id', commentId)
           .count(CountOption.exact);
 
@@ -37,7 +34,7 @@ class CommentLikeRepositoryImpl implements CommentLikeRepository {
       if (myId != null) {
         final data = await _client
             .from('comment_likes')
-            .select()
+            .select('id')
             .eq('comment_id', commentId)
             .eq('user_id', myId)
             .maybeSingle(); // 데이터가 없으면 null 반환
