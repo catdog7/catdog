@@ -3,6 +3,7 @@ import 'package:catdog/ui/pages/feed/view_model/feed_view_model.dart';
 import 'package:catdog/ui/pages/home/widgets/navigation_body.dart';
 import 'package:catdog/ui/pages/home/view/pet_register_view.dart';
 import 'package:catdog/ui/widgets/main_navigation_bar.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,7 +11,7 @@ final showModalProvider = StateProvider<bool>((ref) => false);
 
 class HomeView extends ConsumerStatefulWidget {
   final int initialIndex;
-  
+
   const HomeView({super.key, this.initialIndex = 1});
 
   @override
@@ -25,12 +26,34 @@ class _HomeViewState extends ConsumerState<HomeView> {
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    // 앱 진입 시 첫 화면 로그 기록 (Microtask로 렌더링 직후 실행)
+    Future.microtask(() => _logScreenView(_selectedIndex));
+  }
+
+  // 2. 로그 기록을 위한 헬퍼 함수
+  void _logScreenView(int index) {
+    String screenName = switch (index) {
+      0 => 'Home_Tab',
+      1 => 'Feed_Tab',
+      2 => 'Friend_Tab',
+      3 => 'My_Profile_Tab',
+      _ => 'Unknown_Tab',
+    };
+
+    FirebaseAnalytics.instance.logScreenView(
+      screenName: screenName,
+      screenClass: 'HomeView', // 현재 클래스명
+    );
+    print('Analytics: $screenName 기록됨');
   }
 
   void _onItemTapped(int index) {
     final showModal = ref.read(showModalProvider);
     if (showModal) return;
-    
+
+    // 같은 탭을 또 눌렀을 때는 로그를 남기지 않도록 방어 로직
+    if (_selectedIndex == index && index != 0) return;
+
     setState(() {
       _selectedIndex = index;
       // 홈 탭으로 돌아올 때마다 리프레시
@@ -38,6 +61,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
         _homeContentKey++;
       }
     });
+
+    // 탭 전환 시 로그 기록
+    _logScreenView(index);
   }
 
   @override
@@ -54,7 +80,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
             ignoring: showModal,
             child: NavigationBody(
               selectedIndex: _selectedIndex,
-              homeContentKey: _selectedIndex == 0 ? ValueKey(_homeContentKey) : null,
+              homeContentKey: _selectedIndex == 0
+                  ? ValueKey(_homeContentKey)
+                  : null,
             ),
           ),
           bottomNavigationBar: IgnorePointer(
@@ -71,7 +99,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 // 게시글 작성 완료 후 게시물 탭으로 이동
                 if (result == true && mounted) {
                   // FeedViewModel 새로고침
-                  ref.read(feedViewModelProvider.notifier).fetchFeedsForFriends();
+                  ref
+                      .read(feedViewModelProvider.notifier)
+                      .fetchFeedsForFriends();
                   setState(() {
                     _selectedIndex = 1;
                   });
@@ -84,9 +114,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
         if (showModal) ...[
           Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.4),
-            ),
+            child: Container(color: Colors.black.withOpacity(0.4)),
           ),
           Center(
             child: Material(
@@ -103,7 +131,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 24, left: 20, right: 20),
+                      padding: const EdgeInsets.only(
+                        top: 24,
+                        left: 20,
+                        right: 20,
+                      ),
                       child: Column(
                         children: [
                           Image.asset(
@@ -152,7 +184,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               onTap: () async {
                                 await Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => const PetRegisterView(),
+                                    builder: (context) =>
+                                        const PetRegisterView(),
                                   ),
                                 );
                                 if (mounted && _selectedIndex == 0) {
@@ -162,7 +195,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                                 }
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
                                 decoration: ShapeDecoration(
                                   color: const Color(0xFFFDCA40),
                                   shape: RoundedRectangleBorder(
