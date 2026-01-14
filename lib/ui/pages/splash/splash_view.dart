@@ -3,6 +3,7 @@ import 'package:catdog/core/config/user_dependency.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
 import 'package:catdog/ui/pages/login/nickname_view.dart';
 import 'package:catdog/ui/pages/login/login_view.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,6 +22,24 @@ class _SplashViewState extends ConsumerState<SplashView> {
   bool _titleSmallLoaded = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    // 앱이 켜지고 스플래시 위젯이 생성시 기록
+    _logSplashEntry();
+  }
+
+  // 로그 기록용 별도 함수
+  void _logSplashEntry() {
+    FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Splash_View',
+      screenClass: 'SplashView',
+    );
+    FirebaseAnalytics.instance.logEvent(name: 'app_open_start');
+    debugPrint('Analytics: Splash_View 기록');
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _preloadImages();
@@ -29,10 +48,22 @@ class _SplashViewState extends ConsumerState<SplashView> {
   Future<void> _preloadImages() async {
     try {
       await Future.wait([
-        precacheImage(const AssetImage('assets/images/splash/splash_bg.png'), context),
-        precacheImage(const AssetImage('assets/images/splash/splash_cat.webp'), context),
-        precacheImage(const AssetImage('assets/images/splash/title.png'), context),
-        precacheImage(const AssetImage('assets/images/splash/title_small.png'), context),
+        precacheImage(
+          const AssetImage('assets/images/splash/splash_bg.png'),
+          context,
+        ),
+        precacheImage(
+          const AssetImage('assets/images/splash/splash_cat.webp'),
+          context,
+        ),
+        precacheImage(
+          const AssetImage('assets/images/splash/title.png'),
+          context,
+        ),
+        precacheImage(
+          const AssetImage('assets/images/splash/title_small.png'),
+          context,
+        ),
       ]);
 
       if (mounted) {
@@ -69,6 +100,7 @@ class _SplashViewState extends ConsumerState<SplashView> {
       if (!mounted) return;
 
       if (session == null) {
+        await FirebaseAnalytics.instance.logEvent(name: 'splash_to_login');
         _navigate(const LoginView());
         return;
       }
@@ -78,8 +110,10 @@ class _SplashViewState extends ConsumerState<SplashView> {
       if (!mounted) return;
 
       if (!hasNickname) {
+        await FirebaseAnalytics.instance.logEvent(name: 'splash_to_nickname');
         _navigate(const NicknameView());
       } else {
+        await FirebaseAnalytics.instance.logEvent(name: 'splash_to_home');
         _navigate(const HomeView());
       }
     } catch (_) {
@@ -96,7 +130,10 @@ class _SplashViewState extends ConsumerState<SplashView> {
     );
   }
 
-  ImageFrameBuilder _createFrameBuilder(bool Function() isLoaded, void Function() setLoaded) {
+  ImageFrameBuilder _createFrameBuilder(
+    bool Function() isLoaded,
+    void Function() setLoaded,
+  ) {
     return (context, child, frame, wasSynchronouslyLoaded) {
       if (frame != null && !isLoaded()) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

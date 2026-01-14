@@ -1,5 +1,6 @@
 import 'package:catdog/domain/model/friend_info_model.dart';
 import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 
 class AlarmWidget extends StatelessWidget {
@@ -45,9 +46,13 @@ class AlarmWidget extends StatelessWidget {
               ),
             ),
             InkWell(
-              onTap: () {
+              onTap: () async {
                 onDeleted(user.userId);
                 //print("친구 요청 삭제");
+                await FirebaseAnalytics.instance.logEvent(
+                  name: 'friend_request_reject',
+                  parameters: {'from_user_id': user.userId},
+                );
               },
               child: Container(
                 height: 35,
@@ -73,7 +78,7 @@ class AlarmWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(5),
               ),
               child: InkWell(
-                onTap: () {
+                onTap: () async {
                   onAccepted(user.userId);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -99,6 +104,10 @@ class AlarmWidget extends StatelessWidget {
                         ],
                       ),
                     ),
+                  );
+                  await FirebaseAnalytics.instance.logEvent(
+                    name: 'friend_request_accept',
+                    parameters: {'from_user_id': user.userId},
                   );
                 },
                 child: Container(

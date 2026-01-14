@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:catdog/ui/pages/comment/view/comment_view.dart';
 import 'package:catdog/ui/pages/friend/view/widget/friend_widget.dart';
 import 'package:catdog/ui/pages/friend/view/widget/search_widget.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_search_view_model.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -26,10 +26,29 @@ class FriendSearchPage extends HookConsumerWidget {
       isTyping.value = true;
       debounce.value?.cancel();
       debounce.value = Timer(const Duration(milliseconds: 200), () async {
+        if (value.trim().isEmpty) {
+          isTyping.value = false;
+          return;
+        }
         await followvm.searchUsers(value);
         isTyping.value = false;
+
+        await FirebaseAnalytics.instance.logEvent(
+          name: 'friend_search_perform',
+          parameters: {'search_term': value},
+        );
+
+        debugPrint('Analytics: 검색어 "$value" 기록됨');
       });
     }
+
+    useEffect(() {
+      FirebaseAnalytics.instance.logScreenView(
+        screenName: 'Friend_Search_View',
+        screenClass: 'FriendSearchView',
+      );
+      return null;
+    }, []);
 
     useEffect(() {
       return () {
@@ -71,29 +90,6 @@ class FriendSearchPage extends HookConsumerWidget {
                 },
                 child: Icon(Icons.arrow_back_ios),
               ),
-              ///////////코멘트 테스트하려고 만듦////////////////
-              // actions: [
-              //   InkWell(
-              //     onTap: () {
-              //       //
-              //       showModalBottomSheet(
-              //         context: context,
-              //         isScrollControlled: true,
-              //         backgroundColor: Colors.transparent,
-              //         builder: (context) => CommentView(
-              //           feedId: "90d715f6-44e0-4817-bd4f-cf9c7c171944",
-              //         ),
-              //       );
-              //     },
-              //     child: Container(
-              //       width: 35,
-              //       height: 35,
-              //       color: Colors.transparent,
-              //       child: Icon(CupertinoIcons.bubble_middle_bottom),
-              //     ),
-              //   ),
-              // ],
-              ////////////////////////////////////////
             ),
             body: Column(
               children: [
@@ -113,7 +109,12 @@ class FriendSearchPage extends HookConsumerWidget {
                     children: [
                       InkWell(
                         onTap: () async {
+                          if (searchText.text.trim().isEmpty) return;
                           await followvm.searchUsers(searchText.text);
+                          await FirebaseAnalytics.instance.logEvent(
+                            name: 'friend_search_perform',
+                            parameters: {'search_term': searchText.text},
+                          );
                         },
                         child: Container(
                           width: 35,

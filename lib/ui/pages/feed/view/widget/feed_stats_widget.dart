@@ -1,6 +1,7 @@
 import 'package:catdog/core/utils/debouncer.dart';
 import 'package:catdog/ui/pages/comment/view/comment_view.dart';
 import 'package:catdog/ui/pages/feed/view_model/feed_like_view_model.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -100,6 +101,14 @@ class FeedStatsWidget extends HookConsumerWidget {
             const SizedBox(width: 12),
             InkWell(
               onTap: () async {
+                await FirebaseAnalytics.instance.logEvent(
+                  name: 'comment_sheet_open',
+                  parameters: {
+                    'feed_id': feedId,
+                    'initial_comment_count':
+                        data.commentCount, // 열었을 때 댓글이 몇 개였나
+                  },
+                );
                 await showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,

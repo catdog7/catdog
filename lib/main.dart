@@ -1,13 +1,13 @@
 import 'dart:async';
-
-import 'package:catdog/core/config/common_dependency.dart';
+import 'dart:ui';
 import 'package:catdog/core/config/fcm_dependency.dart';
 import 'package:catdog/core/utils/app_keys.dart';
-import 'package:catdog/domain/use_case/fcm_service.dart';
 import 'package:catdog/firebase_options.dart';
 import 'package:catdog/ui/pages/friend/state/fcm_event.dart';
 import 'package:catdog/ui/pages/splash/splash_view.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,7 +18,16 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  debugPrint('백그라운드 FCM 메시지 수신됨!');
+
+  await FirebaseAnalytics.instance.logEvent(
+    name: 'notification_receive_bg',
+    parameters: {
+      'message_id': message.messageId?.toString() ?? 'unknown',
+      'title': message.notification?.title ?? 'no_title',
+      'type': message.data['type'] ?? 'default',
+    },
+  );
+  debugPrint('백그라운드 FCM 메시지 수신 및 로그 기록 완료');
 }
 
 void main() async {
@@ -30,6 +39,16 @@ void main() async {
     url: dotenv.env['SUPABASE_URL'] ?? '',
     anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
+
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+
+  //Flutter 프레임워크에서 처리하지 않는 비동기 오류를 포착
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -88,9 +107,7 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   void dispose() {
-    final supabase = ref.read(supabaseClientProvider);
-    FcmService.instance(supabase).dispose();
-    //_sub?.cancel();
+    _sub?.cancel();
     super.dispose();
   }
 
@@ -99,6 +116,9 @@ class _MyAppState extends ConsumerState<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'CatDog',
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      ], //페이지 전환 추적
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

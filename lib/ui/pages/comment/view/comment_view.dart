@@ -1,12 +1,12 @@
 import 'package:catdog/domain/model/comment_info_model.dart';
 import 'package:catdog/ui/pages/comment/view/widget/comment_user_widget.dart';
 import 'package:catdog/ui/pages/comment/view_model/comment_view_model.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-//수정중
 class CommentView extends HookConsumerWidget {
   const CommentView({super.key, required this.feedId});
   final String feedId;
@@ -40,6 +40,14 @@ class CommentView extends HookConsumerWidget {
       scrollController.addListener(listener);
       return () => scrollController.removeListener(listener);
     }, [scrollController]);
+
+    useEffect(() {
+      FirebaseAnalytics.instance.logScreenView(
+        screenName: 'Comment_Sheet_View',
+        screenClass: 'CommentView',
+      );
+      return null;
+    }, []);
 
     // void scrollToTop() {
     //   // scrollController.animateTo(
@@ -195,16 +203,18 @@ class CommentView extends HookConsumerWidget {
                                 hasText.value = value.isNotEmpty;
                               },
                               onSubmitted: (value) async {
-                                vm.addComment(
-                                  CommentInfoModel(
-                                    id: uuid.v4(),
-                                    userId: data.myInfo?.id ?? "",
-                                    nickname: data.myInfo?.nickname ?? "",
-                                    content: comment.text,
-                                    isLike: false,
-                                    likeCount: 0,
-                                  ),
-                                );
+                                if (value.trim().isNotEmpty) {
+                                  vm.addComment(
+                                    CommentInfoModel(
+                                      id: uuid.v4(),
+                                      userId: data.myInfo?.id ?? "",
+                                      nickname: data.myInfo?.nickname ?? "",
+                                      content: comment.text,
+                                      isLike: false,
+                                      likeCount: 0,
+                                    ),
+                                  );
+                                }
                                 print("댓글 입력 : ${comment.text}");
                                 // WidgetsBinding.instance.addPostFrameCallback((
                                 //   _,

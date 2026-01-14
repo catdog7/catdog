@@ -1,12 +1,14 @@
 import 'package:catdog/ui/pages/friend/view/widget/alarm_widget.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_alarm_view_model.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class FriendAlarmPage extends ConsumerWidget {
-  FriendAlarmPage({super.key});
+class FriendAlarmPage extends HookConsumerWidget {
+  const FriendAlarmPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,6 +18,14 @@ class FriendAlarmPage extends ConsumerWidget {
     FirebaseMessaging.onMessage.listen((message) {
       vm.refresh();
     });
+
+    useEffect(() {
+      FirebaseAnalytics.instance.logScreenView(
+        screenName: 'Friend_Request_List_View',
+        screenClass: 'FriendRequestView',
+      );
+      return null;
+    }, []);
     return state.when(
       skipError: true,
       skipLoadingOnRefresh: true,
