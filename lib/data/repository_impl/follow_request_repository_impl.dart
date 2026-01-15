@@ -156,6 +156,7 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
     return [];
   }
 
+  //내 친구 요청의 상태 확인
   @override
   Future<bool> checkFollowPending(String freindId) async {
     try {
@@ -182,6 +183,37 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
       return false;
     } catch (e) {
       print("Follow Status Check Fail");
+      return false;
+    }
+  }
+
+  //상대가 나에게 요청한게 있는지 확인
+  @override
+  Future<bool> checkRequestPending(String friendId) async {
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId != null) {
+        final result = await _client
+            .from('follow_requests')
+            .select()
+            .eq('from_user_id', friendId)
+            .eq('to_user_id', userId)
+            .maybeSingle();
+        if (result != null) {
+          if (FollowRequestMapper.toDomain(
+                FollowRequestDto.fromJson(result),
+              ).status ==
+              "PENDING") {
+            return true;
+          }
+          return false;
+        } else {
+          return false;
+        }
+      }
+      return false;
+    } catch (e) {
+      print("Request Status Check Fail");
       return false;
     }
   }

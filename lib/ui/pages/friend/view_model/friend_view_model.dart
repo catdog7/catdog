@@ -11,10 +11,6 @@ part 'friend_view_model.g.dart';
 class FriendViewModel extends _$FriendViewModel {
   @override
   Future<FriendState> build() async {
-    final link = ref.keepAlive();
-    Timer(const Duration(minutes: 5), () {
-      link.close();
-    });
     final useCase = ref.watch(friendUseCaseProvider);
     final friends = await useCase.getMyFriends();
     return FriendState(isLoading: false, friends: friends);

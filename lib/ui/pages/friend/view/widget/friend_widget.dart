@@ -1,15 +1,17 @@
 import 'package:catdog/domain/model/friend_info_model.dart';
+import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
 import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
 import 'package:catdog/ui/widgets/more_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FriendWidget extends StatelessWidget {
+class FriendWidget extends ConsumerWidget {
   final FriendInfoModel friend;
   final void Function(String id) onTap;
   const FriendWidget({super.key, required this.friend, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       height: 60,
       color: Colors.transparent,
@@ -17,15 +19,17 @@ class FriendWidget extends StatelessWidget {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
                 //다른 사람 홈페이지 이동
-                Navigator.of(context).push(
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
                       return FriendHomeView(friendUserId: friend.userId);
                     },
                   ),
                 );
+                if (!context.mounted) return;
+                await ref.read(friendViewModelProvider.notifier).refresh();
               },
               child: Container(
                 //color: Colors.transparent,

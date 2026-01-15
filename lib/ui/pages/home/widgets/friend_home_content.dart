@@ -4,6 +4,7 @@ import 'package:catdog/data/dto/feed_dto.dart';
 import 'package:catdog/data/repository_impl/feed_repository_impl.dart';
 import 'package:catdog/domain/model/pet_model.dart';
 import 'package:catdog/domain/model/user_model.dart';
+import 'package:catdog/ui/pages/home/widgets/friend_request_btn.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -210,6 +211,7 @@ class _FriendHomeContentState extends ConsumerState<FriendHomeContent>
             ),
           ],
         ),
+        actions: [FriendRequestBtn(friendId: widget.friendUserId)],
       ),
       body: Stack(
         children: [
