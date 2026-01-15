@@ -62,23 +62,21 @@ class _FeedViewState extends ConsumerState<FeedView> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: const Color(0xFFF8FAFE),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFFFF),
+        backgroundColor: const Color(0xFFF8FAFE),
         elevation: 0,
         automaticallyImplyLeading: false,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        title: const Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            '게시글',
-            style: TextStyle(
-              fontFamily: 'Pretendard',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF000000),
-            ),
+        centerTitle: false,
+        title: const Text(
+          '게시글',
+          style: TextStyle(
+            fontFamily: 'Pretendard',
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF000000),
           ),
         ),
       ),
