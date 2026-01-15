@@ -1,15 +1,17 @@
 import 'package:catdog/domain/model/friend_info_model.dart';
+import 'package:catdog/ui/pages/friend/view_model/friend_search_view_model.dart';
 import 'package:catdog/ui/pages/home/view/friend_home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SearchWidget extends HookWidget {
+class SearchWidget extends HookConsumerWidget {
   final FriendInfoModel user;
   final Function(String id) onTap;
   const SearchWidget({super.key, required this.user, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final clicked = useState(false);
     return Container(
       height: 60,
@@ -17,15 +19,22 @@ class SearchWidget extends HookWidget {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
                 // 다른 사람 홈페이지 이동
-                Navigator.of(context).push(
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
                       return FriendHomeView(friendUserId: user.userId);
                     },
                   ),
                 );
+                if (!context.mounted) return;
+                final result = await ref
+                    .read(friendSearchViewModelProvider.notifier)
+                    .isPending(user.userId);
+                if (result) {
+                  clicked.value = true;
+                }
               },
               child: Container(
                 height: 40,

@@ -204,4 +204,15 @@ class FriendUseCase {
   Future<bool> rejectFollowRequest(String friendId) async {
     return await _followRepo.rejectFollowRequest(friendId);
   }
+
+  Future<(bool isFriend, bool isSendPending, bool isReceivePending)>
+  checkFriendStatus(String friendId) async {
+    final result = await Future.wait([
+      _friendRepo.isFriend(friendId),
+      _followRepo.checkFollowPending(friendId),
+      _followRepo.checkRequestPending(friendId),
+    ]);
+
+    return (result[0], result[1], result[2]);
+  }
 }

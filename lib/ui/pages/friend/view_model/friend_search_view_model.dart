@@ -38,4 +38,11 @@ class FriendSearchViewModel extends _$FriendSearchViewModel {
     print("친구 요청 보냄");
     return await useCase.sendFollowRequest(friendId);
   }
+
+  Future<bool> isPending(String friendId) async {
+    final useCase = ref.read(friendUseCaseProvider);
+    final (isFriend, isSendPending, isReceivePending) = await useCase
+        .checkFriendStatus(friendId);
+    return isSendPending;
+  }
 }
