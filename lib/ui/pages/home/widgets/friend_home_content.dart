@@ -200,13 +200,17 @@ class _FriendHomeContentState extends ConsumerState<FriendHomeContent>
                     ),
             ),
             const SizedBox(width: 8),
-            Text(
-              nickname,
-              style: const TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: semanticTextBlack,
+            Expanded(
+              child: Text(
+                nickname,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: semanticTextBlack,
+                ),
               ),
             ),
           ],

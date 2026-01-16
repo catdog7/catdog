@@ -66,7 +66,9 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     // FCM 초기화
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 1초 정도 여유를 주어 시스템 서비스가 준비될 시간을 줌
+      await Future.delayed(const Duration(seconds: 1));
       ref.read(fcmBootstrapProvider);
     });
 
@@ -86,19 +88,22 @@ class _MyAppState extends ConsumerState<MyApp> {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(20),
           duration: const Duration(seconds: 2),
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  '${event.who ?? ''}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width - 80,
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    '${event.who ?? ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-              Text(message),
-            ],
+                Text(message),
+              ],
+            ),
           ),
         ),
       );

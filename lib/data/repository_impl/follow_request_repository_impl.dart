@@ -137,23 +137,27 @@ class FollowRequestRepositoryImpl implements FollowRequestRepository {
   //내가 보낸 요청들 가져오기
   @override
   Future<List<FollowRequestModel>> getMyRequests() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId != null) {
-      final response1 = await _client
-          .from('follow_requests')
-          .select()
-          .eq('from_user_id', userId);
+    try {
+      final userId = _client.auth.currentUser?.id;
+      if (userId != null) {
+        final response1 = await _client
+            .from('follow_requests')
+            .select()
+            .eq('from_user_id', userId);
 
-      final result1 = response1
-          .map(
-            (json) =>
-                FollowRequestMapper.toDomain(FollowRequestDto.fromJson(json)),
-          )
-          .toList();
+        final result1 = response1
+            .map(
+              (json) =>
+                  FollowRequestMapper.toDomain(FollowRequestDto.fromJson(json)),
+            )
+            .toList();
 
-      return result1;
+        return result1;
+      }
+      return [];
+    } catch (e) {
+      return [];
     }
-    return [];
   }
 
   //내 친구 요청의 상태 확인

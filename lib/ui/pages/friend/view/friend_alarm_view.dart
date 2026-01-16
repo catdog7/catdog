@@ -15,17 +15,20 @@ class FriendAlarmPage extends HookConsumerWidget {
     final state = ref.watch(friendAlarmViewModelProvider);
     final vm = ref.read(friendAlarmViewModelProvider.notifier);
     final friendvm = ref.read(friendViewModelProvider.notifier);
-    FirebaseMessaging.onMessage.listen((message) {
-      vm.refresh();
-    });
 
     useEffect(() {
       FirebaseAnalytics.instance.logScreenView(
         screenName: 'Friend_Request_List_View',
         screenClass: 'FriendRequestView',
       );
-      return null;
+
+      final subscription = FirebaseMessaging.onMessage.listen((message) {
+        vm.refresh();
+      });
+
+      return () => subscription.cancel();
     }, []);
+
     return state.when(
       skipError: true,
       skipLoadingOnRefresh: true,

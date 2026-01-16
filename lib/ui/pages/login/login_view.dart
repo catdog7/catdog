@@ -32,19 +32,22 @@ class _LoginViewState extends ConsumerState<LoginView> {
     super.initState();
     client = ref.read(supabaseClientProvider);
 
-    _authSubscription = client.auth.onAuthStateChange.listen((data) {
-      final session = data.session;
-      if (session != null && !_isNavigating) {
-        _handlePostLoginNavigation(session.user.id);
-      } else {
-        // 세션이 없거나 에러 상황일 때 로딩을 풀어줌
+    _authSubscription = client.auth.onAuthStateChange.listen(
+      (data) {
+        final session = data.session;
+        if (session != null && !_isNavigating) {
+          _handlePostLoginNavigation(session.user.id);
+        } else {
+          // 세션이 없거나 에러 상황일 때 로딩을 풀어줌
+          if (mounted) setState(() => _isLoading = false);
+        }
+      },
+      onError: (error) {
+        // 에러 발생 시 처리
         if (mounted) setState(() => _isLoading = false);
-      }
-    }, onError: (error) {
-      // 에러 발생 시 처리
-      if (mounted) setState(() => _isLoading = false);
-      debugPrint('Auth State Error: $error');
-    });
+        debugPrint('Auth State Error: $error');
+      },
+    );
   }
 
   @override
@@ -94,10 +97,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
           errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.';
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     }
@@ -117,8 +117,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
         return;
       }
 
-      final targetPage =
-          hasNickname ? const HomeView() : const NicknameView();
+      final targetPage = hasNickname ? const HomeView() : const NicknameView();
 
       if (mounted) {
         setState(() => _isLoading = false);
@@ -153,11 +152,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
         OAuthProvider.google,
         redirectTo: 'io.supabase.catdog://login-callback',
         authScreenLaunchMode: LaunchMode.externalApplication,
-        queryParams: {
-          'prompt': 'select_account',
-        },
+        queryParams: {'prompt': 'select_account'},
       );
-      
+
       // OAuth 로그인은 비동기로 앱으로 돌아오며 onAuthStateChange가 트리거됩니다.
       // 사용자가 브라우저를 수동으로 닫을 경우 로딩 상태가 계속 유지될 수 있으므로,
       // 탭을 다시 눌렀을 때 로딩이 풀리도록 로직을 구성했습니다.
@@ -179,16 +176,17 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
     try {
       // iOS/macOS에서는 네이티브 Sign in with Apple 사용
-      if (!kIsWeb && (Theme.of(context).platform == TargetPlatform.iOS || 
-                      Theme.of(context).platform == TargetPlatform.macOS)) {
+      if (!kIsWeb &&
+          (Theme.of(context).platform == TargetPlatform.iOS ||
+              Theme.of(context).platform == TargetPlatform.macOS)) {
         await _appleLoginNative();
       } else {
         // Android, Web, Windows, Linux에서는 OAuth 방식 사용
         await client.auth.signInWithOAuth(
           OAuthProvider.apple,
           redirectTo: kIsWeb ? null : 'io.supabase.catdog://login-callback',
-          authScreenLaunchMode: kIsWeb 
-              ? LaunchMode.platformDefault 
+          authScreenLaunchMode: kIsWeb
+              ? LaunchMode.platformDefault
               : LaunchMode.externalApplication,
         );
       }
@@ -219,7 +217,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
       final idToken = credential.identityToken;
       if (idToken == null) {
         throw const AuthException(
-            'Could not find ID Token from generated credential.');
+          'Could not find ID Token from generated credential.',
+        );
       }
 
       // Supabase에 ID Token으로 로그인
@@ -234,7 +233,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
       if (credential.givenName != null || credential.familyName != null) {
         final nameParts = <String>[];
         if (credential.givenName != null) nameParts.add(credential.givenName!);
-        if (credential.familyName != null) nameParts.add(credential.familyName!);
+        if (credential.familyName != null)
+          nameParts.add(credential.familyName!);
         final fullName = nameParts.join(' ');
 
         await client.auth.updateUser(
@@ -249,8 +249,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
       }
 
       // 로그인 성공 후 네비게이션 처리
-      if (authResponse.session != null && 
-          authResponse.user != null && 
+      if (authResponse.session != null &&
+          authResponse.user != null &&
           !_isNavigating) {
         await _handlePostLoginNavigation(authResponse.user!.id);
       }
@@ -292,11 +292,12 @@ class _LoginViewState extends ConsumerState<LoginView> {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                      ),
                       child: Column(
                         children: [
                           SizedBox(height: availableHeight * 0.2), // 상단 여백 증가
-
                           // 부제목 이미지
                           Image.asset(
                             'assets/images/des.webp',
@@ -305,7 +306,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           ),
 
                           SizedBox(height: availableHeight * 0.02), // 간격 증가
-
                           // 타이틀 이미지
                           Image.asset(
                             'assets/images/title.webp',
@@ -314,7 +314,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           ),
 
                           SizedBox(height: availableHeight * 0.12), // 간격 증가
-
                           // 아이디/비밀번호 로그인 영역
                           if (_showEmailPassword) ...[
                             // 아이디 입력 필드
@@ -322,7 +321,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFE0E0E0)),
+                                border: Border.all(
+                                  color: const Color(0xFFE0E0E0),
+                                ),
                               ),
                               child: TextField(
                                 controller: _emailController,
@@ -334,7 +335,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                     fontSize: 16,
                                   ),
                                   border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
                                 ),
                                 keyboardType: TextInputType.emailAddress,
                                 enabled: !_isLoading,
@@ -348,7 +352,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFE0E0E0)),
+                                border: Border.all(
+                                  color: const Color(0xFFE0E0E0),
+                                ),
                               ),
                               child: TextField(
                                 controller: _passwordController,
@@ -360,7 +366,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                     fontSize: 16,
                                   ),
                                   border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
                                 ),
                                 obscureText: true,
                                 enabled: !_isLoading,
@@ -371,10 +380,12 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
                             // 로그인 버튼
                             SizedBox(
-                              width: double.infinity,
+                              width: constraints.maxWidth,
                               height: 56,
                               child: ElevatedButton(
-                                onPressed: _isLoading ? null : _emailPasswordLogin,
+                                onPressed: _isLoading
+                                    ? null
+                                    : _emailPasswordLogin,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFDCA40),
                                   shape: RoundedRectangleBorder(
@@ -388,7 +399,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                         height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.black,
+                                              ),
                                         ),
                                       )
                                     : const Text(
@@ -417,7 +431,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                   });
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
                                   child: const Text(
                                     '돌아가기',
                                     style: TextStyle(
@@ -439,7 +455,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               onTap: _isLoading ? null : _googleLogin,
                               child: Image.asset(
                                 'assets/images/google.webp',
-                                width: double.infinity,
+                                width: constraints.maxWidth,
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -451,7 +467,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               onTap: _isLoading ? null : _appleLogin,
                               child: Image.asset(
                                 'assets/images/ios.webp',
-                                width: double.infinity,
+                                width: constraints.maxWidth,
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -468,7 +484,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                   });
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
                                   child: const Text(
                                     '아이디, 비밀번호 로그인',
                                     style: TextStyle(
@@ -492,7 +510,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   padding: EdgeInsets.only(
                     left: termsPadding,
                     right: termsPadding,
-                    bottom: safeAreaBottom > 0 ? safeAreaBottom + screenHeight * 0.02 : screenHeight * 0.02,
+                    bottom: safeAreaBottom > 0
+                        ? safeAreaBottom + screenHeight * 0.02
+                        : screenHeight * 0.02,
                   ),
                   child: Text(
                     '회원가입 시 댕냥댕냥 서비스의\n개인정보처리방침 및 이용약관에 동의한것으로\n간주합니다.',
@@ -514,4 +534,3 @@ class _LoginViewState extends ConsumerState<LoginView> {
     );
   }
 }
-

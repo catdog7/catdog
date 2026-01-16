@@ -22,6 +22,8 @@ class FeedEditView extends HookConsumerWidget {
     final viewInsets = MediaQuery.of(context).viewInsets;
     final bool isKeyboardOpen = viewInsets.bottom > 40;
 
+    final isPicking = useState<bool>(false); //이미지 피커 중복 클릭 방지
+
     useEffect(() {
       FirebaseAnalytics.instance.logScreenView(
         screenName: 'Feed_Edit_View',
@@ -31,19 +33,30 @@ class FeedEditView extends HookConsumerWidget {
       FirebaseAnalytics.instance.logEvent(
         name: 'feed_edit_open',
         parameters: {
-          'original_content_length': textLength, // 기존 글의 길이
+          'original_content_length': textLength.value, // 기존 글의 길이
         },
       );
       return null;
     }, []);
 
     Future<void> pickImage() async {
-      final picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (isPicking.value) return;
 
-      if (image != null) {
-        selectedImage.value = image.path;
-        isLocalFile.value = true;
+      try {
+        isPicking.value = true;
+        final picker = ImagePicker();
+        final XFile? image = await picker.pickImage(
+          source: ImageSource.gallery,
+        );
+
+        if (image != null) {
+          selectedImage.value = image.path;
+          isLocalFile.value = true;
+        }
+      } catch (e) {
+        debugPrint("에러 발생: $e");
+      } finally {
+        isPicking.value = false;
       }
     }
 

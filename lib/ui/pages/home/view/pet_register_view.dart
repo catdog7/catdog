@@ -4,6 +4,7 @@ import 'package:catdog/core/config/pet_dependency.dart';
 import 'package:catdog/domain/model/pet_model.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
 import 'package:catdog/ui/pages/home/view/pet_edit_view.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,13 +38,13 @@ class _PetCardData {
   factory _PetCardData.fromPetModel(PetModel pet) {
     final nameController = TextEditingController(text: pet.name);
     final ageController = TextEditingController();
-    
+
     if (pet.birthDatePrecision == 'UNKNOWN') {
       ageController.text = '모름';
     } else if (pet.birthDate != null) {
       ageController.text = DateFormat('yyyy년 M월 d일').format(pet.birthDate!);
     }
-    
+
     return _PetCardData(
       id: pet.id,
       nameController: nameController,
@@ -69,11 +70,18 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
   final _uuid = const Uuid();
   bool _isLoading = false;
   bool _isInitialLoading = true;
+  bool isPicking = false; // 이미지 피커 중복 클릭 방지
 
   @override
   void initState() {
     super.initState();
     _loadExistingPets();
+
+    //화면 진입 로그 기록
+    FirebaseAnalytics.instance.logScreenView(
+      screenName: 'Pet_Register_View',
+      screenClass: 'PetRegisterView',
+    );
   }
 
   @override
@@ -92,16 +100,18 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
       setState(() {
         _isInitialLoading = false;
         if (_petCards.isEmpty) {
-          _petCards.add(_PetCardData(
-            id: 'new_1',
-            nameController: TextEditingController(),
-            ageController: TextEditingController(),
-            selectedSpecies: 'DOG',
-            selectedBirthDate: null,
-            selectedImage: null,
-            isAgeUnknown: false,
-            isExisting: false,
-          ));
+          _petCards.add(
+            _PetCardData(
+              id: 'new_1',
+              nameController: TextEditingController(),
+              ageController: TextEditingController(),
+              selectedSpecies: 'DOG',
+              selectedBirthDate: null,
+              selectedImage: null,
+              isAgeUnknown: false,
+              isExisting: false,
+            ),
+          );
         }
       });
       return;
@@ -118,33 +128,42 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
       setState(() {
         _isInitialLoading = false;
         if (_petCards.isEmpty) {
-          _petCards.add(_PetCardData(
-            id: 'new_1',
-            nameController: TextEditingController(),
-            ageController: TextEditingController(),
-            selectedSpecies: 'DOG',
-            selectedBirthDate: null,
-            selectedImage: null,
-            isAgeUnknown: false,
-            isExisting: false,
-          ));
+          _petCards.add(
+            _PetCardData(
+              id: 'new_1',
+              nameController: TextEditingController(),
+              ageController: TextEditingController(),
+              selectedSpecies: 'DOG',
+              selectedBirthDate: null,
+              selectedImage: null,
+              isAgeUnknown: false,
+              isExisting: false,
+            ),
+          );
         }
       });
     }
   }
 
   void _addPetCard() {
+    //카드 추가 이벤트 기록
+    FirebaseAnalytics.instance.logEvent(
+      name: 'add_pet_card_clicked',
+      parameters: {'current_card_count': _petCards.length},
+    );
     setState(() {
-      _petCards.add(_PetCardData(
-        id: 'new_${DateTime.now().millisecondsSinceEpoch}',
-        nameController: TextEditingController(),
-        ageController: TextEditingController(),
-        selectedSpecies: 'DOG',
-        selectedBirthDate: null,
-        selectedImage: null,
-        isAgeUnknown: false,
-        isExisting: false,
-      ));
+      _petCards.add(
+        _PetCardData(
+          id: 'new_${DateTime.now().millisecondsSinceEpoch}',
+          nameController: TextEditingController(),
+          ageController: TextEditingController(),
+          selectedSpecies: 'DOG',
+          selectedBirthDate: null,
+          selectedImage: null,
+          isAgeUnknown: false,
+          isExisting: false,
+        ),
+      );
     });
   }
 
@@ -155,7 +174,7 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
         final card = _petCards[index];
         card.nameController.dispose();
         card.ageController.dispose();
-        
+
         if (card.isExisting) {
           ref.read(petUseCaseProvider).removePet(card.id).catchError((e) {
             debugPrint('Pet delete error: $e');
@@ -164,19 +183,27 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
             );
           });
         }
-        
+
         _petCards.removeAt(index);
       }
     });
   }
 
   Future<void> _pickImage(_PetCardData cardData) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        cardData.selectedImage = image;
-      });
+    if (isPicking) return;
+    try {
+      isPicking = true;
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          cardData.selectedImage = image;
+        });
+      }
+    } catch (e) {
+      debugPrint("에러 발생: $e");
+    } finally {
+      isPicking = false;
     }
   }
 
@@ -187,7 +214,9 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
     if (cardData.isAgeUnknown) {
       cardData.ageController.text = '모름';
     } else if (cardData.selectedBirthDate != null) {
-      cardData.ageController.text = DateFormat('yyyy년 M월 d일').format(cardData.selectedBirthDate!);
+      cardData.ageController.text = DateFormat(
+        'yyyy년 M월 d일',
+      ).format(cardData.selectedBirthDate!);
     }
 
     await showModalBottomSheet(
@@ -256,27 +285,30 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
                       },
                       child: Row(
                         children: [
-                        Checkbox(
-                          value: tempIsAgeUnknown,
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          onChanged: (value) {
-                            setModalState(() {
-                              tempIsAgeUnknown = value ?? false;
-                            });
-                          },
-                        ),
-                          const Text(
-                            '나이 모름',
-                            style: TextStyle(fontSize: 14),
+                          Checkbox(
+                            value: tempIsAgeUnknown,
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            onChanged: (value) {
+                              setModalState(() {
+                                tempIsAgeUnknown = value ?? false;
+                              });
+                            },
                           ),
+                          const Text('나이 모름', style: TextStyle(fontSize: 14)),
                         ],
                       ),
                     ),
                   ),
 
                   Padding(
-                    padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).padding.bottom + 20),
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      8,
+                      20,
+                      MediaQuery.of(context).padding.bottom + 20,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -314,7 +346,9 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
                                 } else {
                                   cardData.selectedBirthDate = tempDate;
                                   cardData.isAgeUnknown = false;
-                                  cardData.ageController.text = DateFormat('yyyy년 M월 d일').format(tempDate);
+                                  cardData.ageController.text = DateFormat(
+                                    'yyyy년 M월 d일',
+                                  ).format(tempDate);
                                 }
                               });
 
@@ -343,16 +377,16 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
   Future<void> _savePet() async {
     for (var card in _petCards) {
       if (card.nameController.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('모든 반려동물 이름을 입력해주세요.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('모든 반려동물 이름을 입력해주세요.')));
         return;
       }
 
       if (card.selectedBirthDate == null && !card.isAgeUnknown) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('모든 반려동물 나이를 선택해주세요.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('모든 반려동물 나이를 선택해주세요.')));
         return;
       }
     }
@@ -365,15 +399,26 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
       if (userId == null) {
         throw Exception('로그인이 필요합니다.');
       }
+      //등록 시도 로그
+      FirebaseAnalytics.instance.logEvent(
+        name: 'pet_registration_attempt',
+        parameters: {
+          'pet_count': _petCards.length,
+          'has_new_pet': _petCards.any((c) => !c.isExisting),
+        },
+      );
 
       for (var card in _petCards) {
         String? imageUrl = card.existingImageUrl;
-        
+
         if (card.selectedImage != null) {
           try {
-            final fileName = "${DateTime.now().millisecondsSinceEpoch}_${card.id}.jpg";
+            final fileName =
+                "${DateTime.now().millisecondsSinceEpoch}_${card.id}.jpg";
             final bytes = await card.selectedImage!.readAsBytes();
-            await client.storage.from("pet_image").uploadBinary(fileName, bytes);
+            await client.storage
+                .from("pet_image")
+                .uploadBinary(fileName, bytes);
             imageUrl = client.storage.from('pet_image').getPublicUrl(fileName);
           } catch (e) {
             print('Image upload error: $e');
@@ -399,11 +444,17 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
         }
       }
 
+      //최종 등록 성공 로그
+      FirebaseAnalytics.instance.logEvent(
+        name: 'pet_registration_success',
+        parameters: {'final_pet_count': _petCards.length},
+      );
+
       ref.read(showModalProvider.notifier).state = false;
 
       if (mounted) {
         setState(() => _isLoading = false);
-        
+
         await showDialog(
           context: context,
           barrierDismissible: false,
@@ -414,12 +465,17 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
         }
       }
     } catch (e) {
+      //에러 발생 로그
+      FirebaseAnalytics.instance.logEvent(
+        name: 'pet_registration_error',
+        parameters: {'error_message': e.toString()},
+      );
       print('Pet save error: $e');
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('등록 중 오류가 발생했습니다: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('등록 중 오류가 발생했습니다: $e')));
       }
     }
   }
@@ -441,66 +497,64 @@ class _PetRegisterViewState extends ConsumerState<PetRegisterView> {
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
-        child: Column(
-          children: [
-            _Header(
-              onClose: () => Navigator.of(context).pop(),
-            ),
+          child: Column(
+            children: [
+              _Header(onClose: () => Navigator.of(context).pop()),
 
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      ..._petCards.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final cardData = entry.value;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: _PetFormCard(
-                            cardId: '${index + 1}',
-                            selectedSpecies: cardData.selectedSpecies,
-                            onSpeciesChanged: (species) {
-                              setState(() {
-                                cardData.selectedSpecies = species;
-                              });
-                            },
-                            nameController: cardData.nameController,
-                            ageController: cardData.ageController,
-                            selectedBirthDate: cardData.selectedBirthDate,
-                            isAgeUnknown: cardData.isAgeUnknown,
-                            onBirthDateTap: () => _selectBirthDate(cardData),
-                            selectedImage: cardData.selectedImage,
-                            existingImageUrl: cardData.existingImageUrl,
-                            onImageTap: () => _pickImage(cardData),
-                            onImageRemove: () {
-                              setState(() {
-                                cardData.selectedImage = null;
-                                cardData.existingImageUrl = null;
-                              });
-                            },
-                            showRemoveButton: _petCards.length > 1,
-                            onRemove: () => _removePetCard(cardData.id),
-                          ),
-                        );
-                      }),
-                      _AddButton(onPressed: _addPetCard),
-                    ],
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        ..._petCards.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final cardData = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: _PetFormCard(
+                              cardId: '${index + 1}',
+                              selectedSpecies: cardData.selectedSpecies,
+                              onSpeciesChanged: (species) {
+                                setState(() {
+                                  cardData.selectedSpecies = species;
+                                });
+                              },
+                              nameController: cardData.nameController,
+                              ageController: cardData.ageController,
+                              selectedBirthDate: cardData.selectedBirthDate,
+                              isAgeUnknown: cardData.isAgeUnknown,
+                              onBirthDateTap: () => _selectBirthDate(cardData),
+                              selectedImage: cardData.selectedImage,
+                              existingImageUrl: cardData.existingImageUrl,
+                              onImageTap: () => _pickImage(cardData),
+                              onImageRemove: () {
+                                setState(() {
+                                  cardData.selectedImage = null;
+                                  cardData.existingImageUrl = null;
+                                });
+                              },
+                              showRemoveButton: _petCards.length > 1,
+                              onRemove: () => _removePetCard(cardData.id),
+                            ),
+                          );
+                        }),
+                        _AddButton(onPressed: _addPetCard),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-              child: _CompleteButton(
-                isLoading: _isLoading,
-                onPressed: _savePet,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+                child: _CompleteButton(
+                  isLoading: _isLoading,
+                  onPressed: _savePet,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -523,7 +577,11 @@ class _Header extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back, size: 24, color: Color(0xFF1C1B1F)),
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 24,
+                color: Color(0xFF1C1B1F),
+              ),
               onPressed: onClose,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -539,9 +597,7 @@ class _Header extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const PetEditView(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const PetEditView()),
                 );
               },
               child: const Text(
@@ -608,7 +664,7 @@ class _PetFormCard extends StatelessWidget {
             blurRadius: 8,
             offset: Offset(0, 2),
             spreadRadius: 0,
-          )
+          ),
         ],
       ),
       child: Column(
@@ -655,10 +711,7 @@ class _PetFormCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          _InputField(
-            label: '반려동물 이름',
-            controller: nameController,
-          ),
+          _InputField(label: '반려동물 이름', controller: nameController),
           const SizedBox(height: 24),
           _InputField(
             label: '반려동물 나이',
@@ -669,45 +722,42 @@ class _PetFormCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '반려동물 대표사진',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF1C1B1F),
-                      ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '반려동물 대표사진',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1C1B1F),
                     ),
-                    GestureDetector(
-                      onTap: onImageTap,
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 6),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey,
-                              width: 1.0,
-                            ),
-                          ),
+                  ),
+                  GestureDetector(
+                    onTap: onImageTap,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey, width: 1.0),
                         ),
-                        child: const Text(
-                          '이미지 등록하기',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 15,
-                            fontFamily: 'Pretendard',
-                            fontWeight: FontWeight.w500,
-                          ),
+                      ),
+                      child: const Text(
+                        '이미지 등록하기',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 15,
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
               const Spacer(),
               if (selectedImage != null || existingImageUrl != null)
                 SizedBox(
@@ -726,8 +776,10 @@ class _PetFormCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                             image: DecorationImage(
                               image: selectedImage != null
-                                  ? FileImage(File(selectedImage!.path)) as ImageProvider
-                                  : NetworkImage(existingImageUrl!) as ImageProvider,
+                                  ? FileImage(File(selectedImage!.path))
+                                        as ImageProvider
+                                  : NetworkImage(existingImageUrl!)
+                                        as ImageProvider,
                               fit: BoxFit.cover,
                               onError: (exception, stackTrace) {},
                             ),
@@ -742,7 +794,11 @@ class _PetFormCard extends StatelessWidget {
                           child: CircleAvatar(
                             radius: 12,
                             backgroundColor: Colors.black,
-                            child: const Icon(Icons.close, size: 16, color: Colors.white),
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -799,7 +855,9 @@ class _PetType extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 side: BorderSide(
                   width: 1.20,
-                  color: isSelected ? const Color(0xFFFDCA40) : const Color(0xFFDDDFE3),
+                  color: isSelected
+                      ? const Color(0xFFFDCA40)
+                      : const Color(0xFFDDDFE3),
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -890,7 +948,7 @@ class _InputField extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                             color: Color(0xFF1C1B1F),
                           ),
-                          onTap: label == '반려동물 나이' 
+                          onTap: label == '반려동물 나이'
                               ? () {
                                   FocusScope.of(context).unfocus();
                                   onTap?.call();
@@ -948,10 +1006,7 @@ class _CompleteButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onPressed;
 
-  const _CompleteButton({
-    required this.isLoading,
-    required this.onPressed,
-  });
+  const _CompleteButton({required this.isLoading, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -960,9 +1015,7 @@ class _CompleteButton extends StatelessWidget {
         backgroundColor: const Color(0xFFFDCA40),
         minimumSize: const Size(double.infinity, 52),
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       ),
       onPressed: isLoading ? null : onPressed,
       child: isLoading
