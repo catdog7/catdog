@@ -33,12 +33,15 @@ class MypageViewModel extends _$MypageViewModel {
       final allFeeds = await repository.getFeeds();
       final myFeeds = allFeeds.where((feed) => feed.userId == user.id).toList();
 
+        print("DB에서 가져온 유저 데이터: $userData");
+
       // 2. 상태 업데이트 (닉네임 등은 나중에 유저 테이블에서 가져오도록 확장 가능)
       state = state.copyWith(
       isLoading: false,
       nickname: userData['nickname'],
-      inviteCode: "dsfsdgr3561",
-      myFeeds: myFeeds,
+      inviteCode: userData['invite_code'],
+      profileImageUrl: userData['profile_image_url'],
+      myFeeds: myFeeds
     );
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
@@ -70,6 +73,25 @@ Future<void> updateProfileImage(String imagePath) async {
     await fetchMyData();
   } catch (e) {
     state = state.copyWith(isLoading: false, errorMessage: "이미지 변경 실패: $e");
+  }
+}
+//마이페이지 수정 부분
+Future<void> updateNickname(String newNickname) async {
+  state = state.copyWith(isLoading: true);
+  try {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    // Supabase DB 업데이트
+    await Supabase.instance.client
+        .from('users')
+        .update({'nickname': newNickname})
+        .eq('id', user.id);
+
+    // 성공 시 상태 반영 및 다시 불러오기
+    await fetchMyData();
+  } catch (e) {
+    state = state.copyWith(isLoading: false, errorMessage: "닉네임 수정 실패: $e");
   }
 }
 }
