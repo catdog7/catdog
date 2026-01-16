@@ -11,6 +11,7 @@ import 'package:catdog/ui/pages/home/view/pet_register_view.dart';
 import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomeContent extends ConsumerStatefulWidget {
@@ -92,6 +93,9 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
         return timeB.compareTo(timeA); // 내림차순 (최신이 위로)
       });
       
+      // Update Android frame widget with latest feed image
+      _updateFrameWidget(sortedFeeds);
+      
       if (mounted) {
         setState(() {
           _user = user;
@@ -106,6 +110,12 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
         ref.read(showModalProvider.notifier).state = false;
       }
     }
+  }
+
+  void _updateFrameWidget(List<FeedDto> feeds) {
+    const channel = MethodChannel('com.team.catdog/widget');
+    final latestImageUrl = feeds.isNotEmpty ? feeds.first.imageUrl : null;
+    channel.invokeMethod('updateFrameWidget', {'imageUrl': latestImageUrl});
   }
 
   String _formatBirthDate(PetModel pet) {
@@ -225,6 +235,10 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
               color: semanticTextBlack,
             ),
             onPressed: () async {
+              // Clear frame widget data before logout
+              const channel = MethodChannel('com.team.catdog/widget');
+              channel.invokeMethod('updateFrameWidget', {'imageUrl': null});
+              
               final client = ref.read(supabaseClientProvider);
               await client.auth.signOut();
               if (mounted) {
