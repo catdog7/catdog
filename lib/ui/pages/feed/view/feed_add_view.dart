@@ -18,6 +18,7 @@ class FeedAddView extends HookConsumerWidget {
     final isEnabled = selectedImage != null && textLength.value >= 1;
     final viewInsets = MediaQuery.of(context).viewInsets;
     final bool isKeyboardOpen = viewInsets.bottom > 40;
+    final isPicking = useState<bool>(false); // 이미지 피커 중복 클릭 방지
 
     useEffect(() {
       FirebaseAnalytics.instance.logScreenView(
@@ -75,11 +76,14 @@ class FeedAddView extends HookConsumerWidget {
                     children: [
                       const SizedBox(height: 16),
                       GestureDetector(
-                        onTap: () {
-                          viewModel.pickImage();
+                        onTap: () async {
+                          if (isPicking.value) return;
+                          isPicking.value = true;
+                          await viewModel.pickImage();
                           FirebaseAnalytics.instance.logEvent(
                             name: 'feed_image_pick_click',
                           );
+                          isPicking.value = false;
                         },
                         child: Container(
                           width: 68,

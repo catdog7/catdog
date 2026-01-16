@@ -5,6 +5,7 @@ import 'package:catdog/ui/pages/friend/view_model/friend_alarm_view_model.dart';
 import 'package:catdog/ui/pages/friend/view_model/friend_view_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -20,9 +21,14 @@ class FriendView extends HookConsumerWidget {
       loading: () => false,
       error: (_, __) => false,
     );
-    FirebaseMessaging.onMessage.listen((message) {
-      vm.refresh();
-    });
+
+    useEffect(() {
+      final subscription = FirebaseMessaging.onMessage.listen((message) {
+        ref.read(friendViewModelProvider.notifier).refresh();
+      });
+      return subscription.cancel; // 위젯 제거 시 리스너 해제
+    }, []);
+
     return state.when(
       skipError: true,
       skipLoadingOnRefresh: true,

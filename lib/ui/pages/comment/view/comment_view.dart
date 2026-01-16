@@ -173,73 +173,77 @@ class CommentView extends HookConsumerWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    border: Border(top: BorderSide(color: Colors.grey[100]!)),
+                    border: Border(top: BorderSide(color: Color(0xFFD9D9D9))),
                   ),
                   child: SafeArea(
-                    child: Row(
-                      children: [
-                        const CircleAvatar(
-                          radius: 18,
-                          backgroundImage: AssetImage(
-                            'assets/images/default_image.webp',
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              border: hasText.value
-                                  ? Border.all(color: Color(0xFF666666))
-                                  : Border.all(color: Color(0xFFD9D9D9)),
-                              borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 18,
+                            backgroundImage: AssetImage(
+                              'assets/images/default_image.webp',
                             ),
-                            child: TextField(
-                              minLines: 1,
-                              maxLines: 2,
-                              controller: comment,
-                              textInputAction: TextInputAction.done,
-                              onChanged: (value) {
-                                hasText.value = value.isNotEmpty;
-                              },
-                              onSubmitted: (value) async {
-                                if (value.trim().isNotEmpty) {
-                                  vm.addComment(
-                                    CommentInfoModel(
-                                      id: uuid.v4(),
-                                      userId: data.myInfo?.id ?? "",
-                                      nickname: data.myInfo?.nickname ?? "",
-                                      content: comment.text,
-                                      isLike: false,
-                                      likeCount: 0,
-                                    ),
-                                  );
-                                }
-                                print("댓글 입력 : ${comment.text}");
-                                // WidgetsBinding.instance.addPostFrameCallback((
-                                //   _,
-                                // ) {
-                                //   scrollToTop();
-                                // });
-                                comment.clear();
-                                hasText.value = false;
-                              },
-                              decoration: InputDecoration(
-                                hintText: "댓글을 남겨보세요.",
-                                border: InputBorder.none,
-                                hintStyle: TextStyle(
-                                  fontSize: 15,
-                                  color: Color(0xFFB3B3B3),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              decoration: BoxDecoration(
+                                border: hasText.value
+                                    ? Border.all(color: Color(0xFF666666))
+                                    : Border.all(color: Color(0xFFD9D9D9)),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: TextField(
+                                minLines: 1,
+                                maxLines: 2,
+                                controller: comment,
+                                textInputAction: TextInputAction.done,
+                                onChanged: (value) {
+                                  hasText.value = value.isNotEmpty;
+                                },
+                                onSubmitted: (value) async {
+                                  if (value.trim().isNotEmpty) {
+                                    vm.addComment(
+                                      CommentInfoModel(
+                                        id: uuid.v4(),
+                                        userId: data.myInfo?.id ?? "",
+                                        nickname: data.myInfo?.nickname ?? "",
+                                        content: comment.text,
+                                        isLike: false,
+                                        likeCount: 0,
+                                      ),
+                                    );
+                                  }
+                                  print("댓글 입력 : ${comment.text}");
+                                  // WidgetsBinding.instance.addPostFrameCallback((
+                                  //   _,
+                                  // ) {
+                                  //   scrollToTop();
+                                  // });
+                                  comment.clear();
+                                  hasText.value = false;
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "댓글을 남겨보세요.",
+                                  border: InputBorder.none,
+                                  hintStyle: TextStyle(
+                                    fontSize: 15,
+                                    color: Color(0xFFB3B3B3),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-
                 SizedBox(height: keyboardHeight),
               ],
             ),
