@@ -1,7 +1,9 @@
 import 'package:catdog/ui/pages/feed/view/feed_view.dart';
+import 'package:catdog/ui/pages/mypage/view/mypage_edit_view.dart';
 import 'package:catdog/ui/pages/mypage/view_model/mypage_view_model.dart';
 import 'package:catdog/data/dto/feed_dto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class MypageView extends HookConsumerWidget {
@@ -22,7 +24,7 @@ class MypageView extends HookConsumerWidget {
         ],
         backgroundColor: Colors.white,
         elevation: 0,
-        scrolledUnderElevation: 0, // 스크롤 시 앱바 색상 변함 방지
+        scrolledUnderElevation: 0,
       ),
       body: myPageState.isLoading 
         ? const Center(child: CircularProgressIndicator())
@@ -32,12 +34,11 @@ class MypageView extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //  상단 프로필 카드 (노란색 영역)
-                  _buildProfileHeader(myPageState),
+                  
+                  _buildProfileHeader(context, myPageState),
                   
                   const SizedBox(height: 30),
                   
-                  //  내가 쓴 게시글 목록 
                   if (myPageState.myFeeds.isEmpty)
                     const Center(child: Text("\n아직 작성한 게시글이 없습니다."))
                   else
@@ -48,7 +49,6 @@ class MypageView extends HookConsumerWidget {
                       separatorBuilder: (context, index) => const SizedBox(height: 16),
                       itemBuilder: (context, index) {
                         final feed = myPageState.myFeeds[index];
-                        // ✅ 새로 바뀐 피드 카드 위젯 호출
                         return myFeedCard(context, ref, feed);
                       },
                     ),
@@ -59,8 +59,8 @@ class MypageView extends HookConsumerWidget {
     );
   }
 
-  // 상단 노란색 프로필 카드 위젯
-  Widget _buildProfileHeader(dynamic state) {
+
+  Widget _buildProfileHeader(BuildContext context, dynamic state) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -73,30 +73,77 @@ class MypageView extends HookConsumerWidget {
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 state.nickname ?? "이름 없음", 
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Text(
-                "초대코드 ${state.inviteCode ?? ""}",
-                style: const TextStyle(fontSize: 14, color: Colors.black54),
+              // 코드 복사
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (state.inviteCode != null) {
+                        Clipboard.setData(ClipboardData(text: state.inviteCode!));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("초대코드를 클립보드에 복사했습니다.")),
+                        );
+                      }
+                    },
+                    child: const Icon(Icons.copy, size: 16, color: Colors.black54),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    "초대코드 ${state.inviteCode ?? ""}",
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                ],
               ),
             ],
           ),
-          CircleAvatar(
-            radius: 35,
-            backgroundColor: Colors.white,
-            backgroundImage: state.profileImageUrl != null 
-                ? NetworkImage(state.profileImageUrl!) 
-                : null,
-            child: state.profileImageUrl == null 
-                ? const Icon(Icons.person, size: 40, color: Colors.grey) 
-                : null,
-          ),
+          // 이미지 편집 함수를 호출합니다.
+          _buildProfileImageStack(context, state),
         ],
       ),
+    );
+  }
+
+  //stack 함수입니다.
+  Widget _buildProfileImageStack(BuildContext context, dynamic state) {
+    return Stack(
+      children: [
+        CircleAvatar(
+          radius: 35,
+          backgroundColor: Colors.white,
+          backgroundImage: state.profileImageUrl != null 
+              ? NetworkImage(state.profileImageUrl!) 
+              : null,
+          child: state.profileImageUrl == null 
+              ? const Icon(Icons.person, size: 40, color: Colors.grey) 
+              : null,
+        ),
+        // 연필 모양 편집 버튼
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> MypageEditView()));
+              
+            },
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.edit, size: 12, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
