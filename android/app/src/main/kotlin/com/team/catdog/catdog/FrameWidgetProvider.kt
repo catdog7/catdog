@@ -2,39 +2,37 @@ package com.team.catdog.catdog
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.widget.RemoteViews
+import es.antonborri.home_widget.HomeWidgetProvider
 import java.net.URL
 import java.util.concurrent.Executors
 
-class FrameWidgetProvider : AppWidgetProvider() {
-    
-    companion object {
-        private const val PREFS_NAME = "frame_widget_prefs"
-        private const val PREF_LATEST_IMAGE_URL = "latest_image_url"
-    }
+class FrameWidgetProvider : HomeWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
+        appWidgetIds: IntArray,
+        widgetData: SharedPreferences
     ) {
         for (appWidgetId in appWidgetIds) {
-            updateWidget(context, appWidgetManager, appWidgetId)
+            updateWidget(context, appWidgetManager, appWidgetId, widgetData)
         }
     }
 
     private fun updateWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
-        appWidgetId: Int
+        appWidgetId: Int,
+        widgetData: SharedPreferences
     ) {
         val views = RemoteViews(context.packageName, R.layout.frame_widget_layout)
 
@@ -52,9 +50,8 @@ class FrameWidgetProvider : AppWidgetProvider() {
 
         views.setOnClickPendingIntent(R.id.frame_image, pendingIntent)
 
-        // Get saved image URL from SharedPreferences
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val imageUrl = prefs.getString(PREF_LATEST_IMAGE_URL, null)
+        // Get saved image URL from home_widget SharedPreferences
+        val imageUrl = widgetData.getString("latest_image_url", null)
 
         if (imageUrl != null && imageUrl.isNotEmpty()) {
             // Load image from URL in background thread
@@ -66,6 +63,10 @@ class FrameWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    companion object {
+        private val executor = Executors.newCachedThreadPool()
+    }
+
     private fun loadImageFromUrl(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -73,7 +74,6 @@ class FrameWidgetProvider : AppWidgetProvider() {
         views: RemoteViews,
         imageUrl: String
     ) {
-        val executor = Executors.newSingleThreadExecutor()
         val handler = Handler(Looper.getMainLooper())
 
         executor.execute {
@@ -86,10 +86,16 @@ class FrameWidgetProvider : AppWidgetProvider() {
                         // Crop to square (1:1 aspect ratio)
                         val squareBitmap = cropToSquare(originalBitmap)
                         views.setImageViewBitmap(R.id.frame_image, squareBitmap)
+                        appWidgetManager.updateAppWidget(appWidgetId, views)
+                        
+                        // Recycle original bitmap to free memory
+                        if (!originalBitmap.isRecycled && originalBitmap != squareBitmap) {
+                            originalBitmap.recycle()
+                        }
                     } else {
                         views.setImageViewResource(R.id.frame_image, R.drawable.ic_frame_default)
+                        appWidgetManager.updateAppWidget(appWidgetId, views)
                     }
-                    appWidgetManager.updateAppWidget(appWidgetId, views)
                 }
             } catch (e: Exception) {
                 handler.post {

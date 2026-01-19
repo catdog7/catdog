@@ -18,8 +18,9 @@ final showModalProvider = StateProvider<bool>((ref) => false);
 
 class HomeView extends ConsumerStatefulWidget {
   final int initialIndex;
+  final String? initialDeepLink;
   
-  const HomeView({super.key, this.initialIndex = 1});
+  const HomeView({super.key, this.initialIndex = 1, this.initialDeepLink});
 
   @override
   ConsumerState<HomeView> createState() => _HomeViewState();
@@ -42,6 +43,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
     
     // 리스너를 최대한 빨리 등록하여 신호를 놓치지 않도록 함
     _setupWidgetLink();
+
+    // SplashView에서 전달된 딥링크 처리 (Cold Start)
+    if (widget.initialDeepLink != null) {
+      debugPrint('HomeView: Processing initialDeepLink from SplashView: ${widget.initialDeepLink}');
+      _hasPendingNavigation = true;
+      _lastHandledTime = DateTime.now();
+    }
 
     // 위젯 빌드가 끝난 후 실행되도록 보장 (다이얼로그 표시 및 지연된 네비게이션 처리)
     WidgetsBinding.instance.addPostFrameCallback((_) {

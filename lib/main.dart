@@ -66,9 +66,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     // FCM 초기화
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // 1초 정도 여유를 주어 시스템 서비스가 준비될 시간을 줌
-      await Future.delayed(const Duration(seconds: 1));
+    Future.microtask(() {
       ref.read(fcmBootstrapProvider);
     });
 
@@ -88,22 +86,19 @@ class _MyAppState extends ConsumerState<MyApp> {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(20),
           duration: const Duration(seconds: 2),
-          content: SizedBox(
-            width: MediaQuery.of(context).size.width - 80,
-            child: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    '${event.who ?? ''}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  '${event.who ?? ''}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Text(message),
-              ],
-            ),
+              ),
+              Text(message),
+            ],
           ),
         ),
       );
@@ -140,9 +135,11 @@ class _MyAppState extends ConsumerState<MyApp> {
       scaffoldMessengerKey: scaffoldMessengerKey,
       // 딥링크 처리 시 Flutter Navigator가 해당 경로를 찾지 못해 발생하는 에러 방지
       onGenerateRoute: (settings) {
-        // Supabase OAuth 콜백 등 딥링크 경로는 여기서 처리하지 않고 무시함
+        // 위젯 딥링크 등은 SplashView에서 처리하도록 함
+        // Supabase OAuth 콜백 등도 SplashView -> 로직 처리 흐름을 타게 하거나
+        // 필요한 경우 분기 처리. 여기서는 빈 화면(Black Screen) 방지를 위해 SplashView 반환
         return MaterialPageRoute(
-          builder: (_) => const SizedBox.shrink(),
+          builder: (_) => const SplashView(),
           settings: settings,
         );
       },
