@@ -59,14 +59,14 @@ Future<void> updateProfileImage(String imagePath) async {
     final file = File(imagePath);
     final fileName = 'profile_${user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-    // 1. Storage 업로드 (기존에 만든 feed_images 버킷 혹은 profile 버킷 사용)
-    await Supabase.instance.client.storage.from('feed_images').upload(fileName, file);
-    final imageUrl = Supabase.instance.client.storage.from('feed_images').getPublicUrl(fileName);
+    // 1. Storage 업로드 프로파일로 변경
+    await Supabase.instance.client.storage.from('profile_image').upload(fileName, file);
+    final imageUrl = Supabase.instance.client.storage.from('profile_image').getPublicUrl(fileName);
 
     // 2. Users 테이블 업데이트
     await Supabase.instance.client
         .from('users')
-        .update({'image_url': imageUrl})
+        .update({'profile_image_url': imageUrl})
         .eq('id', user.id);
 
     // 3. 다시 데이터 불러오기
