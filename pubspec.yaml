@@ -69,6 +69,7 @@ dependencies:
   crypto: ^3.0.5                     # SHA256 해싱용
   firebase_crashlytics: ^5.0.6
   firebase_analytics: ^12.1.0
+  home_widget: ^0.9.0
   flutter_image_compress: ^2.4.0
   path_provider: ^2.1.5
 

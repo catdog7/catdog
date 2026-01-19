@@ -1,6 +1,7 @@
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/pet_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
+import 'package:catdog/core/service/widget_service.dart';
 import 'package:catdog/data/dto/feed_dto.dart';
 import 'package:catdog/data/repository_impl/feed_repository_impl.dart';
 import 'package:catdog/domain/model/pet_model.dart';
@@ -11,7 +12,6 @@ import 'package:catdog/ui/pages/home/view/pet_register_view.dart';
 import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomeContent extends ConsumerStatefulWidget {
@@ -113,9 +113,8 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
   }
 
   void _updateFrameWidget(List<FeedDto> feeds) {
-    const channel = MethodChannel('com.team.catdog/widget');
     final latestImageUrl = feeds.isNotEmpty ? feeds.first.imageUrl : null;
-    channel.invokeMethod('updateFrameWidget', {'imageUrl': latestImageUrl});
+    WidgetService.updateLatestImageUrl(latestImageUrl);
   }
 
   String _formatBirthDate(PetModel pet) {
@@ -236,8 +235,7 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
             ),
             onPressed: () async {
               // Clear frame widget data before logout
-              const channel = MethodChannel('com.team.catdog/widget');
-              channel.invokeMethod('updateFrameWidget', {'imageUrl': null});
+              await WidgetService.clearWidgetData();
               
               final client = ref.read(supabaseClientProvider);
               await client.auth.signOut();

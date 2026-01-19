@@ -1,11 +1,13 @@
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/user_dependency.dart';
+import 'package:catdog/core/service/widget_service.dart';
 import 'package:catdog/ui/pages/home/home_view.dart';
 import 'package:catdog/ui/pages/login/nickname_view.dart';
 import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 
 class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
@@ -90,33 +92,60 @@ class _SplashViewState extends ConsumerState<SplashView> {
 
   Future<void> _runInit() async {
     try {
+      // 1. 위젯 실행 여부 먼저 확인 (딜레이 없이 즉시 반응하기 위함)
+      String? widgetDeepLink;
+      try {
+        final initialUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
+        debugPrint('SplashView: initialUri from home_widget = $initialUri');
+        
+        if (initialUri != null && initialUri.toString().startsWith('catdog-widget://')) {
+          widgetDeepLink = initialUri.toString();
+          debugPrint('SplashView: widgetDeepLink confirmed = $widgetDeepLink');
+        }
+      } catch (e) {
+        debugPrint('SplashView: initiallyLaunchedFromHomeWidget error: $e');
+      }
+
+      // 2. 위젯으로 실행된 경우가 아니라면, 스플래시 최소 표시 시간 준수
+      // (위젯 실행 시에는 사용자가 빠른 진입을 원하므로 딜레이 스킵)
+      if (widgetDeepLink == null) {
+        await Future.delayed(const Duration(milliseconds: 2000));
+      } else {
+        debugPrint('SplashView: Widget launch detected. Skipping splash delay.');
+      }
+
+      // 3. 세션 확인 및 네비게이션
       final client = ref.read(supabaseClientProvider);
       final useCase = ref.read(userUseCaseProvider);
 
-      await Future.delayed(const Duration(milliseconds: 2000));
-
       final session = client.auth.currentSession;
-
+      
       if (!mounted) return;
 
       if (session == null) {
+        debugPrint('SplashView: Login Check Failed (No Session) -> Navigate to LoginView');
         await FirebaseAnalytics.instance.logEvent(name: 'splash_to_login');
         _navigate(const LoginView());
         return;
       }
 
+      debugPrint('SplashView: Login Check Passed (User ID: ${session.user.id})');
       final hasNickname = await useCase.hasNickname(session.user.id);
 
       if (!mounted) return;
 
       if (!hasNickname) {
+        debugPrint('SplashView: No Nickname -> Navigate to NicknameView');
         await FirebaseAnalytics.instance.logEvent(name: 'splash_to_nickname');
         _navigate(const NicknameView());
       } else {
+        debugPrint('SplashView: All Checks Passed -> Navigate to HomeView (deepLink: $widgetDeepLink)');
         await FirebaseAnalytics.instance.logEvent(name: 'splash_to_home');
-        _navigate(const HomeView());
+        // 위젯 딥링크가 있으면 HomeView에 전달
+        _navigate(HomeView(initialDeepLink: widgetDeepLink));
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('SplashView._runInit error: $e');
       if (mounted) _navigate(const LoginView());
     }
   }

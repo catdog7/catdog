@@ -35,24 +35,6 @@ class MainActivity: FlutterActivity() {
                     result.success(initialUri)
                     initialUri = null // Reset after consumption
                 }
-                "updateFrameWidget" -> {
-                    val imageUrl = call.argument<String>("imageUrl")
-                    android.util.Log.d("MainActivity", "updateFrameWidget: $imageUrl")
-                    
-                    // Save to SharedPreferences
-                    val prefs = getSharedPreferences("frame_widget_prefs", MODE_PRIVATE)
-                    prefs.edit().putString("latest_image_url", imageUrl).apply()
-                    
-                    // Trigger widget update
-                    val intent = Intent(this, FrameWidgetProvider::class.java)
-                    intent.action = android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                    val ids = android.appwidget.AppWidgetManager.getInstance(this)
-                        .getAppWidgetIds(android.content.ComponentName(this, FrameWidgetProvider::class.java))
-                    intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                    sendBroadcast(intent)
-                    
-                    result.success(true)
-                }
                 else -> result.notImplemented()
             }
         }
