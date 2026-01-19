@@ -7,7 +7,7 @@ part of 'friend_home_request_view_model.dart';
 // **************************************************************************
 
 String _$friendHomeRequestViewModelHash() =>
-    r'51f778bf31e7d4e0fba0cb7cd9648edf8f5c1b9a';
+    r'728a4031e4ee19b5fbcb49afc11d29825d14f4de';
 
 /// Copied from Dart SDK
 class _SystemHash {

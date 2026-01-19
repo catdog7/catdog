@@ -633,7 +633,7 @@ class _Header extends StatelessWidget {
               '내 반려동물',
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: Color(0xFF1C1B1F),
               ),
             ),
@@ -1006,18 +1006,21 @@ class _PetFormCard extends StatelessWidget {
             ),
           )
         else
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.grey.shade300,
-            ),
-            child: Center(
-              child: Image.asset(
-                'assets/icon/photo_camera.webp',
-                width: 19,
-                height: 19,
+          GestureDetector(
+            onTap: onImageTap,
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey.shade300,
+              ),
+              child: Center(
+                child: Image.asset(
+                  'assets/icon/photo_camera.webp',
+                  width: 19,
+                  height: 19,
+                ),
               ),
             ),
           ),

@@ -211,38 +211,51 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
                     ),
                   ),
                 ),
-                if (isMyFeed)
-                  MoreWidget(
-                    menus: [
-                      MenuAction(
-                        title: '수정',
-                        onTap: (_) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FeedEditView(feed: feed),
-                            ),
-                          );
-                        },
-                      ),
-                      MenuAction(
-                        title: '삭제',
-                        onTap: (_) async {
-                          // 삭제 확인 팝업
-                          final result = await DeleteDialog.show(
-                            context: context,
-                            title: '게시글을 삭제하시겠습니까?',
-                          );
-                          if (result == true) {
-                            print("삭제 팝업 결과 true");
-                            ref
-                                .read(feedViewModelProvider.notifier)
-                                .deleteFeed(feed.id);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
+                MoreWidget(
+                  menus: isMyFeed
+                      ? [
+                          MenuAction(
+                            title: '수정',
+                            onTap: (_) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      FeedEditView(feed: feed),
+                                ),
+                              );
+                            },
+                          ),
+                          MenuAction(
+                            title: '삭제',
+                            onTap: (_) async {
+                              final result = await DeleteDialog.show(
+                                context: context,
+                                title: '게시글을 삭제하시겠습니까?',
+                              );
+                              if (result == true) {
+                                ref
+                                    .read(feedViewModelProvider.notifier)
+                                    .deleteFeed(feed.id);
+                              }
+                            },
+                          ),
+                        ]
+                      : [
+                          MenuAction(
+                            title: '신고',
+                            onTap: (_) {
+                              _showReportDialog(context, ref, feed);
+                            },
+                          ),
+                          MenuAction(
+                            title: '사용자 차단',
+                            onTap: (_) {
+                              _showBlockDialog(context, ref, feed);
+                            },
+                          ),
+                        ],
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -294,5 +307,70 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
         ),
       );
     },
+  );
+}
+
+void _showReportDialog(BuildContext context, WidgetRef ref, FeedDto feed) {
+  final reasons = ['스팸/부적절한 홍보', '욕설/비방', '음란/선정성', '기타'];
+  
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('신고 사유 선택', style: TextStyle(fontWeight: FontWeight.bold)),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: reasons.length,
+          separatorBuilder: (context, index) => const Divider(height: 1),
+          itemBuilder: (context, index) => ListTile(
+            title: Text(reasons[index]),
+            onTap: () {
+              Navigator.pop(context);
+              ref.read(feedViewModelProvider.notifier).reportFeed(
+                feed.id, 
+                feed.userId, 
+                reasons[index]
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('신고가 접수되었습니다.')),
+              );
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+void _showBlockDialog(BuildContext context, WidgetRef ref, FeedDto feed) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('사용자 차단', style: TextStyle(fontWeight: FontWeight.bold)),
+      content: const Text('이 사용자의 게시글이 더 이상 보이지 않게 됩니다.\n정말 차단하시겠습니까?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("취소", style: TextStyle(color: Colors.grey)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            ref.read(feedViewModelProvider.notifier).blockUser(feed.userId);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('사용자를 차단했습니다.')),
+            );
+          }, 
+          child: const Text("차단", style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
   );
 }

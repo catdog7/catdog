@@ -10,7 +10,7 @@ _$UserDtoImpl _$$UserDtoImplFromJson(Map<String, dynamic> json) =>
     _$UserDtoImpl(
       id: json['id'] as String,
       nickname: json['nickname'] as String,
-      inviteCode: json['invite_code'] as String,
+      inviteCode: json['invite_code'] as String?,
       profileImageUrl: json['profile_image_url'] as String?,
       email: json['email'] as String?,
       provider: json['provider'] as String?,

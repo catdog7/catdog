@@ -5,10 +5,18 @@ import 'package:home_widget/home_widget.dart';
 class WidgetService {
   static const String _androidFrameWidgetName = 'FrameWidgetProvider';
   static const String _androidPostWidgetName = 'PostWidgetProvider';
+  static const String _iosGroupId = 'group.com.team.catdog.catdog'; // Xcode에서 설정한 App Group ID와 일치해야 함
+
+  static Future<void> _initAppGroup() async {
+    if (Platform.isIOS) {
+      await HomeWidget.setAppGroupId(_iosGroupId);
+    }
+  }
   
   /// 최신 피드 이미지 URL을 위젯에 저장하고 업데이트
   static Future<void> updateLatestImageUrl(String? imageUrl) async {
     try {
+      await _initAppGroup();
       // 데이터 저장
       await HomeWidget.saveWidgetData<String>('latest_image_url', imageUrl ?? '');
       
@@ -27,6 +35,7 @@ class WidgetService {
   /// 위젯 클릭으로 앱이 시작되었는지 확인
   static Future<Uri?> getInitialWidgetUri() async {
     try {
+      await _initAppGroup();
       return await HomeWidget.initiallyLaunchedFromHomeWidget();
     } catch (e) {
       print('WidgetService.getInitialWidgetUri error: $e');
@@ -40,6 +49,7 @@ class WidgetService {
   /// 로그아웃 시 위젯 데이터 초기화
   static Future<void> clearWidgetData() async {
     try {
+      await _initAppGroup();
       await HomeWidget.saveWidgetData<String>('latest_image_url', '');
       
       if (Platform.isAndroid) {

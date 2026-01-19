@@ -1,5 +1,6 @@
 import 'package:catdog/ui/pages/feed/view/feed_view.dart';
 import 'package:catdog/ui/pages/mypage/view/mypage_edit_view.dart';
+import 'package:catdog/ui/pages/mypage/view/block_manage_view.dart';
 import 'package:catdog/ui/pages/mypage/view_model/mypage_view_model.dart';
 import 'package:catdog/data/dto/feed_dto.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +19,41 @@ class MypageView extends HookConsumerWidget {
       appBar: AppBar(
         centerTitle: false,
         title: const Text("마이페이지", style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: const [
-          Icon(Icons.more_vert),
-          SizedBox(width: 15),
+        actions: [
+          PopupMenuButton<String>(
+            color: Colors.white,
+            surfaceTintColor: Colors.white,
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'logout') {
+                _showLogoutDialog(context, ref);
+              } else if (value == 'delete') {
+                _showDeleteDialog(context, ref);
+              } else if (value == 'block_manage') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BlockManageView(),
+                  ),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'block_manage',
+                child: Text('차단 관리'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Text('로그아웃'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delete',
+                child: Text('회원탈퇴'),
+              ),
+            ],
+          ),
+          const SizedBox(width: 15),
         ],
         backgroundColor: Colors.white,
         elevation: 0,
@@ -144,6 +177,55 @@ class MypageView extends HookConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        title: const Text('로그아웃'),
+        content: const Text('정말 로그아웃 하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              ref.read(mypageViewModelProvider.notifier).logout(context);
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        title: const Text('회원탈퇴'),
+        content: const Text('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              ref.read(mypageViewModelProvider.notifier).deleteAccount(context);
+            },
+            child: const Text('탈퇴', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 }

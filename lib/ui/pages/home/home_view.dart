@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:home_widget/home_widget.dart';
 
 
 final showModalProvider = StateProvider<bool>((ref) => false);
@@ -29,7 +30,7 @@ class HomeView extends ConsumerStatefulWidget {
 class _HomeViewState extends ConsumerState<HomeView> {
   late int _selectedIndex;
   int _homeContentKey = 0;
-  static const _channel = MethodChannel('com.team.catdog/widget');
+  // static const _channel = MethodChannel('com.team.catdog/widget'); // Removed legacy channel
   bool _isHandlingDeepLink = false;
   DateTime? _lastHandledTime;
   bool _hasPendingNavigation = false;
@@ -98,16 +99,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
   }
 
   void _setupWidgetLink() {
-    _channel.setMethodCallHandler((call) async {
-      if (call.method == 'onDeepLink') {
-        final String uri = call.arguments;
-        _handleDeepLink(uri);
-      }
-    });
-
-    _channel.invokeMethod<String>('getInitialUri').then((uri) {
+    // 앱이 실행 중일 때 위젯 클릭 이벤트를 수신 (Hot Start)
+    HomeWidget.widgetClicked.listen((Uri? uri) {
       if (uri != null) {
-        _handleDeepLink(uri);
+        _handleDeepLink(uri.toString());
       }
     });
   }

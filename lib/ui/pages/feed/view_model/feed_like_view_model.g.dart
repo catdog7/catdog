@@ -6,7 +6,7 @@ part of 'feed_like_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$feedLikeViewModelHash() => r'd295b34083b37ac46acbdc53324d89e1ae5b4c55';
+String _$feedLikeViewModelHash() => r'2cff065acb6933cc3ab2c3a1868f76b87a7df220';
 
 /// Copied from Dart SDK
 class _SystemHash {

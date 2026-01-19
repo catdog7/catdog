@@ -9,7 +9,7 @@ class UserDto with _$UserDto {
   const factory UserDto({
     required String id,
     required String nickname,
-    @JsonKey(name: 'invite_code') required String inviteCode,
+    @JsonKey(name: 'invite_code') String? inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
     String? email,
     String? provider,

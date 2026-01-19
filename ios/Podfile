@@ -50,6 +50,9 @@ post_install do |installer|
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', 'LIBRARY_COMMANDS=1']
       # 알림(Notifications) 권한 활성화
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'PERMISSION_NOTIFICATIONS=1'
+      
+      # iOS Deployment Target 경고 해결: 모든 Pod의 타겟을 15.0으로 강제 설정
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     end
     # 여기까지 추가 내용입니다.
   end
