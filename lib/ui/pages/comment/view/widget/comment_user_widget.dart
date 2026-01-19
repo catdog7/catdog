@@ -22,9 +22,10 @@ class CommentUserWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     late String editedNickname;
-    editedNickname = comment.nickname.length > 15
-        ? '${comment.nickname.substring(0, 15)}...'
-        : comment.nickname;
+    final safeNickname = comment.nickname ?? '사용자';
+    editedNickname = safeNickname.length > 15
+        ? '${safeNickname.substring(0, 15)}...'
+        : safeNickname;
 
     final likeUI = useState(comment.isLike);
     final likeCountUI = useState(comment.likeCount);

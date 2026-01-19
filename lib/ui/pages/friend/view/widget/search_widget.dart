@@ -50,7 +50,7 @@ class SearchWidget extends HookConsumerWidget {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        user.nickname,
+                        user.nickname ?? '이름 없음',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontWeight: FontWeight.w600),

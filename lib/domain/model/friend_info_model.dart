@@ -6,7 +6,7 @@ part 'friend_info_model.freezed.dart';
 class FriendInfoModel with _$FriendInfoModel {
   const factory FriendInfoModel({
     required String userId,
-    required String nickname,
+    String? nickname,
     required bool isFriend,
     String? status,
     String? profileImageUrl,

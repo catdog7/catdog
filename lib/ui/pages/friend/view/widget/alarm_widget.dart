@@ -39,7 +39,7 @@ class AlarmWidget extends StatelessWidget {
             SizedBox(width: 8),
             Expanded(
               child: Text(
-                user.nickname,
+                user.nickname ?? '이름 없음',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),

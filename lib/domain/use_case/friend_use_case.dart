@@ -72,7 +72,7 @@ class FriendUseCase {
         .whereType<FriendInfoModel>()
         .toList();
 
-    result.sort((a, b) => a.nickname.compareTo(b.nickname));
+    result.sort((a, b) => (a.nickname ?? '').compareTo(b.nickname ?? ''));
     return result;
   }
 

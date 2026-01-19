@@ -9,7 +9,7 @@ class UserModel with _$UserModel {
 
   const factory UserModel({
     required String id,
-    required String nickname,
+    String? nickname,
     String? inviteCode,
     String? profileImageUrl,
     String? email,
@@ -22,7 +22,7 @@ class UserModel with _$UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
   /// 생성자 (user 생성 시 사용)
-  /// nickname은 생성 시 없으므로 빈 문자열로 설정
+  /// nickname은 생성 시 없으므로 null로 설정
   factory UserModel.create({
     required String id,
     String? inviteCode,
@@ -35,7 +35,7 @@ class UserModel with _$UserModel {
   }) {
     return UserModel(
       id: id,
-      nickname: '', // 생성 시 nickname은 없음
+      nickname: null, // 생성 시 nickname은 없음
       inviteCode: inviteCode,
       profileImageUrl: profileImageUrl,
       email: email,

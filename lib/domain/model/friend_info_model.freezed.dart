@@ -18,7 +18,7 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$FriendInfoModel {
   String get userId => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
+  String? get nickname => throw _privateConstructorUsedError;
   bool get isFriend => throw _privateConstructorUsedError;
   String? get status => throw _privateConstructorUsedError;
   String? get profileImageUrl => throw _privateConstructorUsedError;
@@ -39,7 +39,7 @@ abstract class $FriendInfoModelCopyWith<$Res> {
   @useResult
   $Res call({
     String userId,
-    String nickname,
+    String? nickname,
     bool isFriend,
     String? status,
     String? profileImageUrl,
@@ -62,7 +62,7 @@ class _$FriendInfoModelCopyWithImpl<$Res, $Val extends FriendInfoModel>
   @override
   $Res call({
     Object? userId = null,
-    Object? nickname = null,
+    Object? nickname = freezed,
     Object? isFriend = null,
     Object? status = freezed,
     Object? profileImageUrl = freezed,
@@ -73,10 +73,10 @@ class _$FriendInfoModelCopyWithImpl<$Res, $Val extends FriendInfoModel>
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
                       as String,
-            nickname: null == nickname
+            nickname: freezed == nickname
                 ? _value.nickname
                 : nickname // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             isFriend: null == isFriend
                 ? _value.isFriend
                 : isFriend // ignore: cast_nullable_to_non_nullable
@@ -106,7 +106,7 @@ abstract class _$$FriendInfoModelImplCopyWith<$Res>
   @useResult
   $Res call({
     String userId,
-    String nickname,
+    String? nickname,
     bool isFriend,
     String? status,
     String? profileImageUrl,
@@ -128,7 +128,7 @@ class __$$FriendInfoModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? userId = null,
-    Object? nickname = null,
+    Object? nickname = freezed,
     Object? isFriend = null,
     Object? status = freezed,
     Object? profileImageUrl = freezed,
@@ -139,10 +139,10 @@ class __$$FriendInfoModelImplCopyWithImpl<$Res>
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
                   as String,
-        nickname: null == nickname
+        nickname: freezed == nickname
             ? _value.nickname
             : nickname // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         isFriend: null == isFriend
             ? _value.isFriend
             : isFriend // ignore: cast_nullable_to_non_nullable
@@ -165,7 +165,7 @@ class __$$FriendInfoModelImplCopyWithImpl<$Res>
 class _$FriendInfoModelImpl implements _FriendInfoModel {
   const _$FriendInfoModelImpl({
     required this.userId,
-    required this.nickname,
+    this.nickname,
     required this.isFriend,
     this.status,
     this.profileImageUrl,
@@ -174,7 +174,7 @@ class _$FriendInfoModelImpl implements _FriendInfoModel {
   @override
   final String userId;
   @override
-  final String nickname;
+  final String? nickname;
   @override
   final bool isFriend;
   @override
@@ -227,7 +227,7 @@ class _$FriendInfoModelImpl implements _FriendInfoModel {
 abstract class _FriendInfoModel implements FriendInfoModel {
   const factory _FriendInfoModel({
     required final String userId,
-    required final String nickname,
+    final String? nickname,
     required final bool isFriend,
     final String? status,
     final String? profileImageUrl,
@@ -236,7 +236,7 @@ abstract class _FriendInfoModel implements FriendInfoModel {
   @override
   String get userId;
   @override
-  String get nickname;
+  String? get nickname;
   @override
   bool get isFriend;
   @override
