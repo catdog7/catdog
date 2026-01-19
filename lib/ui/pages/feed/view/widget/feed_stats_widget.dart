@@ -17,6 +17,7 @@ class FeedStatsWidget extends HookConsumerWidget {
 
     final likeUI = useState(false);
     final likeCountUI = useState(0);
+    final isSheetOpening = useState(false); // 시트 중복 오픈 방지용 상태
 
     //state 값으로 재설정
     useEffect(() {
@@ -100,25 +101,40 @@ class FeedStatsWidget extends HookConsumerWidget {
             ),
             const SizedBox(width: 12),
             InkWell(
-              onTap: () async {
-                await FirebaseAnalytics.instance.logEvent(
-                  name: 'comment_sheet_open',
-                  parameters: {
-                    'feed_id': feedId,
-                    'initial_comment_count':
-                        data.commentCount, // 열었을 때 댓글이 몇 개였나
-                  },
-                );
-                await showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => CommentView(feedId: feedId),
-                );
-                if (context.mounted) {
-                  await vm.countsRefresh(feedId);
-                }
-              },
+              onTap:
+                  isSheetOpening
+                      .value // 이미 열리고 있다면 클릭 무시
+                  ? null
+                  : () async {
+                      try {
+                        isSheetOpening.value = true; // 잠금
+
+                        await FirebaseAnalytics.instance.logEvent(
+                          name: 'comment_sheet_open',
+                          parameters: {
+                            'feed_id': feedId,
+                            'initial_comment_count': data.commentCount,
+                          },
+                        );
+
+                        if (context.mounted) {
+                          await showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => CommentView(feedId: feedId),
+                          );
+                        }
+
+                        // 시트가 닫힌 후 처리
+                        if (context.mounted) {
+                          await vm.countsRefresh(feedId);
+                        }
+                      } finally {
+                        // 성공/실패 여부와 상관없이 다시 열 수 있도록 해제
+                        isSheetOpening.value = false;
+                      }
+                    },
               child: Container(
                 height: 35,
                 color: Colors.transparent,

@@ -23,6 +23,7 @@ class FeedEditView extends HookConsumerWidget {
     final bool isKeyboardOpen = viewInsets.bottom > 40;
 
     final isPicking = useState<bool>(false); //이미지 피커 중복 클릭 방지
+    final isUploading = useState<bool>(false); // 완료버튼 중복 클릭 방지
 
     useEffect(() {
       FirebaseAnalytics.instance.logScreenView(
@@ -243,28 +244,34 @@ class FeedEditView extends HookConsumerWidget {
               ),
               child: Center(
                 child: GestureDetector(
-                  onTap: isEnabled
+                  onTap: (isEnabled && !isUploading.value)
                       ? () async {
-                          await ref
-                              .read(feedViewModelProvider.notifier)
-                              .updateFeed(
-                                feed.id,
-                                captionController.text,
-                                newImagePath: isLocalFile.value
-                                    ? selectedImage.value
-                                    : null,
-                              );
-                          await FirebaseAnalytics.instance.logEvent(
-                            name: 'feed_edit_success',
-                            parameters: {
-                              'is_text_changed':
-                                  (feed.content != captionController.text)
-                                      .toString(),
-                              'final_text_length':
-                                  captionController.text.length,
-                            },
-                          );
-                          if (context.mounted) Navigator.pop(context);
+                          isUploading.value = true; // 로딩 시작
+                          try {
+                            await ref
+                                .read(feedViewModelProvider.notifier)
+                                .updateFeed(
+                                  feed.id,
+                                  captionController.text,
+                                  newImagePath: isLocalFile.value
+                                      ? selectedImage.value
+                                      : null,
+                                );
+                            await FirebaseAnalytics.instance.logEvent(
+                              name: 'feed_edit_success',
+                              parameters: {
+                                'is_text_changed':
+                                    (feed.content != captionController.text)
+                                        .toString(),
+                                'final_text_length':
+                                    captionController.text.length,
+                              },
+                            );
+                            if (context.mounted) Navigator.pop(context);
+                          } catch (e) {
+                            isUploading.value = false;
+                            debugPrint("수정 에러: $e");
+                          }
                         }
                       : null,
                   child: Container(

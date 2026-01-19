@@ -27,6 +27,7 @@ class CommentView extends HookConsumerWidget {
 
     final showBackToTop = useState(false);
     final hasText = useState(false);
+    final isSubmitting = useState<bool>(false);
 
     useEffect(() {
       void listener() {
@@ -207,26 +208,37 @@ class CommentView extends HookConsumerWidget {
                                   hasText.value = value.isNotEmpty;
                                 },
                                 onSubmitted: (value) async {
-                                  if (value.trim().isNotEmpty) {
-                                    vm.addComment(
+                                  if (isSubmitting.value ||
+                                      value.trim().isEmpty)
+                                    return;
+
+                                  try {
+                                    isSubmitting.value = true;
+
+                                    await vm.addComment(
                                       CommentInfoModel(
                                         id: uuid.v4(),
                                         userId: data.myInfo?.id ?? "",
                                         nickname: data.myInfo?.nickname ?? "",
-                                        content: comment.text,
+                                        content: value,
                                         isLike: false,
                                         likeCount: 0,
                                       ),
                                     );
+
+                                    // 성공 시 초기화
+                                    comment.clear();
+                                    hasText.value = false;
+
+                                    // 분석 이벤트 기록
+                                    await FirebaseAnalytics.instance.logEvent(
+                                      name: 'comment_add_success',
+                                    );
+                                  } catch (e) {
+                                    debugPrint("댓글 등록 실패: $e");
+                                  } finally {
+                                    isSubmitting.value = false;
                                   }
-                                  print("댓글 입력 : ${comment.text}");
-                                  // WidgetsBinding.instance.addPostFrameCallback((
-                                  //   _,
-                                  // ) {
-                                  //   scrollToTop();
-                                  // });
-                                  comment.clear();
-                                  hasText.value = false;
                                 },
                                 decoration: InputDecoration(
                                   hintText: "댓글을 남겨보세요.",

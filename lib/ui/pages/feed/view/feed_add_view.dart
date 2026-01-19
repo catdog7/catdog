@@ -19,6 +19,7 @@ class FeedAddView extends HookConsumerWidget {
     final viewInsets = MediaQuery.of(context).viewInsets;
     final bool isKeyboardOpen = viewInsets.bottom > 40;
     final isPicking = useState<bool>(false); // 이미지 피커 중복 클릭 방지
+    final isUploading = useState<bool>(false); // 완료버튼 중복 클릭 방지
 
     useEffect(() {
       FirebaseAnalytics.instance.logScreenView(
@@ -212,6 +213,7 @@ class FeedAddView extends HookConsumerWidget {
                   onTap: isEnabled
                       ? () async {
                           // feed add view의 완료 버튼 누름
+                          isUploading.value = true;
                           await FirebaseAnalytics.instance.logEvent(
                             name: 'feed_upload_start',
                           );
@@ -220,14 +222,15 @@ class FeedAddView extends HookConsumerWidget {
                             await FirebaseAnalytics.instance.logEvent(
                               name: 'feed_upload_success', // 피드 업로드 성공 기록
                             );
+
+                            if (context.mounted) {
+                              Navigator.pop(context, true);
+                            }
                           } catch (e) {
                             await FirebaseAnalytics.instance.logEvent(
                               name: 'feed_upload_fail', // 피드 업로드 실패 기록
                             );
-                          }
-
-                          if (context.mounted) {
-                            Navigator.pop(context, true);
+                            isUploading.value = false;
                           }
                         }
                       : null,
