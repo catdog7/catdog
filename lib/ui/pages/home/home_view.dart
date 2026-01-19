@@ -192,10 +192,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
       
       if (result == true && mounted) {
         ref.read(feedViewModelProvider.notifier).fetchFeedsForFriends();
-        // 위젯에서 온 경우 게시글 탭으로 이동하지 않음
-        // setState(() {
-        //   _selectedIndex = 1;
-        // });
+        
+        setState(() {
+          _selectedIndex = 1; // 피드 탭으로 이동
+        });
+        _logScreenView(1);
       }
     } finally {
       if (mounted) {

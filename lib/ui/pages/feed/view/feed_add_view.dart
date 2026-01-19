@@ -210,7 +210,7 @@ class FeedAddView extends HookConsumerWidget {
                   bottom: (isKeyboardOpen ? viewInsets.bottom + 10 : 40),
                 ),
                 child: GestureDetector(
-                  onTap: isEnabled
+                  onTap: (isEnabled && !isUploading.value)
                       ? () async {
                           // feed add view의 완료 버튼 누름
                           isUploading.value = true;
@@ -244,17 +244,26 @@ class FeedAddView extends HookConsumerWidget {
                           : const Color(0x0D000000),
                     ),
                     child: Center(
-                      child: Text(
-                        '완료',
-                        style: TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: isEnabled
-                              ? const Color(0xFF000000)
-                              : const Color(0x4D000000),
-                        ),
-                      ),
+                      child: isUploading.value
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF000000),
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              '완료',
+                              style: TextStyle(
+                                fontFamily: 'Pretendard',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isEnabled
+                                    ? const Color(0xFF000000)
+                                    : const Color(0x4D000000),
+                              ),
+                            ),
                     ),
                   ),
                 ),
