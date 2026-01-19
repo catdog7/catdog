@@ -3,7 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:catdog/ui/pages/mypage/state/mypage_state.dart';
 import 'package:catdog/data/repository_impl/feed_repository_impl.dart';
 import 'dart:io'; 
-// ... 나머지 임포트들
+import 'package:catdog/core/service/widget_service.dart';
+import 'package:catdog/ui/pages/login/login_view.dart';
+import 'package:flutter/material.dart';
 part 'mypage_view_model.g.dart';
 
 @riverpod
@@ -94,4 +96,45 @@ Future<void> updateNickname(String newNickname) async {
     state = state.copyWith(isLoading: false, errorMessage: "닉네임 수정 실패: $e");
   }
 }
+  // 로그아웃
+  Future<void> logout(BuildContext context) async {
+    try {
+      // 위젯 데이터 초기화
+      await WidgetService.clearWidgetData();
+      
+      // Supabase 로그아웃
+      await Supabase.instance.client.auth.signOut();
+      
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginView()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: "로그아웃 실패: $e");
+    }
+  }
+
+  // 회원 탈퇴
+  Future<void> deleteAccount(BuildContext context) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return;
+
+      // Users 테이블에서 데이터 삭제
+      await Supabase.instance.client
+          .from('users')
+          .delete()
+          .eq('id', user.id);
+
+      // 로그아웃 처리
+      if (context.mounted) {
+        await logout(context);
+      }
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: "회원탈퇴 실패: $e");
+    }
+  }
 }

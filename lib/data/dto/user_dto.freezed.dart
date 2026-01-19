@@ -24,7 +24,7 @@ mixin _$UserDto {
   String get id => throw _privateConstructorUsedError;
   String get nickname => throw _privateConstructorUsedError;
   @JsonKey(name: 'invite_code')
-  String get inviteCode => throw _privateConstructorUsedError;
+  String? get inviteCode => throw _privateConstructorUsedError;
   @JsonKey(name: 'profile_image_url')
   String? get profileImageUrl => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
@@ -52,7 +52,7 @@ abstract class $UserDtoCopyWith<$Res> {
   $Res call({
     String id,
     String nickname,
-    @JsonKey(name: 'invite_code') String inviteCode,
+    @JsonKey(name: 'invite_code') String? inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
     String? email,
     String? provider,
@@ -79,7 +79,7 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
   $Res call({
     Object? id = null,
     Object? nickname = null,
-    Object? inviteCode = null,
+    Object? inviteCode = freezed,
     Object? profileImageUrl = freezed,
     Object? email = freezed,
     Object? provider = freezed,
@@ -97,10 +97,10 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
                 ? _value.nickname
                 : nickname // ignore: cast_nullable_to_non_nullable
                       as String,
-            inviteCode: null == inviteCode
+            inviteCode: freezed == inviteCode
                 ? _value.inviteCode
                 : inviteCode // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             profileImageUrl: freezed == profileImageUrl
                 ? _value.profileImageUrl
                 : profileImageUrl // ignore: cast_nullable_to_non_nullable
@@ -142,7 +142,7 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
   $Res call({
     String id,
     String nickname,
-    @JsonKey(name: 'invite_code') String inviteCode,
+    @JsonKey(name: 'invite_code') String? inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
     String? email,
     String? provider,
@@ -168,7 +168,7 @@ class __$$UserDtoImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? nickname = null,
-    Object? inviteCode = null,
+    Object? inviteCode = freezed,
     Object? profileImageUrl = freezed,
     Object? email = freezed,
     Object? provider = freezed,
@@ -186,10 +186,10 @@ class __$$UserDtoImplCopyWithImpl<$Res>
             ? _value.nickname
             : nickname // ignore: cast_nullable_to_non_nullable
                   as String,
-        inviteCode: null == inviteCode
+        inviteCode: freezed == inviteCode
             ? _value.inviteCode
             : inviteCode // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         profileImageUrl: freezed == profileImageUrl
             ? _value.profileImageUrl
             : profileImageUrl // ignore: cast_nullable_to_non_nullable
@@ -225,7 +225,7 @@ class _$UserDtoImpl implements _UserDto {
   const _$UserDtoImpl({
     required this.id,
     required this.nickname,
-    @JsonKey(name: 'invite_code') required this.inviteCode,
+    @JsonKey(name: 'invite_code') this.inviteCode,
     @JsonKey(name: 'profile_image_url') this.profileImageUrl,
     this.email,
     this.provider,
@@ -243,7 +243,7 @@ class _$UserDtoImpl implements _UserDto {
   final String nickname;
   @override
   @JsonKey(name: 'invite_code')
-  final String inviteCode;
+  final String? inviteCode;
   @override
   @JsonKey(name: 'profile_image_url')
   final String? profileImageUrl;
@@ -321,7 +321,7 @@ abstract class _UserDto implements UserDto {
   const factory _UserDto({
     required final String id,
     required final String nickname,
-    @JsonKey(name: 'invite_code') required final String inviteCode,
+    @JsonKey(name: 'invite_code') final String? inviteCode,
     @JsonKey(name: 'profile_image_url') final String? profileImageUrl,
     final String? email,
     final String? provider,
@@ -338,7 +338,7 @@ abstract class _UserDto implements UserDto {
   String get nickname;
   @override
   @JsonKey(name: 'invite_code')
-  String get inviteCode;
+  String? get inviteCode;
   @override
   @JsonKey(name: 'profile_image_url')
   String? get profileImageUrl;

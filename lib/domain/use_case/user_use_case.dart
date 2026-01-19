@@ -23,7 +23,7 @@ class UserUseCase {
     }
 
     // invite_code를 생성해서 업데이트해줌
-    if (user.inviteCode.isEmpty) {
+    if (user.inviteCode?.isEmpty ?? true) {
       final inviteCode = await generateUniqueInviteCode();
       final updatedUser = user.copyWith(inviteCode: inviteCode);
       await _repository.updateUser(updatedUser);
@@ -37,7 +37,7 @@ class UserUseCase {
     UserModel userToRegister = user;
     
     // inviteCode가 없으면 생성
-    if (userToRegister.inviteCode.isEmpty) {
+    if (userToRegister.inviteCode?.isEmpty ?? true) {
       final inviteCode = await generateUniqueInviteCode();
       userToRegister = userToRegister.copyWith(inviteCode: inviteCode);
     }

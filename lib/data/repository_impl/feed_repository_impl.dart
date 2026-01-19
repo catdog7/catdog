@@ -15,10 +15,43 @@ class FeedRepositoryImpl implements FeedRepository {
 
   @override
   Future<List<FeedDto>> getFeeds() async {
-    final response = await _supabase
-        .from('feeds')
-        .select()
-        .order('created_at', ascending: false);
+    final userId = _supabase.auth.currentUser?.id;
+    List<String> excludedFeedIds = [];
+    List<String> excludedUserIds = [];
+
+    if (userId != null) {
+      // 1. 내가 신고한 피드 ID 가져오기
+      final pd = await _supabase
+          .from('reports')
+          .select('target_id')
+          .eq('reporter_id', userId)
+          .eq('target_type', 'FEED');
+      
+      excludedFeedIds.addAll((pd as List).map((e) => e['target_id'] as String));
+
+      // 2. 내가 차단한 유저 ID 가져오기
+      final bd = await _supabase
+          .from('blocks')
+          .select('blocked_id')
+          .eq('blocker_id', userId);
+      
+      excludedUserIds.addAll((bd as List).map((e) => e['blocked_id'] as String));
+    }
+
+    var query = _supabase.from('feeds').select();
+
+    if (excludedFeedIds.isNotEmpty) {
+      // not in filter (filter notation: 'id', 'not.in', list)
+      // Supabase Flutter SDK .not('column', 'operator', value)
+      // operator 'in' takes list.
+      query = query.not('id', 'in', excludedFeedIds);
+    }
+    
+    if (excludedUserIds.isNotEmpty) {
+      query = query.not('user_id', 'in', excludedUserIds);
+    }
+
+    final response = await query.order('created_at', ascending: false);
 
     return (response as List).map((json) => FeedDto.fromJson(json)).toList();
   }
@@ -62,7 +95,26 @@ class FeedRepositoryImpl implements FeedRepository {
       return [];
     }
 
-    // Supabase에서는 inFilter를 사용하거나, or 조건을 사용
+    // 1. 제외할 피드 ID와 유저 ID 가져오기 ( 신고 / 차단 )
+    List<String> excludedFeedIds = [];
+    List<String> excludedUserIds = [];
+
+    if (userId.isNotEmpty) {
+      final pd = await _supabase
+          .from('reports')
+          .select('target_id')
+          .eq('reporter_id', userId)
+          .eq('target_type', 'FEED');
+      excludedFeedIds.addAll((pd as List).map((e) => e['target_id'] as String));
+
+      final bd = await _supabase
+          .from('blocks')
+          .select('blocked_id')
+          .eq('blocker_id', userId);
+      excludedUserIds.addAll((bd as List).map((e) => e['blocked_id'] as String));
+    }
+
+    // 2. 피드 데이터 가져오기 (전체 가져오기)
     String filterString = allowedUserIds
         .map((id) => 'user_id.eq.$id')
         .join(',');
@@ -73,7 +125,16 @@ class FeedRepositoryImpl implements FeedRepository {
         .or(filterString)
         .order('created_at', ascending: false);
 
-    return (response as List).map((json) => FeedDto.fromJson(json)).toList();
+    final feeds = (response as List).map((json) => FeedDto.fromJson(json)).toList();
+
+    // 3. 메모리에서 필터링 (exclude logic)
+    final filteredFeeds = feeds.where((feed) {
+      final isReported = excludedFeedIds.contains(feed.id);
+      final isBlocked = excludedUserIds.contains(feed.userId);
+      return !isReported && !isBlocked;
+    }).toList();
+
+    return filteredFeeds;
   }
 
   //삭제 함수 기능

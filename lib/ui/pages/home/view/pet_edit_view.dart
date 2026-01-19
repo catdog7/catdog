@@ -1,7 +1,6 @@
 import 'package:catdog/core/config/common_dependency.dart';
 import 'package:catdog/core/config/pet_dependency.dart';
 import 'package:catdog/domain/model/pet_model.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,12 +27,6 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
   void initState() {
     super.initState();
     _loadPets();
-
-    //화면 진입 로그
-    FirebaseAnalytics.instance.logScreenView(
-      screenName: 'Pet_Edit_View',
-      screenClass: 'PetEditView',
-    );
   }
 
   Future<void> _loadPets() async {
@@ -71,8 +64,9 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) =>
-          DeleteConfirmationDialog(petCount: _selectedPetIds.length),
+      builder: (context) => DeleteConfirmationDialog(
+        petCount: _selectedPetIds.length,
+      ),
     );
 
     if (confirmed == true) {
@@ -81,7 +75,7 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
         for (final petId in _selectedPetIds) {
           await petUseCase.removePet(petId);
         }
-
+        
         if (mounted) {
           await _loadPets();
           setState(() {
@@ -91,9 +85,9 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
       } catch (e) {
         debugPrint('Delete error: $e');
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('삭제 중 오류가 발생했습니다.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('삭제 중 오류가 발생했습니다.')),
+          );
         }
       }
     }
@@ -102,16 +96,12 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: semanticBackgroundLight,
+      backgroundColor: semanticBackgroundWhite,
       appBar: AppBar(
         backgroundColor: semanticBackgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            size: 20,
-            color: semanticTextBlack,
-          ),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: semanticTextBlack),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -119,7 +109,7 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
           style: TextStyle(
             fontFamily: 'Pretendard',
             fontSize: 18,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             color: semanticTextBlack,
           ),
         ),
@@ -146,30 +136,29 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _pets.isEmpty
-            ? const Center(
-                child: Text(
-                  '등록된 동물이 없습니다.',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontSize: 16,
-                    color: semanticTextWeak,
+                ? const Center(
+                    child: Text(
+                      '등록된 동물이 없습니다.',
+                      style: TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 16,
+                        color: semanticTextWeak,
+                      ),
+                    ),
+                  )
+                : ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    children: [
+                      ..._pets.map((pet) => _buildPetItem(pet)),
+                    ],
                   ),
-                ),
-              )
-            : ListView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                children: [..._pets.map((pet) => _buildPetItem(pet))],
-              ),
       ),
     );
   }
 
   Widget _buildPetItem(PetModel pet) {
     final isSelected = _selectedPetIds.contains(pet.id);
-
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: GestureDetector(
@@ -204,8 +193,7 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
                       color: Color(0xFFEEEEEE),
                     ),
                     child: ClipOval(
-                      child:
-                          pet.image2dUrl != null && pet.image2dUrl!.isNotEmpty
+                      child: pet.image2dUrl != null && pet.image2dUrl!.isNotEmpty
                           ? Image.network(
                               pet.image2dUrl!,
                               fit: BoxFit.cover,
@@ -221,7 +209,7 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
                     style: const TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                       color: Colors.black,
                     ),
                   ),
@@ -243,7 +231,10 @@ class _PetEditViewState extends ConsumerState<PetEditView> {
 class DeleteConfirmationDialog extends StatelessWidget {
   final int petCount;
 
-  const DeleteConfirmationDialog({super.key, required this.petCount});
+  const DeleteConfirmationDialog({
+    super.key,
+    required this.petCount,
+  });
 
   static const Color semanticBackgroundWhite = Color(0xFFFFFFFF);
   static const Color semanticTextBlack = Color(0xFF121416);
@@ -322,7 +313,9 @@ class DeleteConfirmationDialog extends StatelessWidget {
         onPressed: onPressed,
         style: TextButton.styleFrom(
           backgroundColor: backgroundColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
         child: Text(
           label,
@@ -337,3 +330,4 @@ class DeleteConfirmationDialog extends StatelessWidget {
     );
   }
 }
+

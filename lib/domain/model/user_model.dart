@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_model.freezed.dart';
+part 'user_model.g.dart';
 
 @freezed
 class UserModel with _$UserModel {
@@ -9,7 +10,7 @@ class UserModel with _$UserModel {
   const factory UserModel({
     required String id,
     required String nickname,
-    required String inviteCode,
+    String? inviteCode,
     String? profileImageUrl,
     String? email,
     String? provider,
@@ -18,11 +19,13 @@ class UserModel with _$UserModel {
     DateTime? updatedAt,
   }) = _UserModel;
 
+  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+
   /// 생성자 (user 생성 시 사용)
   /// nickname은 생성 시 없으므로 빈 문자열로 설정
   factory UserModel.create({
     required String id,
-    required String inviteCode,
+    String? inviteCode,
     String? profileImageUrl,
     String? email,
     String? provider,

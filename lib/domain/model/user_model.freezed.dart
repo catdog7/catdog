@@ -15,17 +15,24 @@ final _privateConstructorUsedError = UnsupportedError(
   'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
 );
 
+UserModel _$UserModelFromJson(Map<String, dynamic> json) {
+  return _UserModel.fromJson(json);
+}
+
 /// @nodoc
 mixin _$UserModel {
   String get id => throw _privateConstructorUsedError;
   String get nickname => throw _privateConstructorUsedError;
-  String get inviteCode => throw _privateConstructorUsedError;
+  String? get inviteCode => throw _privateConstructorUsedError;
   String? get profileImageUrl => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
   String? get provider => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+
+  /// Serializes this UserModel to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.
@@ -42,7 +49,7 @@ abstract class $UserModelCopyWith<$Res> {
   $Res call({
     String id,
     String nickname,
-    String inviteCode,
+    String? inviteCode,
     String? profileImageUrl,
     String? email,
     String? provider,
@@ -69,7 +76,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
   $Res call({
     Object? id = null,
     Object? nickname = null,
-    Object? inviteCode = null,
+    Object? inviteCode = freezed,
     Object? profileImageUrl = freezed,
     Object? email = freezed,
     Object? provider = freezed,
@@ -87,10 +94,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.nickname
                 : nickname // ignore: cast_nullable_to_non_nullable
                       as String,
-            inviteCode: null == inviteCode
+            inviteCode: freezed == inviteCode
                 ? _value.inviteCode
                 : inviteCode // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             profileImageUrl: freezed == profileImageUrl
                 ? _value.profileImageUrl
                 : profileImageUrl // ignore: cast_nullable_to_non_nullable
@@ -133,7 +140,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
   $Res call({
     String id,
     String nickname,
-    String inviteCode,
+    String? inviteCode,
     String? profileImageUrl,
     String? email,
     String? provider,
@@ -159,7 +166,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? nickname = null,
-    Object? inviteCode = null,
+    Object? inviteCode = freezed,
     Object? profileImageUrl = freezed,
     Object? email = freezed,
     Object? provider = freezed,
@@ -177,10 +184,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.nickname
             : nickname // ignore: cast_nullable_to_non_nullable
                   as String,
-        inviteCode: null == inviteCode
+        inviteCode: freezed == inviteCode
             ? _value.inviteCode
             : inviteCode // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         profileImageUrl: freezed == profileImageUrl
             ? _value.profileImageUrl
             : profileImageUrl // ignore: cast_nullable_to_non_nullable
@@ -211,12 +218,12 @@ class __$$UserModelImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
+@JsonSerializable()
 class _$UserModelImpl extends _UserModel {
   const _$UserModelImpl({
     required this.id,
     required this.nickname,
-    required this.inviteCode,
+    this.inviteCode,
     this.profileImageUrl,
     this.email,
     this.provider,
@@ -225,12 +232,15 @@ class _$UserModelImpl extends _UserModel {
     this.updatedAt,
   }) : super._();
 
+  factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UserModelImplFromJson(json);
+
   @override
   final String id;
   @override
   final String nickname;
   @override
-  final String inviteCode;
+  final String? inviteCode;
   @override
   final String? profileImageUrl;
   @override
@@ -272,6 +282,7 @@ class _$UserModelImpl extends _UserModel {
                 other.updatedAt == updatedAt));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
@@ -293,13 +304,18 @@ class _$UserModelImpl extends _UserModel {
   @pragma('vm:prefer-inline')
   _$$UserModelImplCopyWith<_$UserModelImpl> get copyWith =>
       __$$UserModelImplCopyWithImpl<_$UserModelImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$UserModelImplToJson(this);
+  }
 }
 
 abstract class _UserModel extends UserModel {
   const factory _UserModel({
     required final String id,
     required final String nickname,
-    required final String inviteCode,
+    final String? inviteCode,
     final String? profileImageUrl,
     final String? email,
     final String? provider,
@@ -309,12 +325,15 @@ abstract class _UserModel extends UserModel {
   }) = _$UserModelImpl;
   const _UserModel._() : super._();
 
+  factory _UserModel.fromJson(Map<String, dynamic> json) =
+      _$UserModelImpl.fromJson;
+
   @override
   String get id;
   @override
   String get nickname;
   @override
-  String get inviteCode;
+  String? get inviteCode;
   @override
   String? get profileImageUrl;
   @override

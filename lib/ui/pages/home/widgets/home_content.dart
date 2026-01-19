@@ -67,16 +67,24 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
   }
 
   Future<void> _loadData() async {
-    final client = ref.read(supabaseClientProvider);
-    final userId = client.auth.currentUser?.id;
-    if (userId == null) {
-      ref.read(showModalProvider.notifier).state = false;
-      return;
-    }
-
+    if (!mounted) return;
+    
+    // Check if ref is valid before using it
     try {
+      final client = ref.read(supabaseClientProvider);
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) {
+        if (mounted) {
+          ref.read(showModalProvider.notifier).state = false;
+        }
+        return;
+      }
+    
       final userUseCase = ref.read(userUseCaseProvider);
       final user = await userUseCase.getUserProfile(userId);
+      
+      if (!mounted) return; // Async gap check
+      
       final pets = await ref.read(petUseCaseProvider).getMyPets(userId);
       final hasPets = await ref.read(petUseCaseProvider).hasPets(userId);
       final feedRepository = ref.read(feedRepositoryProvider);
@@ -228,27 +236,27 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.logout,
-              color: semanticTextBlack,
-            ),
-            onPressed: () async {
-              // Clear frame widget data before logout
-              await WidgetService.clearWidgetData();
-              
-              final client = ref.read(supabaseClientProvider);
-              await client.auth.signOut();
-              if (mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => const LoginView(),
-                  ),
-                  (route) => false,
-                );
-              }
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(
+          //     Icons.logout,
+          //     color: semanticTextBlack,
+          //   ),
+          //   onPressed: () async {
+          //     // Clear frame widget data before logout
+          //     await WidgetService.clearWidgetData();
+          //     
+          //     final client = ref.read(supabaseClientProvider);
+          //     await client.auth.signOut();
+          //     if (mounted) {
+          //       Navigator.of(context).pushAndRemoveUntil(
+          //         MaterialPageRoute(
+          //           builder: (context) => const LoginView(),
+          //         ),
+          //         (route) => false,
+          //       );
+          //     }
+          //   },
+          // ),
         ],
       ),
       body: GestureDetector(

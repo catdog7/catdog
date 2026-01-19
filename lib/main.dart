@@ -75,6 +75,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       final message = switch (event.type) {
         FcmEventType.friendRequest => '님이 친구를 요청 했습니다.',
         FcmEventType.friendAccepted => '님이 친구 요청을 수락 했습니다.',
+        _ => "알림이 업데이트되었습니다.",
       };
 
       scaffoldMessengerKey.currentState?.showSnackBar(

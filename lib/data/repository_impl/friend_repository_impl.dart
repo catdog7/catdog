@@ -108,11 +108,24 @@ class FriendRepositoryImpl implements FriendRepository {
     try {
       final userId = _client.auth.currentUser?.id;
       if (userId != null) {
+        // 차단 필터링을 위한 ID 목록 가져오기
+        final blockingResponse = await _client.from('blocks').select('blocked_id').eq('blocker_id', userId);
+        final blockedByResponse = await _client.from('blocks').select('blocker_id').eq('blocked_id', userId);
+        
+        final Set<String> excludedIds = {};
+        excludedIds.add(userId); // 나 자신도 제외
+        for (var item in blockingResponse) {
+          excludedIds.add(item['blocked_id'] as String);
+        }
+        for (var item in blockedByResponse) {
+          excludedIds.add(item['blocker_id'] as String);
+        }
+
         final response = await _client
             .from('users')
             .select()
             .or('nickname.ilike.%$friendId%, invite_code.ilike.%$friendId%')
-            .neq('id', userId)
+            .not('id', 'in', excludedIds.toList())
             .order('nickname', ascending: true);
         final result = response
             .map((json) => UserMapper.toModel(UserDto.fromJson(json)))

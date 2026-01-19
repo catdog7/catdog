@@ -4,6 +4,8 @@ import 'package:catdog/data/repository_impl/feed_repository_impl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:catdog/ui/pages/feed/state/feed_state.dart';
 import 'package:catdog/data/repository_impl/feed_add_repository_impl.dart';
+import 'package:catdog/data/repository_impl/report_repository_impl.dart';
+import 'package:catdog/data/repository_impl/block_repository_impl.dart';
 
 part 'feed_view_model.g.dart';
 
@@ -118,4 +120,50 @@ Future<void> updateFeed(String feedId, String newContent, {String? newImagePath}
     print("수정 실패: $e");
   }
 }
+  // 신고 함수
+  Future<void> reportFeed(String feedId, String reportedUserId, String category, {String? reasonDetail}) async {
+    try {
+      final repository = ref.read(reportRepositoryProvider);
+      
+      // 1. 서버에 신고 요청 (Await)
+      await repository.reportFeed(
+        feedId: feedId,
+        reportedUserId: reportedUserId,
+        category: category,
+        reasonDetail: reasonDetail,
+      );
+      print("신고 완료 (서버 전송 성공)");
+
+      // 2. 피드 목록 새로고침 (신고한 글은 제외되어야 함)
+      await fetchFeedsForFriends();
+
+    } catch (e) {
+      print("신고 실패: $e");
+      state = state.copyWith(errorMessage: "신고 전송 중 오류가 발생했습니다.");
+    }
+  }
+
+  // 차단 함수
+  Future<void> blockUser(String blockUserId) async {
+    try {
+      final repository = ref.read(blockRepositoryProvider);
+      await repository.blockUser(blockUserId);
+
+      // 친구 관계 삭제
+      try {
+        final friendRepo = ref.read(friendRepositoryProvider);
+        await friendRepo.deleteFriend(blockUserId);
+      } catch (e) {
+        print("친구 삭제 실패 (이미 친구가 아닐 수 있음): $e");
+      }
+
+      // Optimistic Update: 차단한 유저의 모든 글을 리스트에서 제거
+      final updatedFeeds = state.feeds.where((feed) => feed.userId != blockUserId).toList();
+      state = state.copyWith(feeds: updatedFeeds);
+      print("차단 완료 & 리스트 필터링");
+    } catch (e) {
+      print("차단 실패: $e");
+      state = state.copyWith(errorMessage: "차단에 실패했습니다.");
+    }
+  }
 }
