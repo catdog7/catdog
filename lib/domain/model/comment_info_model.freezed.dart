@@ -19,7 +19,7 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$CommentInfoModel {
   String get id => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
+  String? get nickname => throw _privateConstructorUsedError;
   String get content => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   bool get isLike => throw _privateConstructorUsedError;
@@ -43,7 +43,7 @@ abstract class $CommentInfoModelCopyWith<$Res> {
   $Res call({
     String id,
     String userId,
-    String nickname,
+    String? nickname,
     String content,
     DateTime? createdAt,
     bool isLike,
@@ -69,7 +69,7 @@ class _$CommentInfoModelCopyWithImpl<$Res, $Val extends CommentInfoModel>
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? nickname = null,
+    Object? nickname = freezed,
     Object? content = null,
     Object? createdAt = freezed,
     Object? isLike = null,
@@ -86,10 +86,10 @@ class _$CommentInfoModelCopyWithImpl<$Res, $Val extends CommentInfoModel>
                 ? _value.userId
                 : userId // ignore: cast_nullable_to_non_nullable
                       as String,
-            nickname: null == nickname
+            nickname: freezed == nickname
                 ? _value.nickname
                 : nickname // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             content: null == content
                 ? _value.content
                 : content // ignore: cast_nullable_to_non_nullable
@@ -128,7 +128,7 @@ abstract class _$$CommentInfoModelImplCopyWith<$Res>
   $Res call({
     String id,
     String userId,
-    String nickname,
+    String? nickname,
     String content,
     DateTime? createdAt,
     bool isLike,
@@ -153,7 +153,7 @@ class __$$CommentInfoModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? userId = null,
-    Object? nickname = null,
+    Object? nickname = freezed,
     Object? content = null,
     Object? createdAt = freezed,
     Object? isLike = null,
@@ -170,10 +170,10 @@ class __$$CommentInfoModelImplCopyWithImpl<$Res>
             ? _value.userId
             : userId // ignore: cast_nullable_to_non_nullable
                   as String,
-        nickname: null == nickname
+        nickname: freezed == nickname
             ? _value.nickname
             : nickname // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         content: null == content
             ? _value.content
             : content // ignore: cast_nullable_to_non_nullable
@@ -205,7 +205,7 @@ class _$CommentInfoModelImpl implements _CommentInfoModel {
   const _$CommentInfoModelImpl({
     required this.id,
     required this.userId,
-    required this.nickname,
+    this.nickname,
     required this.content,
     this.createdAt,
     required this.isLike,
@@ -218,7 +218,7 @@ class _$CommentInfoModelImpl implements _CommentInfoModel {
   @override
   final String userId;
   @override
-  final String nickname;
+  final String? nickname;
   @override
   final String content;
   @override
@@ -283,7 +283,7 @@ abstract class _CommentInfoModel implements CommentInfoModel {
   const factory _CommentInfoModel({
     required final String id,
     required final String userId,
-    required final String nickname,
+    final String? nickname,
     required final String content,
     final DateTime? createdAt,
     required final bool isLike,
@@ -296,7 +296,7 @@ abstract class _CommentInfoModel implements CommentInfoModel {
   @override
   String get userId;
   @override
-  String get nickname;
+  String? get nickname;
   @override
   String get content;
   @override

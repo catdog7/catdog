@@ -22,7 +22,7 @@ UserDto _$UserDtoFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$UserDto {
   String get id => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
+  String? get nickname => throw _privateConstructorUsedError;
   @JsonKey(name: 'invite_code')
   String? get inviteCode => throw _privateConstructorUsedError;
   @JsonKey(name: 'profile_image_url')
@@ -51,7 +51,7 @@ abstract class $UserDtoCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String nickname,
+    String? nickname,
     @JsonKey(name: 'invite_code') String? inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
     String? email,
@@ -78,7 +78,7 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
   @override
   $Res call({
     Object? id = null,
-    Object? nickname = null,
+    Object? nickname = freezed,
     Object? inviteCode = freezed,
     Object? profileImageUrl = freezed,
     Object? email = freezed,
@@ -93,10 +93,10 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
                       as String,
-            nickname: null == nickname
+            nickname: freezed == nickname
                 ? _value.nickname
                 : nickname // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             inviteCode: freezed == inviteCode
                 ? _value.inviteCode
                 : inviteCode // ignore: cast_nullable_to_non_nullable
@@ -141,7 +141,7 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String nickname,
+    String? nickname,
     @JsonKey(name: 'invite_code') String? inviteCode,
     @JsonKey(name: 'profile_image_url') String? profileImageUrl,
     String? email,
@@ -167,7 +167,7 @@ class __$$UserDtoImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? nickname = null,
+    Object? nickname = freezed,
     Object? inviteCode = freezed,
     Object? profileImageUrl = freezed,
     Object? email = freezed,
@@ -182,10 +182,10 @@ class __$$UserDtoImplCopyWithImpl<$Res>
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
                   as String,
-        nickname: null == nickname
+        nickname: freezed == nickname
             ? _value.nickname
             : nickname // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         inviteCode: freezed == inviteCode
             ? _value.inviteCode
             : inviteCode // ignore: cast_nullable_to_non_nullable
@@ -224,7 +224,7 @@ class __$$UserDtoImplCopyWithImpl<$Res>
 class _$UserDtoImpl implements _UserDto {
   const _$UserDtoImpl({
     required this.id,
-    required this.nickname,
+    this.nickname,
     @JsonKey(name: 'invite_code') this.inviteCode,
     @JsonKey(name: 'profile_image_url') this.profileImageUrl,
     this.email,
@@ -240,7 +240,7 @@ class _$UserDtoImpl implements _UserDto {
   @override
   final String id;
   @override
-  final String nickname;
+  final String? nickname;
   @override
   @JsonKey(name: 'invite_code')
   final String? inviteCode;
@@ -320,7 +320,7 @@ class _$UserDtoImpl implements _UserDto {
 abstract class _UserDto implements UserDto {
   const factory _UserDto({
     required final String id,
-    required final String nickname,
+    final String? nickname,
     @JsonKey(name: 'invite_code') final String? inviteCode,
     @JsonKey(name: 'profile_image_url') final String? profileImageUrl,
     final String? email,
@@ -335,7 +335,7 @@ abstract class _UserDto implements UserDto {
   @override
   String get id;
   @override
-  String get nickname;
+  String? get nickname;
   @override
   @JsonKey(name: 'invite_code')
   String? get inviteCode;

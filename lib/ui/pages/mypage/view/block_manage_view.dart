@@ -39,7 +39,7 @@ class BlockManageView extends ConsumerWidget {
                       : null,
                 ),
                 title: Text(
-                  user.nickname,
+                  user.nickname ?? '사용자',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 trailing: TextButton(

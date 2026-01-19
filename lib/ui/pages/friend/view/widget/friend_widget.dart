@@ -45,7 +45,7 @@ class FriendWidget extends ConsumerWidget {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        friend.nickname,
+                        friend.nickname ?? '이름 없음',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontWeight: FontWeight.w600),
