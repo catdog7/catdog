@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:catdog/data/dto/feed_dto.dart';
 import 'package:catdog/ui/pages/feed/view_model/feed_view_model.dart';
+import 'package:catdog/ui/pages/mypage/view_model/mypage_view_model.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -270,7 +271,13 @@ class FeedEditView extends HookConsumerWidget {
                                       captionController.text.length,
                                 },
                               );
-                              if (context.mounted) Navigator.pop(context);
+                              if (context.mounted) {
+                                ref.read(mypageViewModelProvider.notifier).updateLocalFeed(
+                                  feed.id, 
+                                  captionController.text,
+                                );
+                                Navigator.pop(context);
+                              }
                             } catch (e) {
                               isUploading.value = false;
                               debugPrint("수정 에러: $e");

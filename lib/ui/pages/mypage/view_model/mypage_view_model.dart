@@ -113,25 +113,31 @@ class MypageViewModel extends _$MypageViewModel {
     }
   }
 
-  //마이페이지 수정 부분
   Future<void> updateNickname(String newNickname) async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) return;
+  state = state.copyWith(isLoading: true);
+  try {
+    // 1. 유저 정보 가져오기 (이 줄이 없어서 에러가 났던 것입니다)
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
 
-      // Supabase DB 업데이트
-      await Supabase.instance.client
-          .from('users')
-          .update({'nickname': newNickname})
-          .eq('id', user.id);
+    // 2. Supabase DB 업데이트
+    await Supabase.instance.client
+        .from('users')
+        .update({'nickname': newNickname})
+        .eq('id', user.id);
 
-      // 성공 시 상태 반영 및 다시 불러오기
-      await fetchMyData();
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: "닉네임 수정 실패: $e");
-    }
+    // 3.  핵심: 서버 업데이트 성공 후, 로컬 상태도 즉시 변경하여 화면에 반영
+    state = state.copyWith(
+      nickname: newNickname,
+      isLoading: false,
+    );
+    
+    print("🐾 닉네임 수정 및 즉시 반영 완료: $newNickname");
+  } catch (e) {
+    state = state.copyWith(isLoading: false, errorMessage: "닉네임 수정 실패: $e");
+    print(" 닉네임 수정 중 에러: $e");
   }
+}
 
   // 로그아웃
   Future<void> logout(BuildContext context) async {
@@ -178,7 +184,7 @@ class MypageViewModel extends _$MypageViewModel {
       // 1. Supabase DB에서 삭제 실행
       await Supabase.instance.client.from('feeds').delete().eq('id', feedId);
 
-      // 2. ✅ 화면 즉시 반영: 현재 상태의 리스트에서 삭제된 ID만 제외하고 다시 저장합니다.
+      // 2.  화면 즉시 반영: 현재 상태의 리스트에서 삭제된 ID만 제외하고 다시 저장합니다.
       final updatedFeeds = state.myFeeds
           .where((feed) => feed.id != feedId)
           .toList();
@@ -188,7 +194,21 @@ class MypageViewModel extends _$MypageViewModel {
       print("🐾 게시글이 즉시 삭제되었습니다. ID: $feedId");
     } catch (e) {
       state = state.copyWith(errorMessage: "삭제 실패: $e");
-      print("❌ 삭제 중 에러 발생: $e");
+      print(" 삭제 중 에러 발생: $e");
     }
+  }
+  
+  void updateLocalFeed(String feedId, String newContent) {
+    // 현재 리스트(myFeeds)를 하나씩 검사(map)합니다.
+    final updatedList = state.myFeeds.map((feed) {
+      // 수정된 게시글의 ID와 일치하는 항목을 찾으면 내용을 교체합니다.
+      return feed.id == feedId 
+          ? feed.copyWith(content: newContent) 
+          : feed; 
+    }).toList();
+
+    // 새롭게 만들어진 리스트로 상태를 업데이트합니다.
+    state = state.copyWith(myFeeds: updatedList);
+    print("🐾 게시글 수정 내용이 화면에 즉시 반영되었습니다.");
   }
 }
