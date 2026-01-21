@@ -20,7 +20,7 @@ class FeedEditView extends HookConsumerWidget {
 
     final isEnabled = selectedImage.value != null && textLength.value >= 1;
     final viewInsets = MediaQuery.of(context).viewInsets;
-    final bool isKeyboardOpen = viewInsets.bottom > 40;
+    final bool isKeyboardOpen = viewInsets.bottom > 20;
 
     final isPicking = useState<bool>(false); //이미지 피커 중복 클릭 방지
     final isUploading = useState<bool>(false); // 완료버튼 중복 클릭 방지
@@ -97,221 +97,225 @@ class FeedEditView extends HookConsumerWidget {
             ),
           ],
         ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-                    GestureDetector(
-                      onTap: pickImage,
-                      child: Container(
-                        width: 68,
-                        height: 68,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      GestureDetector(
+                        onTap: pickImage,
+                        child: Container(
+                          width: 68,
+                          height: 68,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: const Color(0x0D000000),
+                              width: 1,
+                            ),
                             color: const Color(0x0D000000),
-                            width: 1,
                           ),
-                          color: const Color(0x0D000000),
-                        ),
-                        child: selectedImage.value != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: isLocalFile.value
-                                    ? Image.file(
-                                        File(selectedImage.value!),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Image.network(
-                                        selectedImage.value!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(
-                                                  Icons.broken_image,
-                                                  size: 24,
-                                                ),
-                                      ),
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.photo_camera_outlined,
-                                    size: 24,
-                                    color: Color(0xFF000000),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    selectedImage.value != null ? "1/1" : "0/1",
-                                    style: const TextStyle(
-                                      fontFamily: 'Pretendard',
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0x4C000000),
+                          child: selectedImage.value != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: isLocalFile.value
+                                      ? Image.file(
+                                          File(selectedImage.value!),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.network(
+                                          selectedImage.value!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Icon(
+                                                    Icons.broken_image,
+                                                    size: 24,
+                                                  ),
+                                        ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.photo_camera_outlined,
+                                      size: 24,
+                                      color: Color(0xFF000000),
                                     ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    const Text(
-                      '캡션',
-                      style: TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF121416),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      height: 158,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0x26000000),
-                          width: 1,
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      selectedImage.value != null
+                                          ? "1/1"
+                                          : "0/1",
+                                      style: const TextStyle(
+                                        fontFamily: 'Pretendard',
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0x4C000000),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
-                        color: const Color(0xFFFFFFFF),
                       ),
-                      child: TextField(
-                        controller: captionController,
-                        maxLines: null,
-                        expands: true,
-                        decoration: const InputDecoration(
-                          hintText: '어떤 일이 있었나요?',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Pretendard',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0x4D000000),
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                        ),
-                        style: const TextStyle(
+                      const SizedBox(height: 28),
+                      const Text(
+                        '캡션',
+                        style: TextStyle(
                           fontFamily: 'Pretendard',
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                           color: Color(0xFF121416),
                         ),
-                        onChanged: (value) {
-                          textLength.value = value.length > 100
-                              ? 100
-                              : value.length;
-                          if (value.length > 100) {
-                            captionController.value = TextEditingValue(
-                              text: value.substring(0, 100),
-                              selection: TextSelection.collapsed(offset: 100),
-                            );
-                          }
-                        },
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '${textLength.value}/100',
-                        style: const TextStyle(
-                          fontFamily: 'Pretendard',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0x4D000000),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        height: 158,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0x26000000),
+                            width: 1,
+                          ),
+                          color: const Color(0xFFFFFFFF),
+                        ),
+                        child: TextField(
+                          controller: captionController,
+                          maxLines: null,
+                          expands: true,
+                          decoration: const InputDecoration(
+                            hintText: '어떤 일이 있었나요?',
+                            hintStyle: TextStyle(
+                              fontFamily: 'Pretendard',
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0x4D000000),
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            fontFamily: 'Pretendard',
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF121416),
+                          ),
+                          onChanged: (value) {
+                            textLength.value = value.length > 100
+                                ? 100
+                                : value.length;
+                            if (value.length > 100) {
+                              captionController.value = TextEditingValue(
+                                text: value.substring(0, 100),
+                                selection: TextSelection.collapsed(offset: 100),
+                              );
+                            }
+                          },
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          '${textLength.value}/100',
+                          style: const TextStyle(
+                            fontFamily: 'Pretendard',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0x4D000000),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: isKeyboardOpen ? viewInsets.bottom + 10 : 40,
-              ),
-              child: Center(
-                child: GestureDetector(
-                  onTap: (isEnabled && !isUploading.value)
-                      ? () async {
-                          isUploading.value = true; // 로딩 시작
-                          try {
-                            await ref
-                                .read(feedViewModelProvider.notifier)
-                                .updateFeed(
-                                  feed.id,
-                                  captionController.text,
-                                  newImagePath: isLocalFile.value
-                                      ? selectedImage.value
-                                      : null,
-                                );
-                            await FirebaseAnalytics.instance.logEvent(
-                              name: 'feed_edit_success',
-                              parameters: {
-                                'is_text_changed':
-                                    (feed.content != captionController.text)
-                                        .toString(),
-                                'final_text_length':
-                                    captionController.text.length,
-                              },
-                            );
-                            if (context.mounted) Navigator.pop(context);
-                          } catch (e) {
-                            isUploading.value = false;
-                            debugPrint("수정 에러: $e");
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: isKeyboardOpen ? viewInsets.bottom + 10 : 20,
+                ),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: (isEnabled && !isUploading.value)
+                        ? () async {
+                            isUploading.value = true; // 로딩 시작
+                            try {
+                              await ref
+                                  .read(feedViewModelProvider.notifier)
+                                  .updateFeed(
+                                    feed.id,
+                                    captionController.text,
+                                    newImagePath: isLocalFile.value
+                                        ? selectedImage.value
+                                        : null,
+                                  );
+                              await FirebaseAnalytics.instance.logEvent(
+                                name: 'feed_edit_success',
+                                parameters: {
+                                  'is_text_changed':
+                                      (feed.content != captionController.text)
+                                          .toString(),
+                                  'final_text_length':
+                                      captionController.text.length,
+                                },
+                              );
+                              if (context.mounted) Navigator.pop(context);
+                            } catch (e) {
+                              isUploading.value = false;
+                              debugPrint("수정 에러: $e");
+                            }
                           }
-                        }
-                      : null,
-                  child: Container(
-                    width: 335,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      color: isEnabled
-                          ? const Color(0xFFFDCA40)
-                          : const Color(0x0D000000),
-                    ),
-                    child: Center(
-                    child: Center(
-                      child: isUploading.value
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF000000),
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              '완료',
-                              style: TextStyle(
-                                fontFamily: 'Pretendard',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: isEnabled
-                                    ? const Color(0xFF000000)
-                                    : const Color(0x4D000000),
-                              ),
-                            ),
-                    ),
+                        : null,
+                    child: Container(
+                      width: 335,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: isEnabled
+                            ? const Color(0xFFFDCA40)
+                            : const Color(0x0D000000),
+                      ),
+                      child: Center(
+                        child: Center(
+                          child: isUploading.value
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF000000),
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  '완료',
+                                  style: TextStyle(
+                                    fontFamily: 'Pretendard',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: isEnabled
+                                        ? const Color(0xFF000000)
+                                        : const Color(0x4D000000),
+                                  ),
+                                ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
