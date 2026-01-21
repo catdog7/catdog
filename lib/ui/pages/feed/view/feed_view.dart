@@ -15,6 +15,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:catdog/ui/pages/mypage/view_model/mypage_view_model.dart';
 
 class FeedView extends ConsumerStatefulWidget {
   const FeedView({super.key});
@@ -237,6 +238,10 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
                                 ref
                                     .read(feedViewModelProvider.notifier)
                                     .deleteFeed(feed.id);
+                                //  마이페이지 리스트에서 즉시 지워지도록 추가
+                                ref
+                                    .read(mypageViewModelProvider.notifier)
+                                    .deleteFeed(feed.id);
                               }
                             },
                           ),
@@ -312,14 +317,17 @@ Widget myFeedCard(BuildContext context, WidgetRef ref, FeedDto feed) {
 
 void _showReportDialog(BuildContext context, WidgetRef ref, FeedDto feed) {
   final reasons = ['스팸/부적절한 홍보', '욕설/비방', '음란/선정성', '기타'];
-  
+
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('신고 사유 선택', style: TextStyle(fontWeight: FontWeight.bold)),
+      title: const Text(
+        '신고 사유 선택',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView.separated(
@@ -330,14 +338,12 @@ void _showReportDialog(BuildContext context, WidgetRef ref, FeedDto feed) {
             title: Text(reasons[index]),
             onTap: () {
               Navigator.pop(context);
-              ref.read(feedViewModelProvider.notifier).reportFeed(
-                feed.id, 
-                feed.userId, 
-                reasons[index]
-              );
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('신고가 접수되었습니다.')),
-              );
+              ref
+                  .read(feedViewModelProvider.notifier)
+                  .reportFeed(feed.id, feed.userId, reasons[index]);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('신고가 접수되었습니다.')));
             },
           ),
         ),
@@ -353,7 +359,10 @@ void _showBlockDialog(BuildContext context, WidgetRef ref, FeedDto feed) {
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('사용자 차단', style: TextStyle(fontWeight: FontWeight.bold)),
+      title: const Text(
+        '사용자 차단',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
       content: const Text('이 사용자의 게시글이 더 이상 보이지 않게 됩니다.\n정말 차단하시겠습니까?'),
       actions: [
         TextButton(
@@ -364,10 +373,10 @@ void _showBlockDialog(BuildContext context, WidgetRef ref, FeedDto feed) {
           onPressed: () {
             Navigator.pop(context);
             ref.read(feedViewModelProvider.notifier).blockUser(feed.userId);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('사용자를 차단했습니다.')),
-            );
-          }, 
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('사용자를 차단했습니다.')));
+          },
           child: const Text("차단", style: TextStyle(color: Colors.red)),
         ),
       ],

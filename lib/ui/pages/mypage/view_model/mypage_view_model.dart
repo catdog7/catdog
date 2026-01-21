@@ -137,4 +137,27 @@ Future<void> updateNickname(String newNickname) async {
       state = state.copyWith(isLoading: false, errorMessage: "회원탈퇴 실패: $e");
     }
   }
+  // 게시글 삭제 함수 추가
+Future<void> deleteFeed(String feedId) async {
+  try {
+    // 1. Supabase DB에서 삭제 실행
+    await Supabase.instance.client
+        .from('feeds')
+        .delete()
+        .eq('id', feedId);
+
+    // 2. ✅ 화면 즉시 반영: 현재 상태의 리스트에서 삭제된 ID만 제외하고 다시 저장합니다.
+    final updatedFeeds = state.myFeeds.where((feed) => feed.id != feedId).toList();
+    
+    state = state.copyWith(
+      myFeeds: updatedFeeds,
+      isLoading: false,
+    );
+    
+    print("🐾 게시글이 즉시 삭제되었습니다. ID: $feedId");
+  } catch (e) {
+    state = state.copyWith(errorMessage: "삭제 실패: $e");
+    print("❌ 삭제 중 에러 발생: $e");
+  }
+}
 }
