@@ -1,6 +1,7 @@
 import 'package:catdog/ui/pages/feed/view/feed_view.dart';
 import 'package:catdog/ui/pages/mypage/view/mypage_edit_view.dart';
 import 'package:catdog/ui/pages/mypage/view/block_manage_view.dart';
+import 'package:catdog/ui/pages/mypage/view/mypage_edit_with_ai_view.dart';
 import 'package:catdog/ui/pages/mypage/view_model/mypage_view_model.dart';
 import 'package:catdog/data/dto/feed_dto.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,10 @@ class MypageView extends HookConsumerWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: false,
-        title: const Text("마이페이지", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "마이페이지",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           PopupMenuButton<String>(
             color: Colors.white,
@@ -43,14 +47,8 @@ class MypageView extends HookConsumerWidget {
                 value: 'block_manage',
                 child: Text('차단 관리'),
               ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Text('로그아웃'),
-              ),
-              const PopupMenuItem<String>(
-                value: 'delete',
-                child: Text('회원탈퇴'),
-              ),
+              const PopupMenuItem<String>(value: 'logout', child: Text('로그아웃')),
+              const PopupMenuItem<String>(value: 'delete', child: Text('회원탈퇴')),
             ],
           ),
           const SizedBox(width: 15),
@@ -59,39 +57,41 @@ class MypageView extends HookConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
-      body: myPageState.isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  
-                  _buildProfileHeader(context, myPageState),
-                  
-                  const SizedBox(height: 30),
-                  
-                  if (myPageState.myFeeds.isEmpty)
-                    const Center(child: Text("\n아직 작성한 게시글이 없습니다."))
-                  else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: myPageState.myFeeds.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 16),
-                      itemBuilder: (context, index) {
-                        final feed = myPageState.myFeeds[index];
-                        return myFeedCard(context, ref, feed);
-                      },
-                    ),
-                ],
+      body: myPageState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProfileHeader(context, myPageState),
+
+                    const SizedBox(height: 30),
+
+                    if (myPageState.myFeeds.isEmpty)
+                      const Center(child: Text("\n아직 작성한 게시글이 없습니다."))
+                    else
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: myPageState.myFeeds.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          final feed = myPageState.myFeeds[index];
+                          return myFeedCard(context, ref, feed);
+                        },
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
     );
   }
-
 
   Widget _buildProfileHeader(BuildContext context, dynamic state) {
     return Container(
@@ -109,8 +109,11 @@ class MypageView extends HookConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                state.nickname ?? "이름 없음", 
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                state.nickname ?? "이름 없음",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               // 코드 복사
@@ -119,13 +122,19 @@ class MypageView extends HookConsumerWidget {
                   GestureDetector(
                     onTap: () {
                       if (state.inviteCode != null) {
-                        Clipboard.setData(ClipboardData(text: state.inviteCode!));
+                        Clipboard.setData(
+                          ClipboardData(text: state.inviteCode!),
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("초대코드를 클립보드에 복사했습니다.")),
                         );
                       }
                     },
-                    child: const Icon(Icons.copy, size: 16, color: Colors.black54),
+                    child: const Icon(
+                      Icons.copy,
+                      size: 16,
+                      color: Colors.black54,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -150,11 +159,11 @@ class MypageView extends HookConsumerWidget {
         CircleAvatar(
           radius: 35,
           backgroundColor: Colors.white,
-          backgroundImage: state.profileImageUrl != null 
-              ? NetworkImage(state.profileImageUrl!) 
+          backgroundImage: state.profileImageUrl != null
+              ? NetworkImage(state.profileImageUrl!)
               : null,
-          child: state.profileImageUrl == null 
-              ? const Icon(Icons.person, size: 40, color: Colors.grey) 
+          child: state.profileImageUrl == null
+              ? const Icon(Icons.person, size: 40, color: Colors.grey)
               : null,
         ),
         // 연필 모양 편집 버튼
@@ -163,8 +172,10 @@ class MypageView extends HookConsumerWidget {
           right: 0,
           child: GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=> MypageEditView()));
-              
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MypageEditWithAiView()),
+              );
             },
             child: Container(
               padding: const EdgeInsets.all(4),
@@ -179,6 +190,7 @@ class MypageView extends HookConsumerWidget {
       ],
     );
   }
+
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
