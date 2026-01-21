@@ -1,5 +1,6 @@
 import 'package:catdog/ui/pages/mypage/view_model/mypage_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -10,7 +11,7 @@ class MypageEditView extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(mypageViewModelProvider);
     // 닉네임 입력을 위한 컨트롤러 (기본값으로 현재 닉네임 설정)
-    final nicknameController = TextEditingController(text: state.nickname);
+    final nicknameController = useTextEditingController(text: state.nickname);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -62,9 +63,14 @@ class MypageEditView extends HookConsumerWidget {
                           source: ImageSource.gallery,
                         );
                         if (image != null) {
-                          ref
+                          await ref
                               .read(mypageViewModelProvider.notifier)
                               .updateProfileImage(image.path);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("프로필 사진이 변경되었습니다.")),
+                            );
+                          }
                         }
                       },
                       child: Container(
