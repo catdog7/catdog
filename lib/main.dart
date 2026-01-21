@@ -5,6 +5,7 @@ import 'package:catdog/core/utils/app_keys.dart';
 import 'package:catdog/firebase_options.dart';
 import 'package:catdog/ui/pages/friend/state/fcm_event.dart';
 import 'package:catdog/ui/pages/splash/splash_view.dart';
+import 'package:catdog/ui/pages/home/home_view.dart'; // Add missing import
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -136,9 +137,17 @@ class _MyAppState extends ConsumerState<MyApp> {
       scaffoldMessengerKey: scaffoldMessengerKey,
       // 딥링크 처리 시 Flutter Navigator가 해당 경로를 찾지 못해 발생하는 에러 방지
       onGenerateRoute: (settings) {
-        // 위젯 딥링크 등은 SplashView에서 처리하도록 함
-        // Supabase OAuth 콜백 등도 SplashView -> 로직 처리 흐름을 타게 하거나
-        // 필요한 경우 분기 처리. 여기서는 빈 화면(Black Screen) 방지를 위해 SplashView 반환
+        debugPrint('MyApp: onGenerateRoute generated for ${settings.name}');
+        
+        // 위젯 딥링크 등은 HomeView로 바로 연결하여 내부에서 처리하도록 함
+        if (settings.name != null && settings.name!.contains('catdog-widget')) {
+          return MaterialPageRoute(
+            builder: (_) => HomeView(initialDeepLink: settings.name),
+            settings: settings,
+          );
+        }
+
+        // 그 외 알 수 없는 경로는 SplashView로 (Supabase OAuth 콜백 등)
         return MaterialPageRoute(
           builder: (_) => const SplashView(),
           settings: settings,

@@ -48,7 +48,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
     // SplashView에서 전달된 딥링크 처리 (Cold Start)
     if (widget.initialDeepLink != null) {
       debugPrint('HomeView: Processing initialDeepLink from SplashView: ${widget.initialDeepLink}');
-      _hasPendingNavigation = true;
+      // POST 위젯(1x1)인 경우에만 글쓰기 화면으로 이동
+      if (widget.initialDeepLink == 'catdog-widget://post') {
+        _hasPendingNavigation = true;
+      }
       _lastHandledTime = DateTime.now();
     }
 
@@ -98,52 +101,71 @@ class _HomeViewState extends ConsumerState<HomeView> {
     }
   }
 
+  static const _channel = MethodChannel('com.team.catdog/widget');
+
   void _setupWidgetLink() {
-    // 앱이 실행 중일 때 위젯 클릭 이벤트를 수신 (Hot Start)
+    // 1. home_widget 패키지의 클릭 이벤트 리스너 (iOS 및 일부 안드로이드)
     HomeWidget.widgetClicked.listen((Uri? uri) {
       if (uri != null) {
         _handleDeepLink(uri.toString());
       }
     });
+
+    // 2. Android MethodChannel 리스너 복구 (MainActivity.kt에서 보내는 신호 수신)
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onDeepLink') {
+        final String uri = call.arguments as String;
+        debugPrint('HomeView: Received deep link via MethodChannel: $uri');
+        _handleDeepLink(uri);
+      }
+    });
   }
 
   void _handleDeepLink(String uri) {
+    debugPrint('HomeView: _handleDeepLink called with uri: $uri');
     // 1000ms 이내의 중복 신호는 무시 (디바운스)
     final now = DateTime.now();
     if (_lastHandledTime != null && 
         now.difference(_lastHandledTime!) < const Duration(milliseconds: 1000)) {
-      print('Deep link debounced: $uri');
+      debugPrint('Deep link debounced: $uri');
       return;
     }
 
     if (_isHandlingDeepLink) {
-      print('Deep link handling already in progress, ignoring: $uri');
+      debugPrint('Deep link handling already in progress, ignoring: $uri');
       return;
     }
 
     // 전용 스킴(catdog-widget)만 처리하여 다른 핸들러와의 충돌 방지
     if (uri == 'catdog-widget://post') {
       _lastHandledTime = now;
-      print('Deep link detected, setting pending flag');
+      debugPrint('Deep link detected as POST, setting pending flag');
       _hasPendingNavigation = true;
       
       // HomeView가 완전히 로드된 후 처리하도록 다음 프레임으로 연기
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _processPendingNavigation();
       });
+    } else {
+      debugPrint('Unknown deep link scheme: $uri');
     }
   }
 
   void _processPendingNavigation() {
+    debugPrint('HomeView: _processPendingNavigation called. Pending: $_hasPendingNavigation, Mounted: $mounted');
     if (_hasPendingNavigation && mounted) {
       _hasPendingNavigation = false;
-      print('Processing pending navigation to FeedAddView');
+      debugPrint('Processing pending navigation to FeedAddView');
       _openFeedAddView();
     }
   }
 
   void _openFeedAddView() async {
-    if (!mounted || _isHandlingDeepLink) return;
+    debugPrint('HomeView: _openFeedAddView started');
+    if (!mounted || _isHandlingDeepLink) {
+      debugPrint('HomeView: _openFeedAddView aborted. Mounted: $mounted, Handling: $_isHandlingDeepLink');
+      return;
+    }
     
     setState(() {
       _isHandlingDeepLink = true;
@@ -157,6 +179,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       // 1. 로그인 체크
       final session = client.auth.currentSession;
       if (session == null) {
+        debugPrint('HomeView: No session, navigating to LoginView');
         if (mounted) {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const LoginView()),
@@ -168,6 +191,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
       // 2. 닉네임 설정 체크
       final hasNickname = await userUseCase.hasNickname(session.user.id);
       if (!hasNickname) {
+        debugPrint('HomeView: No nickname, navigating to NicknameView');
         if (mounted) {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const NicknameView()),
@@ -177,19 +201,27 @@ class _HomeViewState extends ConsumerState<HomeView> {
       }
 
       // 3. 반려동물 등록 체크 (0마리면 홈 화면에서 등록 다이얼로그 노출)
+      debugPrint('HomeView: Checking pets...');
       final hasPets = await petUseCase.hasPets(session.user.id);
       if (!hasPets) {
+        debugPrint('HomeView: No pets found. Aborting navigation to FeedAddView.');
         if (mounted) {
           // 이미 띄워져 있을 수 있으므로 체크 후 표시
           _checkIfRegistrationRequired();
+          // 탭을 홈으로 이동시켜 다이얼로그가 보이게 유도
+          setState(() {
+            _selectedIndex = 0;
+          });
         }
         return;
       }
 
+      debugPrint('HomeView: All checks passed. Pushing FeedAddView.');
       final result = await Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => const FeedAddView()),
       );
       
+      debugPrint('HomeView: FeedAddView returned with result: $result');
       if (result == true && mounted) {
         ref.read(feedViewModelProvider.notifier).fetchFeedsForFriends();
         
@@ -198,6 +230,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
         });
         _logScreenView(1);
       }
+    } catch (e) {
+      debugPrint('HomeView: Error in _openFeedAddView: $e');
     } finally {
       if (mounted) {
         setState(() {

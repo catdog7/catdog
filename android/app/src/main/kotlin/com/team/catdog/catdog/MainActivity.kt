@@ -14,16 +14,19 @@ class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.team.catdog/widget"
 
     override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
         val uri = intent.dataString
         android.util.Log.d("MainActivity", "onNewIntent: $uri")
-        if (uri != null) {
-            initialUri = uri // Store it for getInitialUri if needed
+
+        // catdog-widget 스킴은 Flutter Navigator가 아닌 MethodChannel로만 처리 (중복 네비게이션 방지)
+        if (uri != null && uri.startsWith("catdog-widget://")) {
+            setIntent(intent) // Intent 갱신
             flutterEngine?.dartExecutor?.binaryMessenger?.let {
                 MethodChannel(it, CHANNEL).invokeMethod("onDeepLink", uri)
             }
+            return // super.onNewIntent 호출 생략하여 Flutter가 라우트로 인식하지 않게 함
         }
+
+        super.onNewIntent(intent)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
