@@ -267,24 +267,28 @@ class _LoginViewState extends ConsumerState<LoginView> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
+    final effectiveWidth = screenWidth > 500 ? 500.0 : screenWidth;
     final screenHeight = screenSize.height;
     final safeAreaBottom = MediaQuery.of(context).padding.bottom;
 
     // 반응형 이미지 크기 (화면 너비의 60-70%)
-    final desImageWidth = screenWidth * 0.64; // 240/375 ≈ 0.64
-    final titleImageWidth = screenWidth * 0.693; // 260/375 ≈ 0.693
+    final desImageWidth = effectiveWidth * 0.64; // 240/375 ≈ 0.64
+    final titleImageWidth = effectiveWidth * 0.693; // 260/375 ≈ 0.693
 
     // 반응형 패딩
-    final horizontalPadding = screenWidth * 0.053; // 20/375 ≈ 0.053
-    final termsPadding = screenWidth * 0.099; // 37/375 ≈ 0.099
+    final horizontalPadding = effectiveWidth * 0.053; // 20/375 ≈ 0.053
+    final termsPadding = effectiveWidth * 0.099; // 37/375 ≈ 0.099
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFD),
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final availableHeight = constraints.maxHeight;
+       child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 500),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.maxHeight;
 
             return Column(
               children: [
@@ -519,7 +523,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.black.withOpacity(0.30),
-                      fontSize: screenWidth * 0.035, // 13/375 ≈ 0.035
+                      fontSize: effectiveWidth * 0.035, // 13/375 ≈ 0.035
                       fontFamily: 'Pretendard',
                       fontWeight: FontWeight.w500,
                       height: 1.54,
@@ -528,8 +532,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                 ),
               ],
             );
-          },
+            },
+          ),
         ),
+      ),
       ),
     );
   }

@@ -366,9 +366,10 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
                 const PopupMenuItem(
                   value: 'edit',
                   height: 32,
+                  padding: EdgeInsets.zero,
                   child: Center(
                     child: Text(
-                      '편집',
+                      '삭제',
                       style: TextStyle(
                         fontFamily: 'Pretendard',
                         fontSize: 16,
@@ -382,14 +383,18 @@ class _HomeContentState extends ConsumerState<HomeContent> with WidgetsBindingOb
                 const PopupMenuItem(
                   value: 'add',
                   height: 32,
-                  child: Center(
-                    child: Text(
-                      '추가 등록',
-                      style: TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                  padding: EdgeInsets.zero,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Center(
+                      child: Text(
+                        '수정',
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),

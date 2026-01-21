@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 
 /// HomeScreen Widget 관리 서비스
@@ -15,10 +16,12 @@ class WidgetService {
   
   /// 최신 피드 이미지 URL을 위젯에 저장하고 업데이트
   static Future<void> updateLatestImageUrl(String? imageUrl) async {
+    debugPrint('WidgetService: updateLatestImageUrl called. URL: $imageUrl');
     try {
       await _initAppGroup();
       // 데이터 저장
       await HomeWidget.saveWidgetData<String>('latest_image_url', imageUrl ?? '');
+      debugPrint('WidgetService: Data saved to UserDefaults');
       
       // 위젯 새로고침
       if (Platform.isAndroid) {
@@ -26,9 +29,16 @@ class WidgetService {
           name: _androidFrameWidgetName,
           qualifiedAndroidName: 'com.team.catdog.catdog.$_androidFrameWidgetName',
         );
+      } else if (Platform.isIOS) {
+        debugPrint('WidgetService: Requesting iOS Widget Update (CatdogWidget)');
+        final result = await HomeWidget.updateWidget(
+          name: 'CatdogWidget',
+          iOSName: 'CatdogWidget',
+        );
+        debugPrint('WidgetService: iOS Update Result: $result');
       }
     } catch (e) {
-      print('WidgetService.updateLatestImageUrl error: $e');
+      debugPrint('WidgetService.updateLatestImageUrl error: $e');
     }
   }
   
@@ -56,6 +66,11 @@ class WidgetService {
         await HomeWidget.updateWidget(
           name: _androidFrameWidgetName,
           qualifiedAndroidName: 'com.team.catdog.catdog.$_androidFrameWidgetName',
+        );
+      } else if (Platform.isIOS) {
+        await HomeWidget.updateWidget(
+          name: 'CatdogWidget',
+          iOSName: 'CatdogWidget',
         );
       }
     } catch (e) {

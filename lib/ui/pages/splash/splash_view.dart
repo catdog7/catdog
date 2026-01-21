@@ -7,7 +7,7 @@ import 'package:catdog/ui/pages/login/login_view.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:home_widget/home_widget.dart';
+
 
 class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
@@ -95,8 +95,9 @@ class _SplashViewState extends ConsumerState<SplashView> {
       // 1. 위젯 실행 여부 먼저 확인 (딜레이 없이 즉시 반응하기 위함)
       String? widgetDeepLink;
       try {
-        final initialUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
+        final initialUri = await WidgetService.getInitialWidgetUri();
         debugPrint('SplashView: initialUri from home_widget = $initialUri');
+        
         
         if (initialUri != null && initialUri.toString().startsWith('catdog-widget://')) {
           widgetDeepLink = initialUri.toString();

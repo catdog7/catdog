@@ -225,6 +225,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    // Provider 상태 변화를 감지하여 다이얼로그 표시
+    ref.listen(showModalProvider, (previous, next) {
+      if (next) {
+        _checkIfRegistrationRequired();
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: NavigationBody(
