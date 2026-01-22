@@ -2,12 +2,12 @@
 
 
 ## 위젯
-### 1x1 위젯
+### 1. 1x1 위젯
 - 새 게시글 페이지로 바로 이동
 <img src="https://github.com/user-attachments/assets/f28829d9-1052-4367-8a6b-e7275cbf9a67" width="240" />
 <br/>
 
-### 2x2 위젯
+### 2. 2x2 위젯
 - 내 최신 게시글의 사진 반영
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/1b003bc7-0060-4429-b987-42922a0e601f" />
 
@@ -51,21 +51,45 @@
 ### 2. 친구 게시글인 경우 신고, 사용자 차단 버튼
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/bcf3c9ea-bc7e-4034-9d3d-ac1e528576e6" />
 
-### 3. 코멘트/ 코멘트 좋아요 / 길게 누르면 삭제 창 팝업
+### 3. 코멘트 / 코멘트 좋아요 / 길게 누르면 삭제 창 팝업
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/81a34613-ee1f-47d8-a1b1-f27bea503303" />
-
+<br/>
 
 
 ## 친구
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/144e726f-d477-4008-88e7-20594bbfe8be" />
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/20db8f4f-9e0a-42ea-bfd9-959910a3664d" />
+
+### 1. 친구 검색 페이지
+ - 닉네임 또는 초대코드로 검색
+ - 본인 검색X
+ - 차단한 사용자 검색X
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/b99d8c99-be6a-4deb-b649-9de2d02acc67" />
+<br/>
+
+### 친구 요청 페이지
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/4be3a139-5ffc-488a-a3b0-22c18dbb01d9" />
+<br/>
+
+### 백그라운드 / 포그라운드 알림
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/1cf98894-2e7f-4dde-b712-50b3b1628acc" />
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/73a8d918-d5df-4875-b369-a2e7cf27a3cf" />
+<br/>
 
 
+## 내정보
 
-## 프로필 수정
-### 사진이 강아지나 고양이인지 AI로 확인
+### 1. 초대코드 복사
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/cafccfb2-4e95-47a9-8534-0e29b4416e1d" />
 
+### 2. 프로필 수정
+- 프로필 사진, 닉네임 변경
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/3f589931-8a76-421b-b946-b00fbc26caee" />
+
+### 3. 사진이 강아지나 고양이인지 AI로 확인
 - 강아지나 고양이가 아닐 경우
 <img src="https://github.com/user-attachments/assets/da33af28-9b18-4d3b-95a1-aca39edcc621" width="240" />
-
+<br/>
 
 - 강아지나 고양이인 경우
 <img src="https://github.com/user-attachments/assets/bc399d61-d753-41fb-a557-4a9ca70fa91b" width="240" />
