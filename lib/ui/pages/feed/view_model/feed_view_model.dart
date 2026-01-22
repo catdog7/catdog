@@ -1,293 +1,169 @@
-import 'dart:io';
-
-import 'package:amumal/core/config/feed_dependency.dart';
-import 'package:amumal/domain/model/feed_model.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:catdog/core/config/common_dependency.dart';
+import 'package:catdog/core/config/friend_dependency.dart';
+import 'package:catdog/data/repository_impl/feed_repository_impl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:amumal/core/utils/debouncer.dart';
+import 'package:catdog/ui/pages/feed/state/feed_state.dart';
+import 'package:catdog/data/repository_impl/feed_add_repository_impl.dart';
+import 'package:catdog/data/repository_impl/report_repository_impl.dart';
+import 'package:catdog/data/repository_impl/block_repository_impl.dart';
+
 part 'feed_view_model.g.dart';
 
-/// Feed 작성 화면의 UI 상태를 관리하는 ViewModel
-/// UI 관련 로직만 담당하고, 비즈니스 로직은 UseCase에 위임
 @riverpod
 class FeedViewModel extends _$FeedViewModel {
   @override
-  File? build() {
-    // Provider가 dispose될 때 Debouncer 정리
-    ref.onDispose(() {
-      _autoSaveDebouncer?.dispose();
-    });
-    
-    return null; // 초기값: 선택된 이미지 파일 없음
+  FeedState build() {
+    // 뷰모델이 생성되자마자 데이터를 불러오도록 설정합니다.
+    Future.microtask(() => fetchFeedsForFriends());
+    return  FeedState();
   }
 
-  // === 내부 상태 변수 (UI 입력 값) ===
-  String _tag = "";
-  String _content = "";
-  final ImagePicker _picker = ImagePicker();
+  Future<void> fetchFeeds() async {
+    // print("끼아ㅏ아아아아아아아ㅏ아아아ㅏㄱ되라고!1");
 
-  // === 자동 저장을 위한 Debouncer ===
-  Debouncer? _autoSaveDebouncer;
-
-  // === 수정 모드 관련 변수 ===
-  String? _editModeFeedId;
-  String? _writerId;
-  String? _nickname;
-  DateTime? _existingCreatedAt;
-  String? _existingImageUrl; // 기존 이미지 URL (이미지 변경하지 않았을 때 사용)
-
-    /// 자동 저장 Debouncer 초기화 (수정 모드에서만 사용)
-  void _initializeAutoSave() {
-    if (_autoSaveDebouncer != null) return; // 이미 초기화되었으면 리턴
+    // 1. 로딩 상태 시작
+    state = state.copyWith(isLoading: true, errorMessage: null);
     
-    _autoSaveDebouncer = Debouncer(
-      duration: const Duration(seconds: 3), // 3초 후 자동 저장
-      callback: () {
-        _performAutoSave();
-      },
-    );
-  }
-
-  /// 실제 자동 저장 실행
-  Future<void> _performAutoSave() async {
-    if (_editModeFeedId == null) {
-      return; // 수정 모드가 아니면 종료
-    }
-    
-    if (_content.trim().isEmpty) {
-      return;
-    }
-
     try {
-      final feedUseCase = ref.read(feedUseCaseProvider);
+      // 2. Repository를 통해 Supabase에서 데이터 가져오기
+      // (Repository에 getFeeds 메서드를 곧 만들 예정입니다.)
+      final repository = ref.read(feedRepositoryProvider);
+      final feeds = await repository.getFeeds(); 
+      // print("끼아ㅏ아아아아아아아ㅏ아아아ㅏㄱ되라고!2");
       
-      // 이미지가 변경되었는지 확인
-      if (state != null && await state!.exists()) {
-        // 새 이미지가 선택된 경우
-        await feedUseCase.modifyFeed(
-          id: _editModeFeedId!,
-          writerId: _writerId ?? '',
-          nickname: _nickname ?? '',
-          tagString: _tag,
-          content: _content,
-          imageFile: state!,
-          existingCreatedAt: _existingCreatedAt ?? DateTime.now(),
+      // 3. 성공 시 상태 업데이트
+      state = state.copyWith(
+        feeds: feeds, 
+        isLoading: false
+      );
+    } catch (e) {
+      // print("끼아ㅏ아아아아아아아ㅏ아아아ㅏㄱ되라고!3");
+
+      // 4. 에러 발생 시 상태 업데이트
+      state = state.copyWith(
+        isLoading: false, 
+        errorMessage: "피드를 불러오지 못했습니다: $e"
+      );
+    }
+  }
+
+  Future<void> fetchFeedsForFriends() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    
+    try {
+      final client = ref.read(supabaseClientProvider);
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: "로그인이 필요합니다."
         );
-      } else if (_existingImageUrl != null) {
-        // 이미지를 변경하지 않았을 경우 기존 이미지 URL 사용
-        await feedUseCase.modifyFeedWithoutImage(
-          id: _editModeFeedId!,
-          writerId: _writerId ?? '',
-          nickname: _nickname ?? '',
-          tagString: _tag,
-          content: _content,
-          existingImageUrl: _existingImageUrl!,
-          existingCreatedAt: _existingCreatedAt ?? DateTime.now(),
-        );
-      } else {
         return;
       }
-    } catch (e) {
-      print('자동 저장 실패: $e');
-    }
-  }
 
-  /// 이미지 선택 (UI 이벤트 처리)
-  Future<void> pickImage(ImageSource imageSource) async {
-    final XFile? pickedFile = await _picker.pickImage(source: imageSource);
+      final friendUseCase = ref.read(friendUseCaseProvider);
+      final friends = await friendUseCase.getMyFriends();
+      final friendIds = friends.map((friend) => friend.userId).toList();
 
-    if (pickedFile != null) {
-      state = File(pickedFile.path); // State 업데이트 (UI 자동 rebuild)
+      final repository = ref.read(feedRepositoryProvider);
+      final feeds = await repository.getFeedsForFriends(userId, friendIds);
       
-      // 수정 모드일 때 이미지 변경 시 자동 저장 트리거
-      if (_editModeFeedId != null) {
-        _autoSaveDebouncer?.run();
-      }
-    }
-  }
-
-  /// 태그 입력 값 업데이트 (UI 이벤트 처리)
-  void updateTag(String tag) {
-    _tag = tag;
-    
-    // 수정 모드일 때 자동 저장 트리거
-    if (_editModeFeedId != null) {
-      _autoSaveDebouncer?.run();
-    }
-  }
-
-  /// 내용 입력 값 업데이트 (UI 이벤트 처리)
-  void updateContent(String content) {
-    _content = content;
-    
-    // 수정 모드일 때 자동 저장 트리거
-    if (_editModeFeedId != null) {
-      _autoSaveDebouncer?.run();
-    }
-  }
-
-  /// 피드 등록 (UseCase 호출)
-  /// 비즈니스 로직은 UseCase에서 처리
-  /// 반환값: 성공 시 null, 실패 시 에러 메시지
-  Future<String?> createFeed({
-    required String writerId,
-    required String nickname,
-  }) async {
-    // UI 레벨 유효성 검사: 이미지 체크
-    if (state == null) {
-      return '이미지를 선택해주세요.';
-    }
-    
-    // 파일 존재 여부 확인
-    if (!await state!.exists()) {
-      return '이미지 파일이 존재하지 않습니다.';
-    }
-    
-    // 콘텐츠 검증 (빈 문자열이거나 공백만 있는 경우)
-    final trimmedContent = _content.trim();
-    if (trimmedContent.isEmpty) {
-      return '피드 내용을 입력해주세요.';
-    }
-
-    try {
-      // UseCase 호출 (앱 정책 처리: 이미지 업로드, createdAt/modifiedAt 설정 등)
-      final feedUseCase = ref.read(feedUseCaseProvider);
-      await feedUseCase.createFeed(
-        writerId: writerId,
-        nickname: nickname,
-        tagString: _tag,
-        content: _content,
-        imageFile: state!,
+      state = state.copyWith(
+        feeds: feeds,
+        isLoading: false
       );
-
-      // 성공 시 상태 초기화 및 자동 저장 취소
-      state = null;
-      _tag = '';
-      _content = '';
-      cancelAutoSave(); // 자동 저장 취소
-      _editModeFeedId = null;
-      _writerId = null;
-      _nickname = null;
-      _existingCreatedAt = null;
-      _existingImageUrl = null;
-
-      return null; // 성공
     } catch (e) {
-      // 에러 메시지 추출
-      String errorMessage = '피드 등록에 실패했습니다.';
-      
-      if (e is ArgumentError) {
-        // ArgumentError의 메시지 사용
-        errorMessage = e.message ?? errorMessage;
-      } else {
-        // 기타 에러는 원본 메시지 사용
-        errorMessage = e.toString();
-      }
-      
-      print("피드 등록 오류: $e");
-      return errorMessage; // 에러 메시지 반환
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: "피드를 불러오지 못했습니다: $e"
+      );
     }
   }
+  //피드 삭제함수 
+  Future<void> deleteFeed(String feedId) async {
+  try {
+    final repository = ref.read(feedRepositoryProvider);
+    await repository.deleteFeed(feedId); // ✅ DB에서 먼저 지우고
 
-  /// 피드 수정 (UseCase 호출)
-  /// 비즈니스 로직은 UseCase에서 처리
-  /// 반환값: 성공 시 null, 실패 시 에러 메시지
-  Future<String?> modifyFeed({
-    required String feedId,
-    required String writerId,
-    required String nickname,
-    required DateTime existingCreatedAt,
-  }) async {
-    // 콘텐츠 검증 (빈 문자열이거나 공백만 있는 경우)
-    final trimmedContent = _content.trim();
-    if (trimmedContent.isEmpty) {
-      return '피드 내용을 입력해주세요.';
-    }
-
-    try {
-      // UseCase 호출 (앱 정책 처리: 이미지 업로드, modifiedAt 설정 등)
-      final feedUseCase = ref.read(feedUseCaseProvider);
-      
-      // 이미지가 변경되었는지 확인
-      if (state != null && await state!.exists()) {
-        // 새 이미지가 선택된 경우
-        await feedUseCase.modifyFeed(
-          id: feedId,
-          writerId: writerId,
-          nickname: nickname,
-          tagString: _tag,
-          content: _content,
-          imageFile: state!,
-          existingCreatedAt: existingCreatedAt,
-        );
-      } else if (_existingImageUrl != null) {
-        // 이미지를 변경하지 않았을 경우 기존 이미지 URL 사용
-        await feedUseCase.modifyFeedWithoutImage(
-          id: feedId,
-          writerId: writerId,
-          nickname: nickname,
-          tagString: _tag,
-          content: _content,
-          existingImageUrl: _existingImageUrl!,
-          existingCreatedAt: existingCreatedAt,
-        );
-      } else {
-        return '이미지를 선택해주세요.';
-      }
-
-      // 성공 시 상태 초기화 및 자동 저장 취소
-      state = null;
-      _tag = '';
-      _content = '';
-      cancelAutoSave(); // 자동 저장 취소
-      _editModeFeedId = null;
-      _writerId = null;
-      _nickname = null;
-      _existingCreatedAt = null;
-      _existingImageUrl = null;
-
-      return null; // 성공
-    } catch (e) {
-      // 에러 메시지 추출
-      String errorMessage = '피드 수정에 실패했습니다.';
-      
-      if (e is ArgumentError) {
-        // ArgumentError의 메시지 사용
-        errorMessage = e.message ?? errorMessage;
-      } else {
-        // 기타 에러는 원본 메시지 사용
-        errorMessage = e.toString();
-      }
-      
-      print("피드 수정 오류: $e");
-      return errorMessage; // 에러 메시지 반환
-    }
-  }
-
-  /// 기존 피드 데이터로 ViewModel 초기화 (수정 모드용)
-  void initializeWithExistingFeed(
-    FeedModel feed, {
-    required String writerId,
-    required String nickname,
-  }) {
-    _tag = feed.tag.join(',');
-    _content = feed.content;
-    _editModeFeedId = feed.id;
-    _writerId = writerId;
-    _nickname = nickname;
-    _existingCreatedAt = feed.createdAt;
-    _existingImageUrl = feed.imageUrl; // 기존 이미지 URL 저장
-    // 이미지는 URL이므로 File로 변환할 수 없음
-    // 수정 모드에서는 사용자가 새 이미지를 선택해야 함
-    state = null;
+    // ✅ 내 로컬 상태(리스트)에서도 해당 피드를 지워서 화면을 새로고침합니다.
+    final updatedFeeds = state.feeds.where((feed) => feed.id != feedId).toList();
+    state = state.copyWith(feeds: updatedFeeds);
     
-    // 자동 저장 Debouncer 초기화
-    _initializeAutoSave();
+    print("삭제 성공!");
+  } catch (e) {
+    print("삭제 중 에러 발생: $e");
+    state = state.copyWith(errorMessage: "삭제에 실패했습니다.");
+  }
+}
+
+//피드 수정 함수
+// lib/ui/pages/feed/view_model/feed_view_model.dart
+
+// ✅ newImagePath를 선택적 매개변수({ })로 추가합니다.
+// lib/ui/pages/feed/view_model/feed_view_model.dart
+
+Future<void> updateFeed(String feedId, String newContent, {String? newImagePath}) async {
+  try {
+    state = state.copyWith(isLoading: true); // 로딩 시작
+    
+    final repository = ref.read(feedRepositoryProvider);
+
+    // Repository 호출 (이미지 경로 전달)
+    await repository.updateFeed(feedId, newContent, newImagePath: newImagePath);
+
+    // ✅ 전체 리스트를 다시 불러오거나(fetchFeedsForFriends), 로컬 상태를 영리하게 업데이트합니다.
+    await fetchFeedsForFriends(); 
+    
+    print("수정 완료 및 새로고침 성공!");
+  } catch (e) {
+    state = state.copyWith(isLoading: false, errorMessage: "수정 실패: $e");
+    print("수정 실패: $e");
+  }
+}
+  // 신고 함수
+  Future<void> reportFeed(String feedId, String reportedUserId, String category, {String? reasonDetail}) async {
+    try {
+      final repository = ref.read(reportRepositoryProvider);
+      
+      // 1. 서버에 신고 요청 (Await)
+      await repository.reportFeed(
+        feedId: feedId,
+        reportedUserId: reportedUserId,
+        category: category,
+        reasonDetail: reasonDetail,
+      );
+      print("신고 완료 (서버 전송 성공)");
+
+      // 2. 피드 목록 새로고침 (신고한 글은 제외되어야 함)
+      await fetchFeedsForFriends();
+
+    } catch (e) {
+      print("신고 실패: $e");
+      state = state.copyWith(errorMessage: "신고 전송 중 오류가 발생했습니다.");
+    }
   }
 
-  /// 완료 버튼 클릭 시 자동 저장 취소 (선택적)
-  void cancelAutoSave() {
-    _autoSaveDebouncer?.dispose();
-    _autoSaveDebouncer = null;
+  // 차단 함수
+  Future<void> blockUser(String blockUserId) async {
+    try {
+      final repository = ref.read(blockRepositoryProvider);
+      await repository.blockUser(blockUserId);
+
+      // 친구 관계 삭제
+      try {
+        final friendRepo = ref.read(friendRepositoryProvider);
+        await friendRepo.deleteFriend(blockUserId);
+      } catch (e) {
+        print("친구 삭제 실패 (이미 친구가 아닐 수 있음): $e");
+      }
+
+      // Optimistic Update: 차단한 유저의 모든 글을 리스트에서 제거
+      final updatedFeeds = state.feeds.where((feed) => feed.userId != blockUserId).toList();
+      state = state.copyWith(feeds: updatedFeeds);
+      print("차단 완료 & 리스트 필터링");
+    } catch (e) {
+      print("차단 실패: $e");
+      state = state.copyWith(errorMessage: "차단에 실패했습니다.");
+    }
   }
 }

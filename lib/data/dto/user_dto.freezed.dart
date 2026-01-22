@@ -21,11 +21,19 @@ UserDto _$UserDtoFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserDto {
-  @JsonKey(ignore: true)
-  String? get id => throw _privateConstructorUsedError;
-  String get nickname => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
+  String? get nickname => throw _privateConstructorUsedError;
+  @JsonKey(name: 'invite_code')
+  String? get inviteCode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'profile_image_url')
+  String? get profileImageUrl => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
+  String? get provider => throw _privateConstructorUsedError;
+  String get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  DateTime get createdAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this UserDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -42,9 +50,15 @@ abstract class $UserDtoCopyWith<$Res> {
       _$UserDtoCopyWithImpl<$Res, UserDto>;
   @useResult
   $Res call({
-    @JsonKey(ignore: true) String? id,
-    String nickname,
-    @JsonKey(name: 'created_at') DateTime createdAt,
+    String id,
+    String? nickname,
+    @JsonKey(name: 'invite_code') String? inviteCode,
+    @JsonKey(name: 'profile_image_url') String? profileImageUrl,
+    String? email,
+    String? provider,
+    String status,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -63,24 +77,54 @@ class _$UserDtoCopyWithImpl<$Res, $Val extends UserDto>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? nickname = null,
-    Object? createdAt = null,
+    Object? id = null,
+    Object? nickname = freezed,
+    Object? inviteCode = freezed,
+    Object? profileImageUrl = freezed,
+    Object? email = freezed,
+    Object? provider = freezed,
+    Object? status = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
-            id: freezed == id
+            id: null == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            nickname: null == nickname
+                      as String,
+            nickname: freezed == nickname
                 ? _value.nickname
                 : nickname // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            inviteCode: freezed == inviteCode
+                ? _value.inviteCode
+                : inviteCode // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            profileImageUrl: freezed == profileImageUrl
+                ? _value.profileImageUrl
+                : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            email: freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            provider: freezed == provider
+                ? _value.provider
+                : provider // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            status: null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
                       as String,
-            createdAt: null == createdAt
+            createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -96,9 +140,15 @@ abstract class _$$UserDtoImplCopyWith<$Res> implements $UserDtoCopyWith<$Res> {
   @override
   @useResult
   $Res call({
-    @JsonKey(ignore: true) String? id,
-    String nickname,
-    @JsonKey(name: 'created_at') DateTime createdAt,
+    String id,
+    String? nickname,
+    @JsonKey(name: 'invite_code') String? inviteCode,
+    @JsonKey(name: 'profile_image_url') String? profileImageUrl,
+    String? email,
+    String? provider,
+    String status,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -116,24 +166,54 @@ class __$$UserDtoImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? nickname = null,
-    Object? createdAt = null,
+    Object? id = null,
+    Object? nickname = freezed,
+    Object? inviteCode = freezed,
+    Object? profileImageUrl = freezed,
+    Object? email = freezed,
+    Object? provider = freezed,
+    Object? status = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _$UserDtoImpl(
-        id: freezed == id
+        id: null == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        nickname: null == nickname
+                  as String,
+        nickname: freezed == nickname
             ? _value.nickname
             : nickname // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        inviteCode: freezed == inviteCode
+            ? _value.inviteCode
+            : inviteCode // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        profileImageUrl: freezed == profileImageUrl
+            ? _value.profileImageUrl
+            : profileImageUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        email: freezed == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        provider: freezed == provider
+            ? _value.provider
+            : provider // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        status: null == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
                   as String,
-        createdAt: null == createdAt
+        createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -143,26 +223,47 @@ class __$$UserDtoImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserDtoImpl implements _UserDto {
   const _$UserDtoImpl({
-    @JsonKey(ignore: true) this.id,
-    required this.nickname,
-    @JsonKey(name: 'created_at') required this.createdAt,
+    required this.id,
+    this.nickname,
+    @JsonKey(name: 'invite_code') this.inviteCode,
+    @JsonKey(name: 'profile_image_url') this.profileImageUrl,
+    this.email,
+    this.provider,
+    this.status = 'ACTIVE',
+    @JsonKey(name: 'created_at') this.createdAt,
+    @JsonKey(name: 'updated_at') this.updatedAt,
   });
 
   factory _$UserDtoImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserDtoImplFromJson(json);
 
   @override
-  @JsonKey(ignore: true)
-  final String? id;
+  final String id;
   @override
-  final String nickname;
+  final String? nickname;
+  @override
+  @JsonKey(name: 'invite_code')
+  final String? inviteCode;
+  @override
+  @JsonKey(name: 'profile_image_url')
+  final String? profileImageUrl;
+  @override
+  final String? email;
+  @override
+  final String? provider;
+  @override
+  @JsonKey()
+  final String status;
   @override
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'UserDto(id: $id, nickname: $nickname, createdAt: $createdAt)';
+    return 'UserDto(id: $id, nickname: $nickname, inviteCode: $inviteCode, profileImageUrl: $profileImageUrl, email: $email, provider: $provider, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -173,13 +274,34 @@ class _$UserDtoImpl implements _UserDto {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.nickname, nickname) ||
                 other.nickname == nickname) &&
+            (identical(other.inviteCode, inviteCode) ||
+                other.inviteCode == inviteCode) &&
+            (identical(other.profileImageUrl, profileImageUrl) ||
+                other.profileImageUrl == profileImageUrl) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.provider, provider) ||
+                other.provider == provider) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, nickname, createdAt);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    nickname,
+    inviteCode,
+    profileImageUrl,
+    email,
+    provider,
+    status,
+    createdAt,
+    updatedAt,
+  );
 
   /// Create a copy of UserDto
   /// with the given fields replaced by the non-null parameter values.
@@ -197,21 +319,41 @@ class _$UserDtoImpl implements _UserDto {
 
 abstract class _UserDto implements UserDto {
   const factory _UserDto({
-    @JsonKey(ignore: true) final String? id,
-    required final String nickname,
-    @JsonKey(name: 'created_at') required final DateTime createdAt,
+    required final String id,
+    final String? nickname,
+    @JsonKey(name: 'invite_code') final String? inviteCode,
+    @JsonKey(name: 'profile_image_url') final String? profileImageUrl,
+    final String? email,
+    final String? provider,
+    final String status,
+    @JsonKey(name: 'created_at') final DateTime? createdAt,
+    @JsonKey(name: 'updated_at') final DateTime? updatedAt,
   }) = _$UserDtoImpl;
 
   factory _UserDto.fromJson(Map<String, dynamic> json) = _$UserDtoImpl.fromJson;
 
   @override
-  @JsonKey(ignore: true)
-  String? get id;
+  String get id;
   @override
-  String get nickname;
+  String? get nickname;
+  @override
+  @JsonKey(name: 'invite_code')
+  String? get inviteCode;
+  @override
+  @JsonKey(name: 'profile_image_url')
+  String? get profileImageUrl;
+  @override
+  String? get email;
+  @override
+  String? get provider;
+  @override
+  String get status;
   @override
   @JsonKey(name: 'created_at')
-  DateTime get createdAt;
+  DateTime? get createdAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt;
 
   /// Create a copy of UserDto
   /// with the given fields replaced by the non-null parameter values.

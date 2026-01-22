@@ -1,37 +1,71 @@
-import 'package:amumal/domain/model/comment_model.dart';
-import 'package:amumal/domain/repository/comment_repository.dart';
+import 'package:catdog/domain/model/comment_info_model.dart';
+import 'package:catdog/domain/model/comment_model.dart';
+import 'package:catdog/domain/repository/comment_like_repository.dart';
+import 'package:catdog/domain/repository/comment_repository.dart';
+import 'package:catdog/domain/repository/user_repository.dart';
+import 'package:catdog/domain/model/user_model.dart';
 
 class CommentUseCase {
-  const CommentUseCase({required this.commentRepo});
-  final CommentRepository commentRepo;
+  final CommentRepository _commentRepo;
+  final CommentLikeRepository _commentLikeRepo;
+  final UserRepository _userRepo;
+  CommentUseCase(this._commentRepo, this._commentLikeRepo, this._userRepo);
 
-  /// 댓글 등록
-  /// UseCase에서 앱의 정책을 처리: 등록 시 createdAt, modifiedAt을 자동으로 설정
-  Future<CommentModel> createComment({
-    required String writerId,
-    required String feedId,
-    required String nickname,
-    required String content,
-  }) async {
-    
-    final now = DateTime.now();
-    final comment = CommentModel(
-      writerId: writerId,
-      feedId: feedId,
-      nickname: nickname,
-      content: content,
-      createdAt: now,
-      modifiedAt: now,
-    );
-    return commentRepo.createComment(comment: comment);
+  Future<List<CommentInfoModel>> getAllComments(String feedId) async {
+    final comments = await _commentRepo.getComments(feedId);
+
+    final List<Future<CommentInfoModel?>> futures = comments.map((e) async {
+      final [
+        dynamic userResult,
+        dynamic isLikeResult,
+        dynamic likeCountResult,
+      ] = await Future.wait<dynamic>([
+        _userRepo.getUser(e.userId),
+        _commentLikeRepo.checkLiked(e.id),
+        _commentLikeRepo.getCommentLikeCount(e.id),
+      ]);
+
+      final user = userResult as UserModel?;
+      final isLike = isLikeResult as bool;
+      final likeCount = likeCountResult as int;
+
+      if (user != null) {
+        return CommentInfoModel(
+          id: e.id,
+          userId: e.userId,
+          nickname: user.nickname,
+          content: e.content,
+          createdAt: e.createdAt,
+          isLike: isLike,
+          likeCount: likeCount,
+          profileImageUrl: user.profileImageUrl,
+        );
+      }
+      return null;
+    }).toList();
+
+    final List<CommentInfoModel?> results = await Future.wait(futures);
+
+    return results.whereType<CommentInfoModel>().toList();
   }
 
-  /// 특정 피드의 댓글 목록 조회
-  Future<List<CommentModel>> getCommentsByFeedId({
-    required String feedId,
-  }) => commentRepo.getCommentsByFeedId(feedId: feedId);
+  Future<void> addcomment(CommentModel comment) async {
+    await _commentRepo.addComment(comment);
+  }
 
-  // 댓글 삭제
-  Future<bool> deleteComment({required String commentId}) =>
-      commentRepo.deleteComment(commentId: commentId);
+  Future<bool> deleteComment(String commentId) async {
+    return await _commentRepo.deleteComment(commentId);
+  }
+
+  Future<void> toggleLike(String commentId, bool updatedLike) async {
+    if (updatedLike) {
+      await _commentLikeRepo.addLiked(commentId);
+    } else {
+      await _commentLikeRepo.deleteLiked(commentId);
+    }
+  }
+
+  Future<UserModel?> getMyInfo() async {
+    return await _commentRepo.getMyInfo();
+  }
 }

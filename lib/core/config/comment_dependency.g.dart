@@ -6,7 +6,7 @@ part of 'comment_dependency.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$commentRepositoryHash() => r'd0623bd2aba877e973e1de51ddcf08b3b1207b76';
+String _$commentRepositoryHash() => r'124fcfc2a30389f47cf434b92955aa3d828e777c';
 
 /// See also [commentRepository].
 @ProviderFor(commentRepository)
@@ -24,7 +24,27 @@ final commentRepositoryProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef CommentRepositoryRef = AutoDisposeProviderRef<CommentRepository>;
-String _$commentUseCaseHash() => r'c6b3f2d62f759cbb4eae40799d7794d4a08e2bac';
+String _$commentLikeRepositoryHash() =>
+    r'd00d5ffce80e276d36144d3a7dcbb30628f2cdd2';
+
+/// See also [commentLikeRepository].
+@ProviderFor(commentLikeRepository)
+final commentLikeRepositoryProvider =
+    AutoDisposeProvider<CommentLikeRepository>.internal(
+      commentLikeRepository,
+      name: r'commentLikeRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$commentLikeRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef CommentLikeRepositoryRef =
+    AutoDisposeProviderRef<CommentLikeRepository>;
+String _$commentUseCaseHash() => r'ca65155b25a4bf5de6f162a3edfd651a82c9b7d9';
 
 /// See also [commentUseCase].
 @ProviderFor(commentUseCase)

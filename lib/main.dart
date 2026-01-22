@@ -1,130 +1,159 @@
+import 'dart:async';
+import 'dart:ui';
+import 'package:catdog/core/config/fcm_dependency.dart';
+import 'package:catdog/core/utils/app_keys.dart';
+import 'package:catdog/firebase_options.dart';
+import 'package:catdog/ui/pages/friend/state/fcm_event.dart';
+import 'package:catdog/ui/pages/splash/splash_view.dart';
+import 'package:catdog/ui/pages/home/home_view.dart'; // Add missing import
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  await FirebaseAnalytics.instance.logEvent(
+    name: 'notification_receive_bg',
+    parameters: {
+      'message_id': message.messageId?.toString() ?? 'unknown',
+      'title': message.notification?.title ?? 'no_title',
+      'type': message.data['type'] ?? 'default',
+    },
+  );
+  debugPrint('백그라운드 FCM 메시지 수신 및 로그 기록 완료');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
 
-  runApp(const MyApp());
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+
+  //Flutter 프레임워크에서 처리하지 않는 비동기 오류를 포착
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
+  ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class _MyAppState extends ConsumerState<MyApp> {
+  StreamSubscription<FcmEvent>? _sub;
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  void initState() {
+    super.initState();
+    // FCM 초기화
+    Future.microtask(() {
+      ref.read(fcmBootstrapProvider);
+    });
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+    // 전역 FCM 이벤트 구독 (UI 처리)
+    _sub = ref.read(fcmEventStreamProvider.stream).listen((event) {
+      final message = switch (event.type) {
+        FcmEventType.friendRequest => '님이 친구를 요청 했습니다.',
+        FcmEventType.friendAccepted => '님이 친구 요청을 수락 했습니다.',
+        _ => "알림이 업데이트되었습니다.",
+      };
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF575E6A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(8),
+          ),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(20),
+          duration: const Duration(seconds: 2),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  '${event.who ?? ''}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Text(message),
+            ],
+          ),
+        ),
+      );
     });
   }
 
   @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'CatDog',
+      navigatorObservers: [
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      ], //페이지 전환 추적
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ko', 'KR'), // 한국어 설정
+      ],
+      locale: const Locale('ko', 'KR'),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      scaffoldMessengerKey: scaffoldMessengerKey,
+      // 딥링크 처리 시 Flutter Navigator가 해당 경로를 찾지 못해 발생하는 에러 방지
+      onGenerateRoute: (settings) {
+        debugPrint('MyApp: onGenerateRoute generated for ${settings.name}');
+        
+        // 위젯 딥링크 등은 HomeView로 바로 연결하여 내부에서 처리하도록 함
+        if (settings.name != null && settings.name!.contains('catdog-widget')) {
+          return MaterialPageRoute(
+            builder: (_) => HomeView(initialDeepLink: settings.name),
+            settings: settings,
+          );
+        }
+
+        // 그 외 알 수 없는 경로는 SplashView로 (Supabase OAuth 콜백 등)
+        return MaterialPageRoute(
+          builder: (_) => const SplashView(),
+          settings: settings,
+        );
+      },
+      home: const SplashView(),
     );
   }
 }
