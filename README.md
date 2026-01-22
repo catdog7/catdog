@@ -43,6 +43,7 @@
 
 
 ## 게시글
+ - 나와 친구의 게시글만 보임
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/cd6dacdb-999c-4ad4-b6ed-fb7cd0c1972b" />
 
 ### 1. 내 게시글인 경우 수정, 삭제 버튼
@@ -67,11 +68,11 @@
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/b99d8c99-be6a-4deb-b649-9de2d02acc67" />
 <br/>
 
-### 친구 요청 페이지
+### 2. 친구 요청 페이지
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/4be3a139-5ffc-488a-a3b0-22c18dbb01d9" />
 <br/>
 
-### 백그라운드 / 포그라운드 알림
+### 3. 백그라운드 / 포그라운드 알림
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/1cf98894-2e7f-4dde-b712-50b3b1628acc" />
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/73a8d918-d5df-4875-b369-a2e7cf27a3cf" />
 <br/>
@@ -93,4 +94,21 @@
 
 - 강아지나 고양이인 경우
 <img src="https://github.com/user-attachments/assets/bc399d61-d753-41fb-a557-4a9ca70fa91b" width="240" />
+
+### 4. 내 게시글 수정 / 삭제
+ - 내 정보탭에서는 내 게시글만 보임
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/d3b4f855-0e5e-4fa2-bf7c-f84acf3bcc48" />
+
+### 5. 차단관리 / 로그아웃 / 회원탈퇴
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/28418616-0a7e-41ec-b3fe-d0f85ed67c4a" />
+<br/>
+<br/>
+
+ - 차단 해제 시 다시 검색 가능
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/527f6768-dffb-4414-9e30-82b37e16a19b" />
+<br/>
+
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/e342406c-9fd5-43a7-8e11-96ba60927cbb" />
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/e1ddae29-9bcb-43f7-873f-52975574ae17" />
+
 
