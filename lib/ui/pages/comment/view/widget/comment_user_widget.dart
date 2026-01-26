@@ -93,9 +93,9 @@ class CommentUserWidget extends HookWidget {
                     children: [
                       CircleAvatar(
                         radius: 20,
-                        backgroundImage: AssetImage(
-                          'assets/images/default_image.webp',
-                        ),
+                        backgroundImage: comment.profileImageUrl == null
+                            ? AssetImage('assets/images/default_image.webp')
+                            : NetworkImage(comment.profileImageUrl!),
                       ),
                       SizedBox(width: 8),
                     ],
