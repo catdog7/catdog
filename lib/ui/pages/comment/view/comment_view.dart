@@ -181,11 +181,13 @@ class CommentView extends HookConsumerWidget {
                       width: MediaQuery.of(context).size.width,
                       child: Row(
                         children: [
-                          const CircleAvatar(
+                          CircleAvatar(
                             radius: 18,
-                            backgroundImage: AssetImage(
-                              'assets/images/default_image.webp',
-                            ),
+                            backgroundImage:
+                                (data.myInfo == null ||
+                                    data.myInfo!.profileImageUrl == null)
+                                ? AssetImage('assets/images/default_image.webp')
+                                : NetworkImage(data.myInfo!.profileImageUrl!),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -223,6 +225,8 @@ class CommentView extends HookConsumerWidget {
                                         content: value,
                                         isLike: false,
                                         likeCount: 0,
+                                        profileImageUrl:
+                                            data.myInfo?.profileImageUrl,
                                       ),
                                     );
 
